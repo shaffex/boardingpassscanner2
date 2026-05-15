@@ -1,0 +1,15 @@
+{
+  "originHash" : "9955eff2a099a9e3ed69c596b09eb485203c9aef27cebc721342eab9e9c97dd3",
+  "pins" : [
+    {
+      "identity" : "magicui-framework-beta",
+      "kind" : "remoteSourceControl",
+      "location" : "https://gitlab.com/peter.popovec/magicui-framework-beta",
+      "state" : {
+        "branch" : "main",
+        "revision" : "db432ece1d0a23e73df6561cd9e3d410fc12be01"
+      }
+    }
+  ],
+  "version" : 3
+}

@@ -1,0 +1,69 @@
+<body>
+    <tabview key="selectedTab" value="Home" alert="item:alertItem" alert2="KEY_SHOW_BARCODE_INPUT_ALERT" sheet="item:sheetItem" photospicker2="isShowingImagePicker" onFirstAppear="setString:selectedTab=$settingsStartupTab">
+        <navigationstack tabItem="label:Home;systemImage:house" tag="Home">
+           <remoteview src="resource:Home"/>
+        </navigationstack>
+       
+        <navigationstack tabItem="label:My Passes;systemImage:qrcode" tag="MyCodes">
+           <remoteview src="resource:MyBoardingPasses"/>
+        </navigationstack>
+        
+        <navigationstack tabItem="label:Skusky;systemImage:widget.small" tag="Skusky">
+           <remoteview src="resource:Skusky"/>
+        </navigationstack>
+               
+        <navigationstack tabItem="label:Settings;systemImage:gear" tag="Settings">
+            <remoteview src="resource:Settings"/>
+        </navigationstack>
+    </tabview>
+    
+    <!--    For displaying camera scanner sheet-->
+    <remoteview id="scannerView" src="resource:ScannerView"/>
+    
+    
+    <remoteview id="sheetScanSimulatorView" src="file:live/SXML/DebugOnly/ScanSimulator.xml"/>
+    
+    <remoteview id="sheetPremiumFeatures" src="file:live/SXML/Sheets/PremiumFeatures.xml"/>
+    
+    <datamodel key="dataModelMyCodes" src="res:initialMyCodes.json"/>
+    
+    
+    <event onValueUpdated="xxtorchActivated" action="torch:$torchActivated;level:$torchLevel"/>
+    <event onValueUpdated="xxtorchLevel" action="torch:$torchActivated;level:$torchLevel"/>
+    
+    
+<!--    <event onBarcodeDetected="" action="js:generateAction('$barcodeRectDelay', $barcodeRectSound)"/>-->
+    <event onBarcodeDetected="" action="addNewBoardingBass:type:$barcodeObject.type;text:$barcodeObject.text"/>
+    
+    <dialogs>
+        <alert id="myAlertCode" alertTitle="Detected barcode" alertMessage="$barcodeObject.text">
+        </alert>
+        
+        <alert id="myAlertInvalidCode" alertTitle="Detected barcode" alertMessage="Invalide barcode">
+        </alert>
+      
+        <alert id="myAlertClearHistory" alertTitle="Warning" alertMessage="Are you sure you want to delete all saved barcodes?&#10;&#10;Please note, this action is irreversible.">
+            <button>No</button>
+            <button role="destructive" action="deleteAll:dataModel:dataModelMyCodes">Yes</button>
+        </alert>
+   
+    </dialogs>
+    
+    <files>
+        <copy src="url:https://shaffex.com/passkit/GeneratedPasses/2026-05-08-194441.pkpass" dst="testPass.pkpass"/>
+    </files>
+   
+   
+   
+   <!-- Default settings -->
+       <setDefault key="settingsStartupTab" type="string" value="Home"/>
+       <setDefault key="barcodeRectColor" type="color" value="yellow"/>
+       <setDefault key="barcodeRectLineWidth" type="int" value="8"/>
+       <setDefault key="barcodeRectDelay" type="int" value="4"/>
+       <setDefault key="barcodeRectSound" type="bool" value="true"/>
+       
+       <setDefault key="settingsViewfinderColor" type="color" value="green"/>
+       <setDefault key="settingsViewfinderWidth" type="int" value="20"/>
+   
+   
+</body>

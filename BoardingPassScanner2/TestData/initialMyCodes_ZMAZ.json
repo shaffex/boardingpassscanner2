@@ -1,0 +1,12 @@
+[
+    {"name":"Danka pdf417", "type":"pdf417", "text":"M1HOSSOVA/DANA         UIQDKI LTNTATW9 5457 132Y035D0036 100", "flightDate":"2026-05-12T08:05:00.000Z"},
+    {"name":"Danka aztec", "type":"aztec", "text":"M1HOSSOVA/DANA         UIQDKI LTNTATW9 5457 132Y035D0036 100", "flightDate":"2026-05-12T08:05:00.000Z"},
+    {"name":"Danka qr", "type":"qr", "text":"M1HOSSOVA/DANA         UIQDKI TATLTNW9 5458 139Y035D0018 100"},
+    
+    {"name":"Michael qr", "type":"qr", "text":"M1STARR/MICHAEL       E9L3KEI ATHTLVLY 0546 131Y045C0109 100", "flightDate":"2026-05-11T21:00:00.000Z"},
+    
+    {"name":"Jozko Berlin qr", "type":"qr", "text":"M1JOZKO/MICHAEL       E9L3KEI STNBCNFR 176  131Y045C0109 100", "flightDate":"2026-05-11T12:00:00.000Z"},
+    
+    {"name":"Jozko America qr", "type":"qr", "text":"M1JOZKO/MICHAEL       E9L3KEI STNBCNAA 94   131Y045C0109 100", "flightDate":"2026-05-11T12:00:00.000"},
+]
+

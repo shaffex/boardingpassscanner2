@@ -1,0 +1,26 @@
+<body>
+    <navigationview onAppear="setBool:isShowingViewFinder=true">
+    <zstack id="barcodeScannerView" navLeading="id:buttonCancel" navTrailing="id:buttonTorchToggle">
+    <barcodescanner key="barcodeObject" rectColor="$barcodeRectColor" rectWidth="$barcodeRectLineWidth"/>
+    <vstack background="clear">
+    
+    
+    <spacer/>
+    <text if="js:'$barcodeObject.text'!=''" foregroundColor="white">Detected text: $barcodeObject.text</text>
+    <text if="js:'$barcodeObject.type'!=''" foregroundColor="orange">Detected text: $barcodeObject.type</text>
+    <text if="$isShowingViewFinder" foregroundColor="$settingsViewfinderColor" animationOpacity="animation:linear;duration:1;from:0;to:1;repeatForever:true;autoreverses:true">Scanning</text>
+    
+    </vstack>
+    
+    <ViewFinderCorners if="$isShowingViewFinder" boxSize="0.6" color="$settingsViewfinderColor" animationScale="animation:linear;duration:1;from:1;to:0.9;repeatForever:true;autoreverses:true" animationOpacity="animation:linear;duration:1;from:0.5;to:1;repeatForever:true;autoreverses:true"/>
+    
+    </zstack>
+    </navigationview>
+    
+    <button id="buttonCancel" action="dismissSheet:item:sheetItem">Dismiss</button>
+    <toggle id="buttonTorchToggle" key="torchActive" value="false" xxpadding="trailing">Torch</toggle>
+<!--    <button id="buttonTorchToggle2" action="setValue:key:torchActive;type:bool;">Torch On</button>-->
+    
+    <event onValueUpdated="torchActive" action="torch:$torchActive"/>
+    
+</body>

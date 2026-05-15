@@ -1,0 +1,14 @@
+<body>
+    <list navigationTitle="Letenka">
+        <text>$selectedCode.text</text>
+        <text>Code Type: $selectedCode.type</text>
+        <text>Seat Number: $selectedCode.seatNumber</text>
+        <text>flightDate: $selectedCode.flightDate</text>
+        
+        
+        <barcode barcodeType="$selectedCode.type">$selectedCode.text</barcode>
+        
+        <buttonAddToAppleWallet addPassButtonStyle="black"/>
+        <button action="addPassToWallet">addPassToWallet</button>
+    </list>
+</body>

@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Boarding Pass API Admin</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #1b1f24;
+      --muted: #667085;
+      --line: #d9dee7;
+      --accent: #0f766e;
+      --accent-strong: #0b5f59;
+      --danger: #b42318;
+      --ok: #027a48;
+      --code-bg: #101828;
+      --code-text: #e4e7ec;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+    }
+
+    aside {
+      background: #ffffff;
+      border-right: 1px solid var(--line);
+      padding: 24px 18px;
+    }
+
+    main {
+      padding: 28px;
+    }
+
+    .brand {
+      margin-bottom: 28px;
+    }
+
+    .brand h1 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .brand p,
+    .hint,
+    .field span,
+    .status-line {
+      color: var(--muted);
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .nav-title {
+      margin: 22px 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .endpoint-button {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: left;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .endpoint-button.active {
+      border-color: var(--accent);
+      background: #ecfdf3;
+      color: #064e3b;
+      font-weight: 700;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 480px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 10px;
+    }
+
+    .tab-button {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--text);
+      border-radius: 7px;
+      padding: 9px 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .tab-button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .tab-panel.hidden {
+      display: none;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .field span {
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #cfd6e3;
+      border-radius: 7px;
+      background: #ffffff;
+      color: var(--text);
+      padding: 10px 11px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, .16);
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .segmented button {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--text);
+      border-radius: 7px;
+      padding: 9px 10px;
+      cursor: pointer;
+    }
+
+    .segmented button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .button {
+      border: 1px solid transparent;
+      border-radius: 7px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      min-height: 42px;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .primary:hover {
+      background: var(--accent-strong);
+    }
+
+    .secondary {
+      border-color: var(--line);
+      background: #ffffff;
+      color: var(--text);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: #f2f4f7;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-pill.ok {
+      background: #ecfdf3;
+      color: var(--ok);
+    }
+
+    .status-pill.error {
+      background: #fef3f2;
+      color: var(--danger);
+    }
+
+    .request-line {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .method {
+      background: #e0f2fe;
+      color: #075985;
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .url {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      color: #344054;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+    }
+
+    pre {
+      margin: 0;
+      min-height: 340px;
+      max-height: 68vh;
+      overflow: auto;
+      padding: 16px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      border-radius: 7px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #344054;
+      font-size: 12px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .empty-row {
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .source-note {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .status-line {
+      margin-top: 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .examples {
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .example {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      border-radius: 7px;
+      color: #344054;
+      padding: 9px 10px;
+      text-align: left;
+      cursor: pointer;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 980px) {
+      .shell,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      main {
+        padding: 18px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .grid,
+      .segmented {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <h1>Boarding Pass API Admin</h1>
+        <p>Test JSON endpoints against the production boarding pass API base path.</p>
+      </div>
+
+      <div class="field">
+        <label for="baseUrl">API base URL</label>
+        <input id="baseUrl" value="https://shaffex.com/api/boardingpass2" autocomplete="off">
+        <span>Requests are built from this value and the selected endpoint.</span>
+      </div>
+
+      <div class="nav-title">Endpoints</div>
+      <button class="endpoint-button active" type="button">getFlightInfo.php</button>
+      <div class="field endpoint-field">
+        <label for="endpoint">Endpoint file</label>
+        <input id="endpoint" value="getFlightInfo.php" autocomplete="off" placeholder="getFlightInfo.php">
+        <span>Change this to test another PHP endpoint in the same API folder.</span>
+      </div>
+
+      <div class="nav-title">Saved Examples</div>
+      <div class="examples">
+        <button class="example" type="button" data-example="flight-code">GET getFlightInfo.php?flightCode=FR287</button>
+        <button class="example" type="button" data-example="flight-code-date">GET getFlightInfo.php?flightCode=FR287&amp;date=2026-05-09</button>
+        <button class="example" type="button" data-example="carrier-flight">GET getFlightInfo.php?carrier=FR&amp;flight=287</button>
+      </div>
+    </aside>
+
+    <main>
+      <div class="tabs" role="tablist" aria-label="Admin sections">
+        <button class="tab-button active" type="button" id="apiTab" role="tab" aria-controls="apiPanel" aria-selected="true">API Tester</button>
+        <button class="tab-button" type="button" id="departuresTab" role="tab" aria-controls="departuresPanel" aria-selected="false">Departures</button>
+        <button class="tab-button" type="button" id="boardingPassTab" role="tab" aria-controls="boardingPassPanel" aria-selected="false">Boarding Pass</button>
+      </div>
+
+      <div class="layout tab-panel" id="apiPanel" role="tabpanel" aria-labelledby="apiTab">
+        <section class="panel" aria-labelledby="request-title">
+          <div class="panel-header">
+            <h2 id="request-title">Request Builder</h2>
+            <span class="status-pill" id="modeLabel">Flight code</span>
+          </div>
+          <div class="panel-body">
+            <div class="segmented" aria-label="Request mode">
+              <button type="button" class="active" id="flightCodeMode">Flight code</button>
+              <button type="button" id="carrierMode">Carrier + flight</button>
+            </div>
+
+            <form id="requestForm">
+              <div id="flightCodeFields">
+                <div class="field">
+                  <label for="flightCode">Flight code</label>
+                  <input id="flightCode" name="flightCode" value="FR287" autocomplete="off" placeholder="FR287">
+                  <span>Use the carrier code and flight number together.</span>
+                </div>
+              </div>
+
+              <div id="carrierFields" class="hidden">
+                <div class="grid">
+                  <div class="field">
+                    <label for="carrier">Carrier</label>
+                    <input id="carrier" name="carrier" value="FR" autocomplete="off" placeholder="FR">
+                  </div>
+                  <div class="field">
+                    <label for="flight">Flight number</label>
+                    <input id="flight" name="flight" value="287" autocomplete="off" placeholder="287">
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="date">Flight date</label>
+                <input id="date" name="date" type="date" value="2026-05-09">
+                <span>Optional, but useful when a flight number repeats daily.</span>
+              </div>
+
+              <div class="field">
+                <label for="extraParams">Extra query params</label>
+                <textarea id="extraParams" placeholder="key=value&#10;debug=1"></textarea>
+                <span>One key=value per line. Empty lines are ignored.</span>
+              </div>
+
+              <div class="actions">
+                <button class="button primary" type="submit">Send Request</button>
+                <button class="button secondary" type="button" id="copyUrl">Copy URL</button>
+                <button class="button secondary" type="button" id="clearResponse">Clear</button>
+              </div>
+            </form>
+            <p class="status-line" id="formStatus">Ready.</p>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="response-title">
+          <div class="panel-header">
+            <h2 id="response-title">Response</h2>
+            <span class="status-pill" id="statusPill">Not sent</span>
+          </div>
+          <div class="panel-body">
+            <div class="request-line">
+              <span class="method">GET</span>
+              <span class="url" id="requestUrl"></span>
+            </div>
+            <pre id="responseOutput">Submit a request to see the JSON response here.</pre>
+          </div>
+        </section>
+      </div>
+
+      <div class="layout tab-panel hidden" id="departuresPanel" role="tabpanel" aria-labelledby="departuresTab">
+        <section class="panel" aria-labelledby="departures-title">
+          <div class="panel-header">
+            <h2 id="departures-title">Airport Departures</h2>
+            <span class="status-pill" id="departuresModeLabel">Public board</span>
+          </div>
+          <div class="panel-body">
+            <p class="source-note">Uses a public no-key text reader for the STN departures board. This is client-only and does not use PHP.</p>
+
+            <form id="departuresForm">
+              <div class="grid">
+                <div class="field">
+                  <label for="airportCode">Airport</label>
+                  <input id="airportCode" value="STN" autocomplete="off" placeholder="STN or EGSS">
+                  <span>Client-only scraping is configured for STN and LTN.</span>
+                </div>
+                <div class="field">
+                  <label for="departuresDay">Day</label>
+                  <select id="departuresDay">
+                    <option value="today">Today</option>
+                    <option value="tomorrow">Tomorrow</option>
+                    <option value="yesterday">Yesterday</option>
+                  </select>
+                  <span>Depends on what the public page exposes.</span>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="button primary" type="submit">Load Departures</button>
+                <button class="button secondary" type="button" id="copyDeparturesUrl">Copy URL</button>
+              </div>
+            </form>
+            <p class="status-line" id="departuresStatus">Ready.</p>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="departures-result-title">
+          <div class="panel-header">
+            <h2 id="departures-result-title">Departure List</h2>
+            <span class="status-pill" id="departuresStatusPill">Not loaded</span>
+          </div>
+          <div class="panel-body">
+            <div class="request-line">
+              <span class="method">GET</span>
+              <span class="url" id="departuresUrl"></span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Departure</th>
+                    <th>Destination</th>
+                    <th>Flight</th>
+                    <th>Airline</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="departuresRows">
+                  <tr><td colspan="5" class="empty-row">Load departures to see flights.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <pre id="departuresRaw" class="hidden"></pre>
+          </div>
+        </section>
+      </div>
+
+      <div class="layout tab-panel hidden" id="boardingPassPanel" role="tabpanel" aria-labelledby="boardingPassTab">
+        <section class="panel" aria-labelledby="boardingpass-title">
+          <div class="panel-header">
+            <h2 id="boardingpass-title">Generate Boarding Pass</h2>
+            <span class="status-pill" id="boardingPassModeLabel">Test endpoint</span>
+          </div>
+          <div class="panel-body">
+            <p class="source-note">POSTs a mock barcode to <code>generateBoardingPassTest.php</code> with the flight code + date you supply. Passenger / PNR / seat are mocked. Toggle debug to receive the script's trace instead of downloading the .pkpass.</p>
+
+            <form id="boardingPassForm">
+              <div class="grid">
+                <div class="field">
+                  <label for="bpFlightCode">Flight code</label>
+                  <input id="bpFlightCode" value="LY546" autocomplete="off" placeholder="LY546">
+                  <span>Carrier + flight number combined, e.g. LY546 or FR0287. Used as a debug override and to build the mock barcode when the field below is empty.</span>
+                </div>
+                <div class="field">
+                  <label for="bpDate">Flight date</label>
+                  <input id="bpDate" type="date" value="2026-05-11">
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="bpBarcodeText">Barcode text</label>
+                <textarea id="bpBarcodeText" spellcheck="false">M1HOSSOVA/DANA         UIQDKI TATLTNW9 5458 139Y035D0018 100</textarea>
+                <span>Sent as <code>barcodeText</code>. Clear to fall back to a mock built from the flight code above.</span>
+              </div>
+
+              <div class="field">
+                <label style="font-weight: 400; display: flex; gap: 8px; align-items: center;">
+                  <input type="checkbox" id="bpDebug" style="width: auto;" checked>
+                  <span style="color: var(--text); font-size: 13px;">Debug mode &mdash; show server trace instead of downloading the .pkpass</span>
+                </label>
+              </div>
+
+              <div class="actions">
+                <button class="button primary" type="submit">Generate</button>
+                <button class="button secondary" type="button" id="bpCopyUrl">Copy URL</button>
+                <button class="button secondary" type="button" id="bpClear">Clear</button>
+              </div>
+            </form>
+            <p class="status-line" id="boardingPassStatus">Ready.</p>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="boardingpass-response-title">
+          <div class="panel-header">
+            <h2 id="boardingpass-response-title">Response</h2>
+            <span class="status-pill" id="boardingPassStatusPill">Not sent</span>
+          </div>
+          <div class="panel-body">
+            <div class="request-line">
+              <span class="method">POST</span>
+              <span class="url" id="boardingPassUrl"></span>
+            </div>
+            <pre id="boardingPassOutput">Submit to see the trace or download the .pkpass.</pre>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      mode: "flightCode",
+      endpoint: "getFlightInfo.php",
+      activeTab: "api"
+    };
+
+    const departureSources = {
+      STN: "https://www.airport-stansted.com/stn-departures",
+      LTN: "https://www.airport-luton.com/ltn-departures"
+    };
+
+    const nodes = {
+      apiTab: document.getElementById("apiTab"),
+      departuresTab: document.getElementById("departuresTab"),
+      boardingPassTab: document.getElementById("boardingPassTab"),
+      apiPanel: document.getElementById("apiPanel"),
+      departuresPanel: document.getElementById("departuresPanel"),
+      boardingPassPanel: document.getElementById("boardingPassPanel"),
+      bpFlightCode: document.getElementById("bpFlightCode"),
+      bpDate: document.getElementById("bpDate"),
+      bpBarcodeText: document.getElementById("bpBarcodeText"),
+      bpDebug: document.getElementById("bpDebug"),
+      boardingPassForm: document.getElementById("boardingPassForm"),
+      boardingPassUrl: document.getElementById("boardingPassUrl"),
+      boardingPassOutput: document.getElementById("boardingPassOutput"),
+      boardingPassStatus: document.getElementById("boardingPassStatus"),
+      boardingPassStatusPill: document.getElementById("boardingPassStatusPill"),
+      bpCopyUrl: document.getElementById("bpCopyUrl"),
+      bpClear: document.getElementById("bpClear"),
+      baseUrl: document.getElementById("baseUrl"),
+      endpoint: document.getElementById("endpoint"),
+      flightCodeMode: document.getElementById("flightCodeMode"),
+      carrierMode: document.getElementById("carrierMode"),
+      modeLabel: document.getElementById("modeLabel"),
+      flightCodeFields: document.getElementById("flightCodeFields"),
+      carrierFields: document.getElementById("carrierFields"),
+      flightCode: document.getElementById("flightCode"),
+      carrier: document.getElementById("carrier"),
+      flight: document.getElementById("flight"),
+      date: document.getElementById("date"),
+      extraParams: document.getElementById("extraParams"),
+      requestForm: document.getElementById("requestForm"),
+      requestUrl: document.getElementById("requestUrl"),
+      responseOutput: document.getElementById("responseOutput"),
+      statusPill: document.getElementById("statusPill"),
+      formStatus: document.getElementById("formStatus"),
+      copyUrl: document.getElementById("copyUrl"),
+      clearResponse: document.getElementById("clearResponse"),
+      airportCode: document.getElementById("airportCode"),
+      departuresDay: document.getElementById("departuresDay"),
+      departuresForm: document.getElementById("departuresForm"),
+      copyDeparturesUrl: document.getElementById("copyDeparturesUrl"),
+      departuresUrl: document.getElementById("departuresUrl"),
+      departuresRows: document.getElementById("departuresRows"),
+      departuresStatus: document.getElementById("departuresStatus"),
+      departuresStatusPill: document.getElementById("departuresStatusPill"),
+      departuresRaw: document.getElementById("departuresRaw")
+    };
+
+    function normalizeBaseUrl(value) {
+      return value.trim().replace(/\/+$/, "");
+    }
+
+    function setActiveTab(tab) {
+      state.activeTab = tab;
+      const showApi = tab === "api";
+      const showDep = tab === "departures";
+      const showBp  = tab === "boardingPass";
+      nodes.apiTab.classList.toggle("active", showApi);
+      nodes.departuresTab.classList.toggle("active", showDep);
+      nodes.boardingPassTab.classList.toggle("active", showBp);
+      nodes.apiTab.setAttribute("aria-selected", String(showApi));
+      nodes.departuresTab.setAttribute("aria-selected", String(showDep));
+      nodes.boardingPassTab.setAttribute("aria-selected", String(showBp));
+      nodes.apiPanel.classList.toggle("hidden", !showApi);
+      nodes.departuresPanel.classList.toggle("hidden", !showDep);
+      nodes.boardingPassPanel.classList.toggle("hidden", !showBp);
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      const usesFlightCode = mode === "flightCode";
+      nodes.flightCodeMode.classList.toggle("active", usesFlightCode);
+      nodes.carrierMode.classList.toggle("active", !usesFlightCode);
+      nodes.flightCodeFields.classList.toggle("hidden", !usesFlightCode);
+      nodes.carrierFields.classList.toggle("hidden", usesFlightCode);
+      nodes.modeLabel.textContent = usesFlightCode ? "Flight code" : "Carrier + flight";
+      updatePreview();
+    }
+
+    function appendExtraParams(params) {
+      const lines = nodes.extraParams.value.split("\n");
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        const separator = trimmed.indexOf("=");
+        if (separator === -1) {
+          params.set(trimmed, "");
+          continue;
+        }
+        params.set(trimmed.slice(0, separator).trim(), trimmed.slice(separator + 1).trim());
+      }
+    }
+
+    function buildUrl() {
+      const baseUrl = normalizeBaseUrl(nodes.baseUrl.value);
+      const endpoint = nodes.endpoint.value.trim().replace(/^\/+/, "") || state.endpoint;
+      const url = new URL(`${baseUrl}/${endpoint}`);
+      const params = url.searchParams;
+
+      if (state.mode === "flightCode") {
+        if (nodes.flightCode.value.trim()) params.set("flightCode", nodes.flightCode.value.trim());
+      } else {
+        if (nodes.carrier.value.trim()) params.set("carrier", nodes.carrier.value.trim());
+        if (nodes.flight.value.trim()) params.set("flight", nodes.flight.value.trim());
+      }
+
+      if (nodes.date.value) params.set("date", nodes.date.value);
+      appendExtraParams(params);
+      return url.toString();
+    }
+
+    function updatePreview() {
+      try {
+        nodes.requestUrl.textContent = buildUrl();
+        nodes.formStatus.textContent = "Ready.";
+      } catch (error) {
+        nodes.requestUrl.textContent = "Invalid base URL";
+        nodes.formStatus.textContent = error.message;
+      }
+    }
+
+    function setStatus(label, kind) {
+      nodes.statusPill.textContent = label;
+      nodes.statusPill.classList.toggle("ok", kind === "ok");
+      nodes.statusPill.classList.toggle("error", kind === "error");
+    }
+
+    function setDeparturesStatus(label, kind) {
+      nodes.departuresStatusPill.textContent = label;
+      nodes.departuresStatusPill.classList.toggle("ok", kind === "ok");
+      nodes.departuresStatusPill.classList.toggle("error", kind === "error");
+    }
+
+    function formatResponse(text) {
+      try {
+        return JSON.stringify(JSON.parse(text), null, 2);
+      } catch {
+        return text || "(empty response)";
+      }
+    }
+
+    async function sendRequest(event) {
+      event.preventDefault();
+      let url;
+      try {
+        url = buildUrl();
+      } catch (error) {
+        setStatus("Invalid URL", "error");
+        nodes.formStatus.textContent = error.message;
+        return;
+      }
+
+      nodes.requestUrl.textContent = url;
+      nodes.responseOutput.textContent = "Loading...";
+      setStatus("Sending", "");
+      nodes.formStatus.textContent = "Request in progress.";
+
+      const startedAt = performance.now();
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: { "Accept": "application/json" }
+        });
+        const elapsed = Math.round(performance.now() - startedAt);
+        const text = await response.text();
+        nodes.responseOutput.textContent = formatResponse(text);
+        setStatus(`${response.status} ${response.statusText || ""}`.trim(), response.ok ? "ok" : "error");
+        nodes.formStatus.textContent = `Completed in ${elapsed} ms.`;
+      } catch (error) {
+        setStatus("Request failed", "error");
+        nodes.responseOutput.textContent = error.stack || error.message;
+        nodes.formStatus.textContent = "The browser blocked or failed the request. If this is opened from another domain, check CORS on the API.";
+      }
+    }
+
+    async function copyUrl() {
+      const url = buildUrl();
+      await navigator.clipboard.writeText(url);
+      nodes.formStatus.textContent = "Request URL copied.";
+    }
+
+    function buildDeparturesUrl() {
+      const airport = (nodes.airportCode.value || "STN").trim().toUpperCase();
+      const source = departureSources[airport];
+      if (!source) {
+        throw new Error(`No client-only departure source is configured for ${airport}. STN and LTN are available.`);
+      }
+
+      const sourceUrl = new URL(source);
+      if (nodes.departuresDay.value !== "today") {
+        sourceUrl.searchParams.set("day", nodes.departuresDay.value);
+      }
+      sourceUrl.searchParams.set("_", String(Date.now()));
+
+      return `https://r.jina.ai/http://${sourceUrl.toString()}`;
+    }
+
+    function updateDeparturesPreview() {
+      try {
+        nodes.departuresUrl.textContent = buildDeparturesUrl();
+        nodes.departuresStatus.textContent = `Ready. ${nodes.airportCode.value.toUpperCase()} departures will be loaded from the public board.`;
+      } catch (error) {
+        nodes.departuresUrl.textContent = "Invalid departures request";
+        nodes.departuresStatus.textContent = error.message;
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[character]);
+    }
+
+    function cleanMarkdownValue(value) {
+      return value
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+        .replace(/\[\+\]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function parseDepartures(markdown) {
+      const rows = [];
+      const lines = markdown
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      for (let index = 0; index < lines.length; index += 1) {
+        const destinationMatch = lines[index].match(/^\*\*(.+?)\*\*\(([A-Z0-9]{3})\)$/);
+        if (!destinationMatch) continue;
+
+        const departure = lines[index + 1] || "";
+        const flightLine = lines[index + 2] || "";
+        const airlineLine = lines[index + 3] || "";
+        const statusLine = lines[index + 4] || "";
+        const flightMatch = flightLine.match(/^\[([\s\S]+)\]\(([^)]+)\)$/);
+        const statusMatch = statusLine.match(/^\[([\s\S]+)\]\(([^)]+)\)$/);
+
+        if (!/^\d{2}:\d{2}$/.test(departure) || !flightMatch || !statusMatch) {
+          continue;
+        }
+
+        rows.push({
+          destination: `${cleanMarkdownValue(destinationMatch[1])} (${destinationMatch[2]})`,
+          departure,
+          flight: cleanMarkdownValue(flightMatch[1]),
+          airline: cleanMarkdownValue(airlineLine),
+          status: cleanMarkdownValue(statusMatch[1])
+        });
+      }
+
+      if (rows.length > 0) return rows;
+
+      const compact = markdown.replace(/\s+/g, " ");
+      const fallbackPattern = /\*\*([^*]+)\*\*\(([A-Z0-9]{3})\)\s+(\d{2}:\d{2})\s+\[([A-Z0-9* ]{2,12})\]\(https:\/\/www\.airport-[^)]+?\.com\/[a-z]{3}-flight-status\?departure=[^)]+\)\s+([\s\S]*?)\s+\[([^\[]+?(?:\[\+\])?)\]\(https:\/\/www\.airport-[^)]+?\.com\/[a-z]{3}-flight-status\?departure=/g;
+      let match;
+      while ((match = fallbackPattern.exec(compact)) !== null) {
+        const airline = cleanMarkdownValue(match[5]).replace(/\*\*[^*]+\*\*\([A-Z0-9]{3}\).*$/, "").trim();
+        rows.push({
+          destination: `${cleanMarkdownValue(match[1])} (${match[2]})`,
+          departure: match[3],
+          flight: cleanMarkdownValue(match[4]),
+          airline,
+          status: cleanMarkdownValue(match[6])
+        });
+      }
+
+      return rows;
+    }
+
+    function describeUnparsedDepartures(text) {
+      const preview = text.replace(/\s+/g, " ").trim().slice(0, 420);
+      if (!text.trim()) return "The public board returned an empty response.";
+      if (/error code|security|blocked|captcha|cloudflare|too many requests/i.test(text)) {
+        return `The public board reader returned an error page: ${preview}`;
+      }
+      if (!/Destination|Departure|Flight|Airline|Status/i.test(text)) {
+        return `The response did not look like a departures board: ${preview}`;
+      }
+      return `The departures board loaded, but its format was not recognized. Preview: ${preview}`;
+    }
+
+    function extractDepartureMarkdown(text) {
+      try {
+        const payload = JSON.parse(text);
+        if (payload && payload.data && typeof payload.data.content === "string") {
+          return payload.data.content;
+        }
+        if (payload && typeof payload.content === "string") {
+          return payload.content;
+        }
+      } catch {
+        return text;
+      }
+      return text;
+    }
+
+    function renderDepartures(flights) {
+      if (!Array.isArray(flights) || flights.length === 0) {
+        nodes.departuresRows.innerHTML = '<tr><td colspan="5" class="empty-row">No departures were parsed from the public board.</td></tr>';
+        return;
+      }
+
+      const rows = flights
+        .map((flight) => {
+          return `
+            <tr>
+              <td>${escapeHtml(flight.departure)}</td>
+              <td>${escapeHtml(flight.destination)}</td>
+              <td>${escapeHtml(flight.flight)}</td>
+              <td>${escapeHtml(flight.airline)}</td>
+              <td>${escapeHtml(flight.status)}</td>
+            </tr>
+          `;
+        })
+        .join("");
+
+      nodes.departuresRows.innerHTML = rows;
+    }
+
+    async function loadDepartures(event) {
+      event.preventDefault();
+      let url;
+      try {
+        url = buildDeparturesUrl();
+      } catch (error) {
+        setDeparturesStatus("Invalid request", "error");
+        nodes.departuresStatus.textContent = error.message;
+        return;
+      }
+
+      nodes.departuresUrl.textContent = url;
+      nodes.departuresRows.innerHTML = '<tr><td colspan="5" class="empty-row">Loading departures...</td></tr>';
+      setDeparturesStatus("Loading", "");
+      nodes.departuresStatus.textContent = "Request in progress.";
+
+      const startedAt = performance.now();
+      try {
+        const response = await fetch(url, { headers: { "Accept": "application/json" } });
+        const elapsed = Math.round(performance.now() - startedAt);
+        const text = await response.text();
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${text.replace(/\s+/g, " ").trim().slice(0, 240)}`);
+        }
+        const markdown = extractDepartureMarkdown(text);
+        const flights = parseDepartures(markdown);
+        renderDepartures(flights);
+        nodes.departuresRaw.textContent = markdown;
+        setDeparturesStatus(`${response.status} ${response.statusText || ""}`.trim(), "ok");
+        nodes.departuresStatus.textContent = flights.length > 0
+          ? `Loaded ${flights.length} departures in ${elapsed} ms.`
+          : describeUnparsedDepartures(markdown);
+      } catch (error) {
+        setDeparturesStatus("Request failed", "error");
+        nodes.departuresRows.innerHTML = `<tr><td colspan="5" class="empty-row">${escapeHtml(error.message)}</td></tr>`;
+        nodes.departuresStatus.textContent = error.message;
+      }
+    }
+
+    function applyExample(name) {
+      nodes.extraParams.value = "";
+      nodes.date.value = "";
+      if (name === "flight-code") {
+        setMode("flightCode");
+        nodes.flightCode.value = "FR287";
+      }
+      if (name === "flight-code-date") {
+        setMode("flightCode");
+        nodes.flightCode.value = "FR287";
+        nodes.date.value = "2026-05-09";
+      }
+      if (name === "carrier-flight") {
+        setMode("carrier");
+        nodes.carrier.value = "FR";
+        nodes.flight.value = "287";
+      }
+      updatePreview();
+    }
+
+    function parseFlightCode(raw) {
+      const match = raw.trim().toUpperCase().match(/^([A-Z][A-Z0-9])(\d{1,4})$/);
+      if (!match) return null;
+      return { carrier: match[1], flightNumber: match[2].padStart(4, "0") };
+    }
+
+    function julianDay(isoDate) {
+      if (!isoDate) return "001";
+      const [year, month, day] = isoDate.split("-").map(Number);
+      const target = Date.UTC(year, month - 1, day);
+      const start  = Date.UTC(year, 0, 1);
+      const dayOfYear = Math.round((target - start) / 86400000) + 1;
+      return String(dayOfYear).padStart(3, "0");
+    }
+
+    // Mock BCBP — passenger/PNR/seat/airports are placeholders; only the
+    // flight code and julian date are user-driven. Total length = 60 chars.
+    function buildMockBarcode(flightCode, isoDate) {
+      const parsed = parseFlightCode(flightCode);
+      if (!parsed) return null;
+
+      const segments = [
+        "M1",                          // format + 1 leg
+        "TEST/USER".padEnd(20),        // passenger name (20)
+        " ",                           // ETKT indicator (1)
+        "TESTPNR".padEnd(7),           // PNR (7)
+        "ATH",                         // origin (3)
+        "TLV",                         // destination (3)
+        parsed.carrier.padEnd(3),      // carrier (3)
+        parsed.flightNumber + " ",     // flight# (4) + separator (1)
+        julianDay(isoDate),            // julian date (3)
+        "Y",                           // compartment (1)
+        "001A",                        // seat (4)
+        "0001 ",                       // check-in sequence (5)
+        "1",                           // passenger status (1)
+        "00"                           // additional field length (2)
+      ];
+      return segments.join("");
+    }
+
+    function buildBoardingPassUrl() {
+      const baseUrl = normalizeBaseUrl(nodes.baseUrl.value);
+      const url = new URL(`${baseUrl}/generateBoardingPassTest.php`);
+      if (nodes.bpDebug.checked) {
+        url.searchParams.set("debug", "1");
+      }
+      return url.toString();
+    }
+
+    function updateBoardingPassPreview() {
+      try {
+        nodes.boardingPassUrl.textContent = buildBoardingPassUrl();
+      } catch (error) {
+        nodes.boardingPassUrl.textContent = "Invalid base URL";
+      }
+    }
+
+    function setBoardingPassStatus(label, kind) {
+      nodes.boardingPassStatusPill.textContent = label;
+      nodes.boardingPassStatusPill.classList.toggle("ok", kind === "ok");
+      nodes.boardingPassStatusPill.classList.toggle("error", kind === "error");
+    }
+
+    async function submitBoardingPass(event) {
+      event.preventDefault();
+      const flightCode = nodes.bpFlightCode.value.trim().toUpperCase();
+      const date       = nodes.bpDate.value;
+      const debug      = nodes.bpDebug.checked;
+      const typed      = nodes.bpBarcodeText.value;
+
+      if (!date) {
+        setBoardingPassStatus("Missing inputs", "error");
+        nodes.boardingPassStatus.textContent = "Flight date is required.";
+        return;
+      }
+
+      let barcode;
+      let barcodeSource;
+      if (typed.trim()) {
+        barcode = typed;
+        barcodeSource = "typed";
+      } else {
+        if (!flightCode) {
+          setBoardingPassStatus("Missing inputs", "error");
+          nodes.boardingPassStatus.textContent = "Provide a barcode text, or a flight code to build a mock from.";
+          return;
+        }
+        barcode = buildMockBarcode(flightCode, date);
+        if (!barcode) {
+          setBoardingPassStatus("Bad flight code", "error");
+          nodes.boardingPassStatus.textContent = "Flight code must look like LY546 or FR0287.";
+          return;
+        }
+        barcodeSource = "mock";
+      }
+
+      const url = buildBoardingPassUrl();
+      nodes.boardingPassUrl.textContent = url;
+      nodes.boardingPassOutput.textContent = "Loading...";
+      setBoardingPassStatus("Sending", "");
+      nodes.boardingPassStatus.textContent = "Request in progress.";
+
+      const body = new URLSearchParams({
+        barcodeText: barcode,
+        flightDate:  date
+      });
+
+      const startedAt = performance.now();
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: body.toString()
+        });
+        const elapsed = Math.round(performance.now() - startedAt);
+        const contentType = (response.headers.get("content-type") || "").toLowerCase();
+        const looksTextual = contentType.startsWith("text/") || contentType.includes("json");
+
+        if (debug || looksTextual || !response.ok) {
+          const text = await response.text();
+          nodes.boardingPassOutput.textContent = text || "(empty response)";
+          setBoardingPassStatus(`${response.status} ${response.statusText || ""}`.trim(), response.ok ? "ok" : "error");
+          nodes.boardingPassStatus.textContent = `Completed in ${elapsed} ms. Barcode (${barcodeSource}): ${barcode}`;
+          return;
+        }
+
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = objectUrl;
+        anchor.download = `${flightCode}-${date}.pkpass`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+
+        nodes.boardingPassOutput.textContent = `Downloaded ${flightCode}-${date}.pkpass (${blob.size} bytes, ${contentType || "no content-type"}).\nBarcode (${barcodeSource}) used: ${barcode}`;
+        setBoardingPassStatus(`${response.status} ${response.statusText || ""}`.trim(), "ok");
+        nodes.boardingPassStatus.textContent = `Completed in ${elapsed} ms.`;
+      } catch (error) {
+        setBoardingPassStatus("Request failed", "error");
+        nodes.boardingPassOutput.textContent = error.stack || error.message;
+        nodes.boardingPassStatus.textContent = error.message;
+      }
+    }
+
+    nodes.apiTab.addEventListener("click", () => setActiveTab("api"));
+    nodes.departuresTab.addEventListener("click", () => setActiveTab("departures"));
+    nodes.boardingPassTab.addEventListener("click", () => setActiveTab("boardingPass"));
+    nodes.boardingPassForm.addEventListener("submit", submitBoardingPass);
+    nodes.bpCopyUrl.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(buildBoardingPassUrl());
+      nodes.boardingPassStatus.textContent = "Boarding pass URL copied.";
+    });
+    nodes.bpClear.addEventListener("click", () => {
+      nodes.boardingPassOutput.textContent = "Submit to see the trace or download the .pkpass.";
+      setBoardingPassStatus("Not sent", "");
+      nodes.boardingPassStatus.textContent = "Ready.";
+    });
+    for (const input of [nodes.bpFlightCode, nodes.bpDate, nodes.bpDebug, nodes.baseUrl]) {
+      input.addEventListener("input", updateBoardingPassPreview);
+      input.addEventListener("change", updateBoardingPassPreview);
+    }
+    updateBoardingPassPreview();
+    nodes.flightCodeMode.addEventListener("click", () => setMode("flightCode"));
+    nodes.carrierMode.addEventListener("click", () => setMode("carrier"));
+    nodes.requestForm.addEventListener("submit", sendRequest);
+    nodes.copyUrl.addEventListener("click", copyUrl);
+    nodes.clearResponse.addEventListener("click", () => {
+      nodes.responseOutput.textContent = "Submit a request to see the JSON response here.";
+      setStatus("Not sent", "");
+      nodes.formStatus.textContent = "Ready.";
+    });
+    nodes.departuresForm.addEventListener("submit", loadDepartures);
+    nodes.copyDeparturesUrl.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(buildDeparturesUrl());
+      nodes.departuresStatus.textContent = "Departures URL copied.";
+    });
+
+    for (const input of document.querySelectorAll("input, textarea")) {
+      input.addEventListener("input", updatePreview);
+    }
+
+    for (const input of [nodes.airportCode, nodes.departuresDay]) {
+      input.addEventListener("input", updateDeparturesPreview);
+      input.addEventListener("change", updateDeparturesPreview);
+    }
+
+    for (const example of document.querySelectorAll(".example")) {
+      example.addEventListener("click", () => applyExample(example.dataset.example));
+    }
+
+    updatePreview();
+    updateDeparturesPreview();
+  </script>
+</body>
+</html>

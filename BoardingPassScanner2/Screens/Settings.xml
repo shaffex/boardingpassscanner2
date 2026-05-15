@@ -1,0 +1,46 @@
+<body>
+    <list navigationTitle="Settings">
+        <toggle key="DEBUG_MODE">DEBUG_MODE</toggle>
+        
+        <button action="presentAlert:myAlertClearHistory">Clear History</button>
+        <buttonAddToAppleWallet addPassButtonStyle="black"/>
+        <buttonAddToAppleWallet action="openUrl:https://shaffex.com/passkit/GeneratedPasses/2026-05-08-194441.pkpass" addPassButtonStyle="blackOutline"/>
+        
+        <button action="openUrl:https://shaffex.com/passkit/GeneratedPasses/2026-05-08-194441.pkpass">openUrl</button>
+        <button action="addPassToWallet">addPassToWallet</button>
+        
+        <kkc/>
+        
+        <section header="Databases">
+            <navigationlink destination="viewDatabaseAirlines">Airlines</navigationlink>
+        </section>
+        
+        <section header="working">
+            <toggle key="barcodeRectSound">Sound on scan</toggle>
+        </section>
+        
+    </list>
+    
+    <vstack id="viewDatabaseAirlines">
+    <extendedlist navigationTitle="js: $dataModelAirlines.count == 0 ? 'My Codes' : 'My Codes ($dataModelAirlines.count)'" xnavTrailing="id:buttonsTrailing" autocapitalization="none" disableAutocorrection="true" dataModel="dataModelAirlines" searchable="mode:contains;allMustMatch:false;keys:[name,type];caseSensitive:false" xcontentUnavailable="contentNoData">
+
+        <navigationlink destination="resource:MyCode-View" action="selectItem:selectedCode">
+            <hstack>
+                
+                
+                <text foregroundColor="primary">$dataModel.name</text>
+                <text font="caption" monospaced="">$dataModel.country</text>
+                <text foregroundColor="secondary" font="footnote">$dataModel.code</text>
+                
+                
+            </hstack>
+        </navigationlink>
+        
+
+    </extendedlist>
+    </vstack>
+    
+    
+    <datamodel key="dataModelAirlines" type="csv" src="res:airlines.csv"/>
+    
+</body>
