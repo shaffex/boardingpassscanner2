@@ -48,6 +48,28 @@ struct SxView_BarcodeIcon: SxViewProtocol {
     }
 }
 
+struct MenuItemView: SxViewProtocol {
+    @DynamicNode var node: MagicNode
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack(spacing: 12) {
+                Image(systemName: node.getAttribute("image") ?? "")
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .foregroundColor(.blue)
+                
+                VStack(alignment: .leading) {
+                    Text(node.getAttribute("title") ?? "")
+                    Text(node.getAttribute("description") ?? "")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+    }
+}
+
 //#Preview {
 //    let node = MagicNode()
 //    

@@ -25,3 +25,5 @@ build/
 # Environment
 .env
 .env.local
+BoardingPassScanner2.xcodeproj/xcuserdata/petres.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist
+*.xcuserstate

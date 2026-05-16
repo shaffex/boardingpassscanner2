@@ -2,7 +2,7 @@
     <list navigationTitle="Settings">
         <toggle key="DEBUG_MODE">DEBUG_MODE</toggle>
         
-        <button action="presentAlert:myAlertClearHistory">Clear History</button>
+        
         <buttonAddToAppleWallet addPassButtonStyle="black"/>
         <buttonAddToAppleWallet action="openUrl:https://shaffex.com/passkit/GeneratedPasses/2026-05-08-194441.pkpass" addPassButtonStyle="blackOutline"/>
         

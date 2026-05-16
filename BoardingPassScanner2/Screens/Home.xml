@@ -8,26 +8,43 @@
         </section>
         
         
-        <hstack height="100">
-            <vstack maxHeight="infinity" border="color:yellow;width:2">
-            <button>Scan from Camera</button>
-            </vstack>
-            
-            <vstack maxHeight="infinity" border="color:yellow;width:2">
-            <button>Scan from Image</button>
-            </vstack>
-        </hstack>
+        <button action="copy:M1STARR/MICHAEL       E9L3KEI ATHTLVLY 0546 131Y045C0109 100">Copy Michael M1</button>
+        
         
         
         <button>getFlightInfo</button>
         
-        <section header="Scanning">
-        <button action="presentSheet:item:sheetItem;id:scannerView">Scan from Camera</button>
-        <button action="addNewBoardingBass:type:azrec;text:M1STARR/MICHAEL       E9L3KEI ATHTLVLY 0546 131Y045C0109 100">Fake Scan Michael</button>
-        <button action="addNewBoardingBass:type:pdf417;text:M1HOSSOVA/DANA         UIQDKI LTNTATW9 5457 132Y035D0036 100">Fake Scan Dana1</button>
-        <button action="addNewBoardingBass:type:pdf417;text:M1HOSSOVA/DANA         UIQDKI TATLTNW9 5458 139Y035D0018 100">Fake Scan Dana2</button>
+        <section header="Boarding Pass">
+
+            <button action="presentSheet:item:sheetItem;id:scannerView">
+                <menuitem
+                    image="camera.viewfinder"
+                    title="Scan Boarding Pass"
+                    description="Use your camera to scan a boarding pass"/>
+            </button>
+
+            <button action="setBool:isShowingImagePicker=true">
+                <menuitem
+                    image="photo.on.rectangle"
+                    title="Import Boarding Pass"
+                    description="Detect a boarding pass from a screenshot or photo"/>
+            </button>
+
+            <button action="detectFromClipboard">
+                <menuitem
+                    image="doc.on.clipboard"
+                    title="Paste Boarding Pass"
+                    description="Detect a boarding pass copied to your clipboard"/>
+            </button>
+
         </section>
         
+        
+        <section header="Fake Scanning">
+            <button action="addNewBoardingBass:type:azrec;text:M1STARR/MICHAEL       E9L3KEI ATHTLVLY 0546 131Y045C0109 100">Fake Scan Michael</button>
+            <button action="addNewBoardingBass:type:pdf417;text:M1HOSSOVA/DANA         UIQDKI LTNTATW9 5457 132Y035D0036 100">Fake Scan Dana1</button>
+            <button action="addNewBoardingBass:type:pdf417;text:M1HOSSOVA/DANA         UIQDKI TATLTNW9 5458 139Y035D0018 100">Fake Scan Dana2</button>
+        </section>
         
     </list>
     

@@ -22,7 +22,7 @@
     </vstack>
     
     <!-- This view will be displayed if list is empty -->
-    <contentunavailableview id="contentNoData" title="No Barcodes" description="Your scanned barcodes will appear here."/>
+    <contentunavailableview id="contentNoData" title="No Boarding Passes" description="Your saved boarding passes will appear here."/>
     
     
     <!-- Option menu -->
@@ -39,9 +39,11 @@
             <label systemImage="tray.and.arrow.up">Export codes</label>
         </button>
         
-        <button disabled="js:'$dataModelMyCodes.count' == '0'" role="destructive" action="presentAlert:item:alertItem;id:myAlertClearHistory">
-            <label systemImage="trash">Delete all barcodes</label>
+        <button disabled="js:'$dataModelMyCodes.count' == '0'" role="destructive" action="presentAlert:myAlertClearHistory">
+            <label systemImage="trash">Delete all boarding passes</label>
         </button>
+        
+        
         
         <divider/>
         

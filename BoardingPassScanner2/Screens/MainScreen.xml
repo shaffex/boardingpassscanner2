@@ -42,10 +42,12 @@
         <alert id="myAlertInvalidCode" alertTitle="Detected barcode" alertMessage="Invalide barcode">
         </alert>
       
-        <alert id="myAlertClearHistory" alertTitle="Warning" alertMessage="Are you sure you want to delete all saved barcodes?&#10;&#10;Please note, this action is irreversible.">
+        <alert id="myAlertClearHistory" alertTitle="Warning" alertMessage="Are you sure you want to delete all saved boarding passes?&#10;&#10;Please note, this action is irreversible.">
             <button>No</button>
             <button role="destructive" action="deleteAll:dataModel:dataModelMyCodes">Yes</button>
         </alert>
+        
+        <alert id="myAlertCannotDetectBarcode" alertTitle="No Boarding Pass Found" alertMessage="We couldn’t detect a boarding pass in the selected image. Please try another screenshot or photo."/>
    
     </dialogs>
     

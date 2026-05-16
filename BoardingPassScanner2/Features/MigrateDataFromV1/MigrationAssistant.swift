@@ -11,7 +11,7 @@ struct MigrationAssistant {
     static func checkMigration() {
         let nsDefaultsV1 = NsDefaultsV1()
         if let settings = nsDefaultsV1.loadSettings() {
-            //nsDefaultsV1.deleteSettings()
+            //nsDefaultsV1.deleteSettings()                 // KKC: enable this so after import delete barcodes
             
             if settings.myBoardingPassesArray.isEmpty {
                 print("No boarding passes to migrate (empty")
