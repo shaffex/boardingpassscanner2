@@ -35,9 +35,7 @@ struct SxModifier_photosPicker2: SxModifierProtocol {
                             print("Barcode: \(barcodeText)")
                             print("Type: \(barcodeType)")
 
-                            SxMagicVariables.shared.setValue(barcodeText, forKey: "barcodeObject.text")
-                            SxMagicVariables.shared.setValue(barcodeType, forKey: "barcodeObject.type")
-                            SxEventManager.shared.fireEvent(eventType: SxEventManager.EventType.onBarcodeDetected.rawValue)
+                            EventAddNewBarcode.fireNewBarcodeEvent(barcodeText: barcodeText, barcodeType: barcodeType)
                         } else {
                             print("Error: No barcode detected")
                             PluginActions.shared.runAction("presentAlert:myAlertCannotDetectBarcode")

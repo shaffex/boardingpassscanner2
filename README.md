@@ -4,6 +4,12 @@ Disabled rotation for iPhone ✅
 ## TODO:
 All scanning needs to ge thru same event
 
+## Events:
+
+onBoardingPassAdded
+onBoardingPassAlreadyExists
+onBoardingPassIvalid or error
+
 
 ## Code Types from scanner:
 org.iso.PDF417

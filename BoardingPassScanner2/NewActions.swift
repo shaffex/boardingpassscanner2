@@ -9,7 +9,7 @@ import Foundation
 import MagicUiFramework
 
 
-struct Action_addNewBoardingBass: SxActionProtocol {
+struct Action_addNewBoardingPass: SxActionProtocol {
     let node: MagicNode?
     
     func barcodeType(_ str: String) -> String {

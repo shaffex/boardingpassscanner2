@@ -15,14 +15,13 @@ struct ContentView: View {
         
         MagicUiView.installViewPlugin(name: "barcodeicon", plugin: SxView_BarcodeIcon.self)
         MagicUiView.installViewPlugin(name: "buttonAddToAppleWallet", plugin: ButtonAddToAppleWallet.self)
-        MagicUiView.installViewPlugin(name: "kkc", plugin: kkc.self)
         MagicUiView.installViewPlugin(name: "ViewFinderCorners", plugin: SxView_ViewFinderCorners.self)
         
         // modifiers
         MagicUiView.installModifierPlugin(name: "photospicker2", plugin: SxModifier_photosPicker2.self)
         
         // actions
-        MagicUiView.installActionPlugin(name: "addNewBoardingBass", plugin: Action_addNewBoardingBass.self)
+        MagicUiView.installActionPlugin(name: "addNewBoardingPass", plugin: Action_addNewBoardingPass.self)
         MagicUiView.installActionPlugin(name: "addPassToWallet", plugin: Action_addPass.self)
         MagicUiView.installActionPlugin(name: "detectFromClipboard", plugin: Action_detectFromClipboard.self)
         

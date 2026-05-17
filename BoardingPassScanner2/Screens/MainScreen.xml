@@ -1,4 +1,5 @@
 <body>
+    <zstack viewId="THIS_VIEW" alignment="top"  animation="animation:easeInOut;duration:0.5;value:$isShowingBanner">
     <tabview key="selectedTab" value="Home" alert="item:alertItem" alert2="KEY_SHOW_BARCODE_INPUT_ALERT" sheet="item:sheetItem" photospicker2="isShowingImagePicker" onFirstAppear="setString:selectedTab=$settingsStartupTab">
         <navigationstack tabItem="label:Home;systemImage:house" tag="Home">
            <remoteview src="resource:Home"/>
@@ -17,6 +18,12 @@
         </navigationstack>
     </tabview>
     
+    <!--    Banner-->
+    <vstack if="$isShowingBanner" xmaxWidth="infinity" transition="$transitionType" zIndex="1">
+       <text padding="" background="red" cornerRadius="8" font="largeTitle">Warning</text>
+       </vstack>
+    </zstack>
+    
     <!--    For displaying camera scanner sheet-->
     <remoteview id="scannerView" src="resource:ScannerView"/>
     
@@ -33,7 +40,7 @@
     
     
 <!--    <event onBarcodeDetected="" action="js:generateAction('$barcodeRectDelay', $barcodeRectSound)"/>-->
-    <event onBarcodeDetected="" action="addNewBoardingBass:type:$barcodeObject.type;text:$barcodeObject.text"/>
+    <event onBarcodeDetected="" action="playSystemSound:1017\\addNewBoardingPass:type:$barcodeObject.type;text:$barcodeObject.text"/>
     
     <dialogs>
         <alert id="myAlertCode" alertTitle="Detected barcode" alertMessage="$barcodeObject.text">

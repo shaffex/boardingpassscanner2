@@ -65,7 +65,7 @@ struct BoardingPassScanner2Tests {
     ]
 
     @Test func extractsBarcodeMetadataFromScannerAction() {
-        let action = Action_addNewBoardingBass(node: nil)
+        let action = Action_addNewBoardingPass(node: nil)
         let boardingPass = validBoardingPasses[0]
         let actionString = scannerAction(for: boardingPass.text)
 
@@ -74,14 +74,14 @@ struct BoardingPassScanner2Tests {
     }
 
     @Test func usesRawActionStringWhenNoScannerTextFieldExists() {
-        let action = Action_addNewBoardingBass(node: nil)
+        let action = Action_addNewBoardingPass(node: nil)
         let boardingPass = validBoardingPasses[0]
 
         #expect(action.barcodeText(boardingPass.text) == boardingPass.text)
     }
 
     @Test @MainActor func executeAddsParsedBoardingPassToMyCodesDataModel() async {
-        let action = Action_addNewBoardingBass(node: nil)
+        let action = Action_addNewBoardingPass(node: nil)
 
         
         
@@ -110,7 +110,7 @@ struct BoardingPassScanner2Tests {
     }
 
     @Test @MainActor func executeDoesNotAppendInvalidBoardingPasses() async {
-        let action = Action_addNewBoardingBass(node: nil)
+        let action = Action_addNewBoardingPass(node: nil)
 
         for boardingPassText in invalidBoardingPassTexts {
             let dataModel = emptyMyCodesDataModel()

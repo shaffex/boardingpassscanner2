@@ -12,7 +12,7 @@
         <text>BT: $selectedCode.flightDate</text>
         <button action="setString:selectedCode.flightDate=2026-05-12">set test data</button>
         
-        <button action="addNewBoardingBass:type:pdf417;text:M1HOSSOVA/DANA         UIQDKI LTNTATW9 5457 132Y035D0036 100">Fake Scan Dana1</button>
+        <button action="addNewBoardingPass:type:pdf417;text:M1HOSSOVA/DANA         UIQDKI LTNTATW9 5457 132Y035D0036 100">Fake Scan Dana1</button>
         
         
         <button action="addPassToWallet">addPassToWallet</button>

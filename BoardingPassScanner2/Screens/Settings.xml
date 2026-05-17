@@ -9,7 +9,9 @@
         <button action="openUrl:https://shaffex.com/passkit/GeneratedPasses/2026-05-08-194441.pkpass">openUrl</button>
         <button action="addPassToWallet">addPassToWallet</button>
         
-        <kkc/>
+        <button action="setBool:isShowingBanner=true">isShowingBanner true</button>
+        <button action="setBool:isShowingBanner=false">isShowingBanner false</button>
+        
         
         <section header="Databases">
             <navigationlink destination="viewDatabaseAirlines">Airlines</navigationlink>

@@ -59,9 +59,7 @@ struct Action_detectFromClipboard: SxActionProtocol {
                 return
             }
 
-            SxMagicVariables.shared.setValue(barcodeText, forKey: "barcodeObject.text")
-            SxMagicVariables.shared.setValue(barcodeType, forKey: "barcodeObject.type")
-            SxEventManager.shared.fireEvent(eventType: SxEventManager.EventType.onBarcodeDetected.rawValue)
+            EventAddNewBarcode.fireNewBarcodeEvent(barcodeText: barcodeText, barcodeType: barcodeType)
         }
     }
 }
