@@ -22,6 +22,8 @@ struct ContentView: View {
         MagicUiView.installModifierPlugin(name: "photospicker2", plugin: SxModifier_photosPicker2.self)
         
         // actions
+        MagicUiView.installActionPlugin(name: "showBanner", plugin: Action_showBanner.self)
+        
         MagicUiView.installActionPlugin(name: "addNewBoardingPass", plugin: Action_addNewBoardingPass.self)
         MagicUiView.installActionPlugin(name: "addPassToWallet", plugin: Action_addPass.self)
         MagicUiView.installActionPlugin(name: "detectFromClipboard", plugin: Action_detectFromClipboard.self)

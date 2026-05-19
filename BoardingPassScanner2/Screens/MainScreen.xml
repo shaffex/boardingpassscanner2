@@ -19,8 +19,9 @@
     </tabview>
     
     <!--    Banner-->
-    <vstack if="$isShowingBanner" xmaxWidth="infinity" transition="$transitionType" zIndex="1">
-       <text padding="" background="red" cornerRadius="8" font="largeTitle">Warning</text>
+    <vstack if="$isShowingBanner" xmaxWidth="infinity" transition="slide" zIndex="1" maxWidth="infinity" background="red" cornerRadius="8" padding="">
+       <text font="largeTitle">$bannerType</text>
+       <text font="body">$bannerText</text>
        </vstack>
     </zstack>
     

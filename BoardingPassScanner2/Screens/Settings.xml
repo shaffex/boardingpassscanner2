@@ -9,6 +9,7 @@
         <button action="openUrl:https://shaffex.com/passkit/GeneratedPasses/2026-05-08-194441.pkpass">openUrl</button>
         <button action="addPassToWallet">addPassToWallet</button>
         
+        <button action="showBanner:type:error;text:This is a test message">showBanner:type:error</button>
         <button action="setBool:isShowingBanner=true">isShowingBanner true</button>
         <button action="setBool:isShowingBanner=false">isShowingBanner false</button>
         
@@ -19,6 +20,17 @@
         
         <section header="working">
             <toggle key="barcodeRectSound">Sound on scan</toggle>
+        </section>
+        
+        <section header="About">
+            <text badge="Shaffex Limited">Developer</text>
+            <text badge="$SYSTEM_BUNDLE.VERSION">Version</text>
+            <group if="$DEBUG_MODE">
+            <text  badge="$SYSTEM_BUNDLE.BUILD">Build</text>
+            </group>
+            <button if="$DEBUG_MODE" foregroundColor="accentColor" action="openUrl:itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=1166018608&amp;onlyLatestVersion=true&amp;pageNumber=0&amp;sortOrdering=1&amp;type=Purple+Software">Rate app</button>
+            <navigationlink destination="settings_privacyPolicy">Privacy Policy</navigationlink>
+            <navigationlink destination="settings_contactUs">Contact us</navigationlink>
         </section>
         
     </list>
@@ -41,6 +53,13 @@
 
     </extendedlist>
     </vstack>
+    
+    
+    <!-- Privacy Policy HTML-->
+    <webview id="settings_privacyPolicy" navigationTitle="Privacy Policy">url:https://shaffex.com/api/boardingpass2/Links/privacyPolicy.html</webview>
+    
+    <!-- Privacy Policy HTML-->
+    <webview id="settings_contactUs" navigationTitle="Contact Us">url:https://shaffex.com/api/boardingpass2//Links/contactUs.php</webview>
     
     
     <datamodel key="dataModelAirlines" type="csv" src="res:airlines.csv"/>

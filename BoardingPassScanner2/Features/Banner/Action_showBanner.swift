@@ -7,7 +7,7 @@
 
 import MagicUiFramework
 
-// showBanner:type:error;text:aaaaa
+// showBanner:type:error;text:This is banner text
 
 struct Action_showBanner: SxActionProtocol {
     let node: MagicNode?
@@ -32,6 +32,15 @@ struct Action_showBanner: SxActionProtocol {
     }
     
     func execute(_ actionString: String) {
+        let type = bannerType(actionString)
         let text = bannerText(actionString)
+        
+        SxMagicVariables.shared.setValue(type, forKey: "bannerType")
+        SxMagicVariables.shared.setValue(text, forKey: "bannerText")
+        
+        PluginActions.shared.runAction("setBool:isShowingBanner=true")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            PluginActions.shared.runAction("setBool:isShowingBanner=false")
+        }
     }
 }
