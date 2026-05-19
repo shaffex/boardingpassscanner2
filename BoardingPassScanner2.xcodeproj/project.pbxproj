@@ -34,9 +34,22 @@
 		2FF9A8B12FB205FA0087BE24 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2FC674A82FBCD9D80060548C /* Exceptions for "BoardingPassScanner2" folder in "BoardingPassScanner2" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 2FABFA052FAE284400A66D55 /* BoardingPassScanner2 */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2FABFA082FAE284400A66D55 /* BoardingPassScanner2 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2FC674A82FBCD9D80060548C /* Exceptions for "BoardingPassScanner2" folder in "BoardingPassScanner2" target */,
+			);
 			path = BoardingPassScanner2;
 			sourceTree = "<group>";
 		};
@@ -411,6 +424,8 @@
 				DEVELOPMENT_TEAM = X47885HM53;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BoardingPassScanner2/Info.plist;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs camera access to scan boarding passes.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -444,6 +459,8 @@
 				DEVELOPMENT_TEAM = X47885HM53;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BoardingPassScanner2/Info.plist;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs camera access to scan boarding passes.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
