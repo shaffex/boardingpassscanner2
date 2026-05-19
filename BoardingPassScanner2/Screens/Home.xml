@@ -34,7 +34,7 @@
         
         
         <section header="Fake Scanning">
-            <button action="addNewBoardingPassbo:type:azrec;text:M1STARR/MICHAEL       E9L3KEI ATHTLVLY 0546 131Y045C0109 100">Fake Scan Michael</button>
+            <button action="addNewBoardingPass:type:azrec;text:M1STARR/MICHAEL       E9L3KEI ATHTLVLY 0546 131Y045C0109 100">Fake Scan Michael</button>
             <button action="addNewBoardingPass:type:pdf417;text:M1HOSSOVA/DANA         UIQDKI LTNTATW9 5457 132Y035D0036 100">Fake Scan Dana1</button>
             <button action="addNewBoardingPass:type:pdf417;text:M1HOSSOVA/DANA         UIQDKI TATLTNW9 5458 139Y035D0018 100">Fake Scan Dana2</button>
         </section>

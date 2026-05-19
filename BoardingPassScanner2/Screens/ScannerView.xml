@@ -1,7 +1,7 @@
 <body>
     <navigationview onAppear="setBool:isShowingViewFinder=true">
     <zstack id="barcodeScannerView" navLeading="id:buttonCancel" navTrailing="id:buttonTorchToggle">
-    <barcodescanner key="barcodeObject" rectColor="$barcodeRectColor" rectWidth="$barcodeRectLineWidth"/>
+    <barcodescannerlocal key="barcodeObject" rectColor="$barcodeRectColor" rectWidth="$barcodeRectLineWidth"/>
     <vstack background="clear">
     
     
@@ -19,6 +19,7 @@
     
     <button id="buttonCancel" action="dismissSheet:item:sheetItem">Dismiss</button>
     <toggle id="buttonTorchToggle" key="torchActive" value="false" xxpadding="trailing">Torch</toggle>
+    
 <!--    <button id="buttonTorchToggle2" action="setValue:key:torchActive;type:bool;">Torch On</button>-->
     
     <event onValueUpdated="torchActive" action="torch:$torchActive"/>

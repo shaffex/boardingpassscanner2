@@ -12,6 +12,7 @@ struct ContentView: View {
     init() {
         // views
         MagicUiView.installViewPlugin(name: "menuitem", plugin: MenuItemView.self)
+        MagicUiView.installViewPlugin(name: "barcodescannerlocal", plugin: SxView_BarcodeScanner.self)
         
         MagicUiView.installViewPlugin(name: "barcodeicon", plugin: SxView_BarcodeIcon.self)
         MagicUiView.installViewPlugin(name: "buttonAddToAppleWallet", plugin: ButtonAddToAppleWallet.self)

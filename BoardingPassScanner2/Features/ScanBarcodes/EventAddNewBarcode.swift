@@ -13,4 +13,6 @@ struct EventAddNewBarcode {
         SxMagicVariables.shared.setValue(barcodeType, forKey: "barcodeObject.type")
         SxEventManager.shared.fireEvent(eventType: SxEventManager.EventType.onBarcodeDetected.rawValue)
     }
+    
+    
 }

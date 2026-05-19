@@ -33,8 +33,14 @@ struct Action_addNewBoardingPass: SxActionProtocol {
     
     func execute(_ actionString: String) {
         let text = barcodeText(actionString)
+        
+        if isBoardingPassAlreadyPresent(text) {
+            PluginActions.shared.runAction("presentAlert:myAlertBoardingPassAlreadyExists")
+            return
+        }
+        
         guard (try? BoardingPass(parsing: text)) != nil else {
-            PluginActions.shared.runAction("presentAlert:myAlertInvalidCode")
+            PluginActions.shared.runAction("presentAlert:myAlertInvalidBoardingPassCode")
             return
         }
         
@@ -79,5 +85,16 @@ struct Action_addNewBoardingPass: SxActionProtocol {
             "passengerStatus": boardingPass.passengerStatus,
             "summary": boardingPass.summary
         ]
+    }
+    
+    func isBoardingPassAlreadyPresent(_ str: String) -> Bool {
+        guard !barcodeText(str).isEmpty,
+              let sxDataModel = SxMagicVariables.shared.value(forKey: "dataModelMyCodes") as? SxDataModel else {
+            return false
+        }
+
+        return sxDataModel.items.contains { item in
+            item.item["text"] as? String == barcodeText(str)
+        }
     }
 }

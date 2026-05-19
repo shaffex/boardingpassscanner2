@@ -46,7 +46,7 @@
         <alert id="myAlertCode" alertTitle="Detected barcode" alertMessage="$barcodeObject.text">
         </alert>
         
-        <alert id="myAlertInvalidCode" alertTitle="Detected barcode" alertMessage="Invalide barcode">
+        <alert id="myAlertInvalidBoardingPassCode" alertTitle="Invalid Boarding Pass" alertMessage="The detected barcode is not a valid boarding pass format.">
         </alert>
       
         <alert id="myAlertClearHistory" alertTitle="Warning" alertMessage="Are you sure you want to delete all saved boarding passes?&#10;&#10;Please note, this action is irreversible.">
@@ -55,6 +55,12 @@
         </alert>
         
         <alert id="myAlertCannotDetectBarcode" alertTitle="No Boarding Pass Found" alertMessage="We couldn’t detect a boarding pass in the selected image. Please try another screenshot or photo."/>
+        
+        <alert
+            id="myAlertBoardingPassAlreadyExists"
+            alertTitle="Boarding Pass Already Added"
+            alertMessage="This boarding pass has already been added to your passes. Please try a different one."
+        />
    
     </dialogs>
     
