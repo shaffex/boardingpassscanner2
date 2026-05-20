@@ -28,7 +28,7 @@
             <group if="$DEBUG_MODE">
             <text  badge="$SYSTEM_BUNDLE.BUILD">Build</text>
             </group>
-            <button if="$DEBUG_MODE" foregroundColor="accentColor" action="openUrl:itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=1166018608&amp;onlyLatestVersion=true&amp;pageNumber=0&amp;sortOrdering=1&amp;type=Purple+Software">Rate app</button>
+            <button if="$DEBUG_MODE" foregroundColor="accentColor" action="openUrl:itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=1166018608&amp;onlyLatestVersion=true&amp;pageNumber=0&amp;sortOrdering=1&amp;type=Purple+Software">Rate this app</button>
             <navigationlink destination="settings_privacyPolicy">Privacy Policy</navigationlink>
             <navigationlink destination="settings_contactUs">Contact us</navigationlink>
         </section>
