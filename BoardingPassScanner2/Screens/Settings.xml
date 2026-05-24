@@ -15,7 +15,11 @@
         
         
         <section header="Databases">
+            <text badge="$dataFilesVersion">Data Files Version</text>
             <navigationlink destination="viewDatabaseAirlines">Airlines</navigationlink>
+            <navigationlink destination="viewDatabaseAirports">Airports</navigationlink>
+            <button action="checkForDataUpdate">checkForDataUpdate add dialog</button>
+            
         </section>
         
         <section header="working">
@@ -27,7 +31,12 @@
             <text badge="$SYSTEM_BUNDLE.VERSION">Version</text>
             <group if="$DEBUG_MODE">
             <text  badge="$SYSTEM_BUNDLE.BUILD">Build</text>
+            
+            
             </group>
+            
+            
+            
             <button if="$DEBUG_MODE" foregroundColor="accentColor" action="openUrl:itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=1166018608&amp;onlyLatestVersion=true&amp;pageNumber=0&amp;sortOrdering=1&amp;type=Purple+Software">Rate this app</button>
             <navigationlink destination="settings_privacyPolicy">Privacy Policy</navigationlink>
             <navigationlink destination="settings_contactUs">Contact us</navigationlink>
@@ -35,33 +44,27 @@
         
     </list>
     
-    <vstack id="viewDatabaseAirlines">
-    <extendedlist navigationTitle="js: $dataModelAirlines.count == 0 ? 'My Codes' : 'My Codes ($dataModelAirlines.count)'" xnavTrailing="id:buttonsTrailing" autocapitalization="none" disableAutocorrection="true" dataModel="dataModelAirlines" searchable="mode:contains;allMustMatch:false;keys:[name,type];caseSensitive:false" xcontentUnavailable="contentNoData">
-
-        <navigationlink destination="resource:MyCode-View" action="selectItem:selectedCode">
-            <hstack>
-                
-                
-                <text foregroundColor="primary">$dataModel.name</text>
-                <text font="caption" monospaced="">$dataModel.country</text>
-                <text foregroundColor="secondary" font="footnote">$dataModel.code</text>
-                
-                
-            </hstack>
-        </navigationlink>
-        
-
+    <extendedlist id="viewDatabaseAirlines" navigationTitle="Airlines ($dataModelAirlines.count)" xnavTrailing="id:buttonsTrailing" autocapitalization="none" disableAutocorrection="true" dataModel="dataModelAirlines" searchable="mode:starts;allMustMatch:false;keys:[name,code];caseSensitive:false" xcontentUnavailable="contentNoData">
+        <text badge="$dataModel.code">$dataModel.name</text>
     </extendedlist>
-    </vstack>
+    
+    <extendedlist id="viewDatabaseAirports" navigationTitle="Airports ($dataModelAirports.count)" xnavTrailing="id:buttonsTrailing" autocapitalization="none" disableAutocorrection="true" dataModel="dataModelAirports" searchable="mode:starts;allMustMatch:false;keys:[name,code];caseSensitive:false" xcontentUnavailable="contentNoData">
+        <vstack>
+        <text badge="$dataModel.code">$dataModel.name</text>
+        <text badge="$dataModel.country">$dataModel.city</text>
+        </vstack>
+    </extendedlist>
     
     
     <!-- Privacy Policy HTML-->
     <webview id="settings_privacyPolicy" navigationTitle="Privacy Policy">url:https://shaffex.com/api/boardingpass2/Links/privacyPolicy.html</webview>
     
     <!-- Privacy Policy HTML-->
-    <webview id="settings_contactUs" navigationTitle="Contact Us">url:https://shaffex.com/api/boardingpass2//Links/contactUs.php</webview>
+    <webview id="settings_contactUs" navigationTitle="Contact Us">url:https://shaffex.com/api/boardingpass2/Links/contactUs.php</webview>
     
     
-    <datamodel key="dataModelAirlines" type="csv" src="res:airlines.csv"/>
+<!--    <datamodel key="dataModelAirlines" type="csv" src="res:airlines.csv"/>-->
+<datamodel key="dataModelAirlines" type="csv" src="urlCache:https://shaffex.com/api/boardingpass2/Data/airlines.csv"/>
+<datamodel key="dataModelAirports" type="csv" src="urlCache:https://shaffex.com/api/boardingpass2/Data/airports.csv"/>
     
 </body>

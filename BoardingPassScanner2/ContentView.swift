@@ -29,6 +29,8 @@ struct ContentView: View {
         MagicUiView.installActionPlugin(name: "detectFromClipboard", plugin: Action_detectFromClipboard.self)
         
         MagicUiView.installActionPlugin(name: "importFromV1", plugin: Action_importFromV1.self)
+        
+        MagicUiView.installActionPlugin(name: "checkForDataUpdate", plugin: Action_checkForDataUpdate.self)
     }
     
     var body: some View {
