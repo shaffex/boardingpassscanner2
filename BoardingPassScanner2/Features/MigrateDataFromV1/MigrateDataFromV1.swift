@@ -34,14 +34,36 @@ struct MigrateDataFromV1 {
             importedBarcodes = try JSONDecoder().decode([BoardingPassBarcodeV1].self, from: Data(jsonString.utf8))
             
             if let sxDataModel = SxMagicVariables.shared.value(forKey: "dataModelMyCodes") as? SxDataModel {
-                let newItems = importedBarcodes.map { barcode in
-                    SxDataModelItem(item: ["text":barcode.barcodeText, "type":barcode.barcodeType])
+                
+                let newItems: [SxDataModelItem] = importedBarcodes.compactMap { barcode in
+                    guard let boardingPass = try? BoardingPass(parsing: barcode.barcodeText) else {
+                        return nil
+                    }
+
+                    let airline = BoardingPassMapper.airline(for: boardingPass.operatingCarrierDesignator)
+                    let fromAirport = BoardingPassMapper.airport(for: boardingPass.fromAirport)
+                    let toAirport = BoardingPassMapper.airport(for: boardingPass.toAirport)
+                    
+                    return SxDataModelItem(item: [
+                        "name": boardingPass.passengerName.displayName,
+                        "text": barcode.barcodeText,
+                        "type": barcode.barcodeType,
+                        "flightDate": barcode.barcodeDepartureDate,
+                        "summary": boardingPass.summary,
+                        "fromAirport": boardingPass.fromAirport,
+                        "fromAirportCity": fromAirport?.city ?? "",
+                        "toAirport": boardingPass.toAirport,
+                        "toAirportCity": toAirport?.city ?? "",
+                        "airline": airline?.name ?? "",
+                        "flightCode": boardingPass.operatingCarrierDesignator,
+                        "flightNumber": boardingPass.flightNumber,
+                    ])
                 }
 
                 sxDataModel.items.append(contentsOf: newItems)
             }
             
-            print("KKC")
+            print("Import completed, \(importedBarcodes.count) barcodes imported")
         }
         catch {
             print("Error=",error.localizedDescription)
@@ -63,10 +85,10 @@ struct MigrateDataFromV1 {
 //        UtilsUi.showBannerInfo(title: "Import Status", subtitle: "\n\(imporetBarcodes.count) boarding passes imported successfully.")
     }
 
-    func xxx() {
+    func importFromResource(named: String, withExtension: String) {
         
         
-        if let jsonString = readTextFileFromResource(named: "ExportedBoardingPasses", withExtension: "json") {
+        if let jsonString = readTextFileFromResource(named: named, withExtension: withExtension) {
             importBarcodes(jsonString: jsonString)
         }
     }
@@ -84,6 +106,6 @@ struct Action_importFromV1: SxActionProtocol {
     let node: MagicNode?
     
     func execute(_ actionString: String) {
-        MigrateDataFromV1().xxx()
+        MigrateDataFromV1().importFromResource(named: "ExportedBoardingPasses", withExtension: "json")
     }
 }

@@ -53,8 +53,10 @@ struct Action_addNewBoardingPass: SxActionProtocol {
     }
 
     private func itemData(for barcodeText: String, barcodeType: String) -> [String: String] {
-        let scannedDate = ISO8601DateFormatter().string(from: Date())
+        Self.itemData(for: barcodeText, barcodeType: barcodeType, scannedDate: ISO8601DateFormatter().string(from: Date()))
+    }
 
+    static func itemData(for barcodeText: String, barcodeType: String, scannedDate: String) -> [String: String] {
         guard let boardingPass = try? BoardingPass(parsing: barcodeText) else {
             return [
                 "name": "Unknown passenger",
@@ -64,18 +66,32 @@ struct Action_addNewBoardingPass: SxActionProtocol {
             ]
         }
 
+        let airline = BoardingPassMapper.airline(for: boardingPass.operatingCarrierDesignator)
+        let fromAirport = BoardingPassMapper.airport(for: boardingPass.fromAirport)
+        let toAirport = BoardingPassMapper.airport(for: boardingPass.toAirport)
+
         return [
             "name": boardingPass.passengerName.displayName,
             "text": barcodeText,
             "type": barcodeType,
             "scannedDate": scannedDate,
+            "formatCode": boardingPass.formatCode,
+            "numberOfLegs": String(boardingPass.numberOfLegs),
             "passengerSurname": boardingPass.passengerName.surname,
             "passengerGivenName": boardingPass.passengerName.givenName,
             "electronicTicketIndicator": boardingPass.electronicTicketIndicator,
             "pnr": boardingPass.operatingCarrierPNR,
             "fromAirport": boardingPass.fromAirport,
+            "fromAirportName": fromAirport?.name ?? boardingPass.fromAirport,
+            "fromAirportCity": fromAirport?.city ?? "",
+            "fromAirportCountry": fromAirport?.country ?? "",
             "toAirport": boardingPass.toAirport,
+            "toAirportName": toAirport?.name ?? boardingPass.toAirport,
+            "toAirportCity": toAirport?.city ?? "",
+            "toAirportCountry": toAirport?.country ?? "",
             "operatingCarrier": boardingPass.operatingCarrierDesignator,
+            "airlineName": airline?.name ?? boardingPass.operatingCarrierDesignator,
+            "airlineCountry": airline?.country ?? "",
             "flightNumber": boardingPass.flightNumber,
             "flightDateJulian": String(boardingPass.flightDateJulian),
             "flightDate": boardingPass.flightDate,
@@ -98,3 +114,13 @@ struct Action_addNewBoardingPass: SxActionProtocol {
         }
     }
 }
+
+//struct Action_decodeSelectedBoardingPass: SxActionProtocol {
+//    let node: MagicNode?
+//    
+//    func execute(_ actionString: String) {
+//        if let selectedCode = SxMagicVariables.shared.value(forKey: "selectedCode") {
+//            print("JANA")
+//        }
+//    }
+//}

@@ -63,8 +63,6 @@
     <webview id="settings_contactUs" navigationTitle="Contact Us">url:https://shaffex.com/api/boardingpass2/Links/contactUs.php</webview>
     
     
-<!--    <datamodel key="dataModelAirlines" type="csv" src="res:airlines.csv"/>-->
-<datamodel key="dataModelAirlines" type="csv" src="urlCache:https://shaffex.com/api/boardingpass2/Data/airlines.csv"/>
-<datamodel key="dataModelAirports" type="csv" src="urlCache:https://shaffex.com/api/boardingpass2/Data/airports.csv"/>
+<!-- dataModelAirlines and dataModelAirports are declared in MainScreen.xml so they are available app-wide. -->
     
 </body>

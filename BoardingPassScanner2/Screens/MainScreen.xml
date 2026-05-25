@@ -27,13 +27,18 @@
     
     <!--    For displaying camera scanner sheet-->
     <remoteview id="scannerView" src="resource:ScannerView"/>
-    
+    <remoteview id="sheetDecodedView" src="resource:DecodedView"/>
     
     <remoteview id="sheetScanSimulatorView" src="file:live/SXML/DebugOnly/ScanSimulator.xml"/>
     
     <remoteview id="sheetPremiumFeatures" src="file:live/SXML/Sheets/PremiumFeatures.xml"/>
     
+    
+    
+    
     <datamodel key="dataModelMyCodes" src="res:initialMyCodes.json"/>
+    <datamodel key="dataModelAirlines" type="csv" src="urlCache:https://shaffex.com/api/boardingpass2/Data/airlines.csv"/>
+    <datamodel key="dataModelAirports" type="csv" src="urlCache:https://shaffex.com/api/boardingpass2/Data/airports.csv"/>
     
     
     <event onValueUpdated="xxtorchActivated" action="torch:$torchActivated;level:$torchLevel"/>

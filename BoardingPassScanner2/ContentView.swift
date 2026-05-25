@@ -31,16 +31,22 @@ struct ContentView: View {
         MagicUiView.installActionPlugin(name: "importFromV1", plugin: Action_importFromV1.self)
         
         MagicUiView.installActionPlugin(name: "checkForDataUpdate", plugin: Action_checkForDataUpdate.self)
+        //MagicUiView.installActionPlugin(name: "decodeSelectedBoardingPass", plugin: Action_decodeSelectedBoardingPass.self)
     }
     
     var body: some View {
         MagicUiView(resource: "MainScreen")
             .onFirstAppear {
                 Task {
-                    DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         MigrationAssistant.checkMigration()
+                        // what if ???
                     }
                 }
+//                Task { @MainActor in
+//                    try? await Task.sleep(nanoseconds: 1_000_000_000)
+//                    BoardingPassBackfill.backfillMissingFields()
+//                }
             }
     }
 }

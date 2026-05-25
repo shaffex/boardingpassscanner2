@@ -1,5 +1,5 @@
 <body>
-    <list navigationTitle="Letenka">
+    <list navigationTitle="Letenka" navTrailing="id:buttonsTrailing">
         <text>$selectedCode.text</text>
         <text>Code Type: $selectedCode.type</text>
         <text>Seat Number: $selectedCode.seatNumber</text>
@@ -11,4 +11,30 @@
         <buttonAddToAppleWallet addPassButtonStyle="black"/>
         <button action="addPassToWallet">addPassToWallet</button>
     </list>
+    
+    <!-- Option menu -->
+    <hstack id="buttonsTrailing">
+    <menu systemImage="ellipsis.circle" labelStyle="iconOnly">
+        <button if="$DEBUG_MODE" action="presentSheet:item:sheetItem;id:sheetScanSimulatorView">DEBUG: ScanSimulator</button>
+        
+        
+        <button disabled="js:'$dataModelMyCodes.count' == '0'" action="presentSheet:item:sheetItem;id:sheetDecodedView">
+            <label systemImage="tray.and.arrow.up">Decode fields</label>
+        </button>
+        
+        <button disabled="js:'$dataModelMyCodes.count' == '0'" role="destructive" action="presentAlert:myAlertClearHistory">
+            <label systemImage="trash">Delete all boarding passes</label>
+        </button>
+        
+        
+        
+        <divider/>
+        
+        <toggle key="isReversed" value="false">Reverse Order</toggle>
+    </menu>
+    
+    </hstack>
+    
+    
+    
 </body>

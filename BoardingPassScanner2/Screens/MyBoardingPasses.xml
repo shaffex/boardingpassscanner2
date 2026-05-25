@@ -4,13 +4,45 @@
 
             <navigationlink destination="resource:MyCode-View" action="selectItem:selectedCode">
                 <hstack>
-                    <barcodeicon name="$dataModel.name" size="40"/>
+<!--                    <barcodeicon name="$dataModel.name" size="40"/>-->
                     <vstack alignment="leading">
                     <text foregroundColor="primary">$dataModel.name</text>
-                    <text font="caption" monospaced="">$dataModel.text</text>
+                    
+                    
+                    
+                    <hstack>
+                        <text foregroundColor="blue">$dataModel.flightCode</text>
+                        <text foregroundColor="green">$dataModel.flightNumber</text>
+                        <text foregroundColor="red">$dataModel.airline</text>
+                    </hstack>
+                    
+                    <hstack>
+                        <vstack alignment="leading">
+                            <text foregroundColor="secondary" font="caption">$dataModel.fromAirportCity</text>
+                            <text font="largeTitle" bold="">$dataModel.fromAirport</text>
+                            
+                        </vstack>
+                        
+                        <spacer/>
+                        <image systemName="airplane"/>
+                        <spacer/>
+                        
+                        <vstack alignment="trailing">
+                            <text foregroundColor="secondary" font="caption">$dataModel.toAirportCity</text>
+                            <text font="largeTitle" bold="">$dataModel.toAirport</text>
+                        </vstack>
+                        
+                    </hstack>
+                    
+                    
+                    
+<!--                    <text font="caption" monospaced="">$dataModel.text</text>-->
+                    
                     <text foregroundColor="secondary" font="footnote">$dataModel.type</text>
                     <text foregroundColor="secondary" font="footnote">flightDate: $dataModel.flightDate</text>
-                    <text>summary: $dataModel.summary</text>
+                    
+                    
+<!--                    <text>summary: $dataModel.summary</text>-->
                     </vstack>
                 </hstack>
             </navigationlink>
@@ -58,5 +90,7 @@
         </button>
     </menu>
     </hstack>
+    
+    
     
 </body>
