@@ -9,7 +9,6 @@ import Foundation
 import MagicUiFramework
 
 struct MigrateDataFromV1 {
-    
     func readTextFileFromResource(named fileName: String, withExtension fileExtension: String) -> String? {
         guard let url = Bundle.main.url(
             forResource: fileName,
@@ -18,7 +17,7 @@ struct MigrateDataFromV1 {
             print("Resource not found: \(fileName).\(fileExtension)")
             return nil
         }
-        
+
         do {
             return try String(contentsOf: url, encoding: .utf8)
         } catch {
@@ -26,86 +25,42 @@ struct MigrateDataFromV1 {
             return nil
         }
     }
-    
+
+    @MainActor
     public func importBarcodes(jsonString: String) {
         print("importBarcodes:", jsonString)
-        var importedBarcodes: [BoardingPassBarcodeV1] = []
+
         do {
-            importedBarcodes = try JSONDecoder().decode([BoardingPassBarcodeV1].self, from: Data(jsonString.utf8))
-            
-            if let sxDataModel = SxMagicVariables.shared.value(forKey: "dataModelMyCodes") as? SxDataModel {
-                
-                let newItems: [SxDataModelItem] = importedBarcodes.compactMap { barcode in
-                    guard let boardingPass = try? BoardingPass(parsing: barcode.barcodeText) else {
-                        return nil
-                    }
+            let importedBarcodes = try JSONDecoder().decode([BoardingPassBarcodeV1].self, from: Data(jsonString.utf8))
 
-                    let airline = BoardingPassMapper.airline(for: boardingPass.operatingCarrierDesignator)
-                    let fromAirport = BoardingPassMapper.airport(for: boardingPass.fromAirport)
-                    let toAirport = BoardingPassMapper.airport(for: boardingPass.toAirport)
-                    
-                    return SxDataModelItem(item: [
-                        "name": boardingPass.passengerName.displayName,
-                        "text": barcode.barcodeText,
-                        "type": barcode.barcodeType,
-                        "flightDate": barcode.barcodeDepartureDate,
-                        "summary": boardingPass.summary,
-                        "fromAirport": boardingPass.fromAirport,
-                        "fromAirportCity": fromAirport?.city ?? "",
-                        "toAirport": boardingPass.toAirport,
-                        "toAirportCity": toAirport?.city ?? "",
-                        "airline": airline?.name ?? "",
-                        "flightCode": boardingPass.operatingCarrierDesignator,
-                        "flightNumber": boardingPass.flightNumber,
-                    ])
-                }
-
-                sxDataModel.items.append(contentsOf: newItems)
+            let store = BoardingPassStore.shared
+            for barcode in importedBarcodes {
+                store.insertIfMissing(barcodeText: barcode.barcodeText, barcodeType: barcode.barcodeType)
             }
-            
+
             print("Import completed, \(importedBarcodes.count) barcodes imported")
-        }
-        catch {
-            print("Error=",error.localizedDescription)
-//            UtilsUi.showBannerError(title: "Error", subtitle: "File format is not in a valid Boarding Pass Scanner format for importing barcodes.")
+        } catch {
+            print("Error=", error.localizedDescription)
             return
         }
-        
+
         print("Json decoding passed")
-        
-//        for importedBoardingPass in imporetBarcodes {
-//            if ((importedBoardingPass.barcodeText == "" || importedBoardingPass.barcodeType == "")) {
-//                UtilsUi.showBannerError(title: "Error", subtitle: "File format is not in a valid Boarding Pass Scanner format for importing barcodes.")
-//                return
-//            }
-//            importToMyBoardingPasses(importedBoardingPass)
-//        }
-//        saveSettings()
-//        
-//        UtilsUi.showBannerInfo(title: "Import Status", subtitle: "\n\(imporetBarcodes.count) boarding passes imported successfully.")
     }
 
+    @MainActor
     func importFromResource(named: String, withExtension: String) {
-        
-        
         if let jsonString = readTextFileFromResource(named: named, withExtension: withExtension) {
             importBarcodes(jsonString: jsonString)
         }
     }
-    
-    
-    func migrateDateFromNsDefaultsV1() {
-        //if let UserDefaults.standard.object(forKey: "settings")
-    }
-    
 }
 
-// temp only
-import MagicUiFramework
 struct Action_importFromV1: SxActionProtocol {
     let node: MagicNode?
-    
+
     func execute(_ actionString: String) {
-        MigrateDataFromV1().importFromResource(named: "ExportedBoardingPasses", withExtension: "json")
+        Task { @MainActor in
+            MigrateDataFromV1().importFromResource(named: "ExportedBoardingPasses", withExtension: "json")
+        }
     }
 }

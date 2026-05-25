@@ -1,3 +1,10 @@
+
+CloudKit container:
+com.shaffex.boardingpassscanner
+
+Bundle ID:
+com.shaffex.boardingpassscanner
+
 ## Scanning Flow
 
 All boarding pass scan entry points use the same event pipeline:

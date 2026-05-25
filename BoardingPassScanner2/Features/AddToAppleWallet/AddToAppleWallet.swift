@@ -11,12 +11,28 @@ import MagicUiFramework
 
 struct AddToWalletButton: UIViewRepresentable {
     let addPassButtonStyle: PKAddPassButtonStyle
-    
+    var onTap: (() -> Void)? = nil
+
     func makeUIView(context: Context) -> PKAddPassButton {
-        PKAddPassButton(addPassButtonStyle: addPassButtonStyle)
+        let button = PKAddPassButton(addPassButtonStyle: addPassButtonStyle)
+        button.addAction(UIAction { _ in
+            context.coordinator.onTap?()
+        }, for: .touchUpInside)
+        return button
     }
 
-    func updateUIView(_ uiView: PKAddPassButton, context: Context) {}
+    func updateUIView(_ uiView: PKAddPassButton, context: Context) {
+        context.coordinator.onTap = onTap
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onTap: onTap)
+    }
+
+    final class Coordinator {
+        var onTap: (() -> Void)?
+        init(onTap: (() -> Void)?) { self.onTap = onTap }
+    }
 }
 
 struct ButtonAddToAppleWallet: SxViewProtocol {
@@ -59,10 +75,19 @@ struct AddPassView: UIViewControllerRepresentable {
 
 struct Action_addPass: SxActionProtocol {
     let node: MagicUiFramework.MagicNode?
-    
+
+    static func presentForRecord(_ record: BoardingPassRecord) {
+        let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
+        Task {
+            await Action_addPass(node: nil).presentWallet(
+                barcodeText: record.text,
+                flightDate: flightDateString
+            )
+        }
+    }
+
     func execute(_ actionString: String) {
         Task {
-            //await addPass()
             await presentWallet(
                 barcodeText: SxMagicVariables.shared.value(forKey: "selectedCode.text") as? String ?? "",
                 flightDate: SxMagicVariables.shared.value(forKey: "selectedCode.flightDate") as? String ?? ""

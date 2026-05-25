@@ -6,7 +6,7 @@
         </navigationstack>
        
         <navigationstack tabItem="label:My Passes;systemImage:qrcode" tag="MyCodes">
-           <remoteview src="resource:MyBoardingPasses"/>
+           <myBoardingPassesList/>
         </navigationstack>
         
         <navigationstack tabItem="label:Skusky;systemImage:widget.small" tag="Skusky">
@@ -27,16 +27,11 @@
     
     <!--    For displaying camera scanner sheet-->
     <remoteview id="scannerView" src="resource:ScannerView"/>
-    <remoteview id="sheetDecodedView" src="resource:DecodedView"/>
     
     <remoteview id="sheetScanSimulatorView" src="file:live/SXML/DebugOnly/ScanSimulator.xml"/>
     
     <remoteview id="sheetPremiumFeatures" src="file:live/SXML/Sheets/PremiumFeatures.xml"/>
     
-    
-    
-    
-    <datamodel key="dataModelMyCodes" src="res:initialMyCodes.json"/>
     <datamodel key="dataModelAirlines" type="csv" src="urlCache:https://shaffex.com/api/boardingpass2/Data/airlines.csv"/>
     <datamodel key="dataModelAirports" type="csv" src="urlCache:https://shaffex.com/api/boardingpass2/Data/airports.csv"/>
     
@@ -55,10 +50,7 @@
         <alert id="myAlertInvalidBoardingPassCode" alertTitle="Invalid Boarding Pass" alertMessage="The detected barcode is not a valid boarding pass format.">
         </alert>
       
-        <alert id="myAlertClearHistory" alertTitle="Warning" alertMessage="Are you sure you want to delete all saved boarding passes?&#10;&#10;Please note, this action is irreversible.">
-            <button>No</button>
-            <button role="destructive" action="deleteAll:dataModel:dataModelMyCodes">Yes</button>
-        </alert>
+
         
         <alert id="myAlertCannotDetectBarcode" alertTitle="No Boarding Pass Found" alertMessage="We couldn’t detect a boarding pass in the selected image. Please try another screenshot or photo."/>
         
