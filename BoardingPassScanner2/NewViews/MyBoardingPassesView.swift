@@ -36,7 +36,9 @@ struct MyBoardingPassesView: View {
     }
 
     private var navigationTitle: String {
-        records.isEmpty ? "My Codes" : "My Codes (\(records.count))"
+        records.isEmpty
+            ? String(localized: "TEXT_MY_BOARDING_PASSES")
+            : String(localized: "TEXT_MY_BOARDING_PASSES (\(records.count))")
     }
 
     var body: some View {

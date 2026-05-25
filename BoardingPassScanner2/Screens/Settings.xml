@@ -1,5 +1,5 @@
 <body>
-    <list navigationTitle="Settings">
+    <list navigationTitle="$TEXT_SETTINGS">
         <toggle key="DEBUG_MODE">DEBUG_MODE</toggle>
         
         

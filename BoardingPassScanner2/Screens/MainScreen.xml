@@ -1,19 +1,19 @@
 <body>
     <zstack viewId="THIS_VIEW" alignment="top"  animation="animation:easeInOut;duration:0.5;value:$isShowingBanner">
     <tabview key="selectedTab" value="Home" alert="item:alertItem" alert2="KEY_SHOW_BARCODE_INPUT_ALERT" sheet="item:sheetItem" photospicker2="isShowingImagePicker" onFirstAppear="setString:selectedTab=$settingsStartupTab">
-        <navigationstack tabItem="label:Home;systemImage:house" tag="Home">
+        <navigationstack tabItem="label:$TEXT_HOME;systemImage:house" tag="Home">
            <remoteview src="resource:Home"/>
         </navigationstack>
        
-        <navigationstack tabItem="label:My Passes;systemImage:qrcode" tag="MyCodes">
+        <navigationstack tabItem="label:$TEXT_MYPASSES;systemImage:qrcode" tag="MyCodes">
            <myBoardingPassesList/>
         </navigationstack>
         
-        <navigationstack tabItem="label:Skusky;systemImage:widget.small" tag="Skusky">
+        <navigationstack tabItem="label:$TEXT_MISC;systemImage:widget.small" tag="Skusky">
            <remoteview src="resource:Skusky"/>
         </navigationstack>
                
-        <navigationstack tabItem="label:Settings;systemImage:gear" tag="Settings">
+        <navigationstack tabItem="label:$TEXT_SETTINGS;systemImage:gear" tag="Settings">
             <remoteview src="resource:Settings"/>
         </navigationstack>
     </tabview>

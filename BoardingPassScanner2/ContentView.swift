@@ -10,6 +10,11 @@ import MagicUiFramework
 
 struct ContentView: View {
     init() {
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            MagicLocalisation.exportKeys()
+        }
+        
         // views
         MagicUiView.installViewPlugin(name: "menuitem", plugin: MenuItemView.self)
         MagicUiView.installViewPlugin(name: "barcodescannerlocal", plugin: SxView_BarcodeScanner.self)
@@ -37,6 +42,9 @@ struct ContentView: View {
     var body: some View {
         MagicUiView(resource: "MainScreen")
             .onFirstAppear {
+                
+                
+                
                 Task { @MainActor in
                     MigrationAssistant.checkMigration()
                 }

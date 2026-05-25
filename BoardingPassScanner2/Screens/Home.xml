@@ -1,42 +1,37 @@
 <body>
     <list navigationTitle="Home" xxxsheet="isPresented:scannerView">
         
-        <button action="copy:M1STARR/MICHAEL       E9L3KEI ATHTLVLY 0546 131Y045C0109 100">Copy Michael M1</button>
-        
-        
-        
-        <button>getFlightInfo</button>
-        
         <section header="Boarding Pass">
 
             <button action="presentSheet:item:sheetItem;id:scannerView">
                 <menuitem
                     image="camera.viewfinder"
-                    title="Scan Boarding Pass"
-                    description="Use your camera to scan a boarding pass"/>
+                    title="$TEXT_SCAN_BOARDING_PASS"
+                    description="$TEXT_SCAN_BOARDING_DESCRIPTION"/>
             </button>
 
             <button action="setBool:isShowingImagePicker=true">
                 <menuitem
                     image="photo.on.rectangle"
-                    title="Import Boarding Pass"
-                    description="Detect a boarding pass from a screenshot or photo"/>
+                    title="$TEXT_IMPORT_BOARDING_PASS"
+                    description="$TEXT_IMPORT_BOARDING_PASS_DESCRIPTION"/>
             </button>
 
             <button action="detectFromClipboard">
                 <menuitem
                     image="doc.on.clipboard"
-                    title="Paste Boarding Pass"
-                    description="Detect a boarding pass copied to your clipboard"/>
+                    title="$TEXT_PASTE_BOARDING_PASS"
+                    description="$TEXT_PASTE_BOARDING_PASS_DESCRIPTION"/>
             </button>
 
         </section>
         
         
-        <section header="Fake Scanning">
+        <section if="$DEBUG_MODE" header="DEBUG: Fake Scanning">
             <button action="addNewBoardingPass:type:azrec;text:M1STARR/MICHAEL       E9L3KEI ATHTLVLY 0546 131Y045C0109 100">Fake Scan Michael</button>
             <button action="addNewBoardingPass:type:pdf417;text:M1HOSSOVA/DANA         UIQDKI LTNTATW9 5457 132Y035D0036 100">Fake Scan Dana1</button>
             <button action="addNewBoardingPass:type:pdf417;text:M1HOSSOVA/DANA         UIQDKI TATLTNW9 5458 139Y035D0018 100">Fake Scan Dana2</button>
+            <button action="copy:M1STARR/MICHAEL       E9L3KEI ATHTLVLY 0546 131Y045C0109 100">Copy Michael M1</button>
         </section>
         
     </list>
