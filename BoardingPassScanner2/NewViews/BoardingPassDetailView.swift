@@ -13,23 +13,31 @@ struct BoardingPassDetailView: View {
     let record: BoardingPassRecord
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
 
+    @State private var debugMode = false
     @State private var showDecodedSheet = false
     @State private var showDeleteAlert = false
-    @State private var showRawData = false
+    @State private var isAddingToWallet = false
+    @State private var showWalletSpinner = false
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            screenBackground.ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 26) {
+                    barcodeCard
                     BoardingPassCard(record: record)
                     tripDetails
-                    barcodeCard
-                    walletButton
+                    if isUpcomingBoardingPass {
+                        if debugMode {
+                            walletDebugPanel
+                        }
+                        walletButton
+                    }
                     actionButtons
-                    rawDataPanel
+                    decodedDataButton
                 }
                 .padding(.horizontal, 18)
                 .padding(.top, 18)
@@ -39,22 +47,10 @@ struct BoardingPassDetailView: View {
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showDecodedSheet = true
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .background(.white.opacity(0.1), in: Circle())
-                        .overlay {
-                            Circle().stroke(.white.opacity(0.12), lineWidth: 1)
-                        }
-                }
-            }
+        .toolbarColorScheme(colorScheme == .dark ? .dark : .light, for: .navigationBar)
+        .onAppear(perform: refreshDebugMode)
+        .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
+            refreshDebugMode()
         }
         .alert("Warning", isPresented: $showDeleteAlert) {
             Button("No", role: .cancel) {}
@@ -87,10 +83,10 @@ struct BoardingPassDetailView: View {
         }
         .padding(22)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(panelBackground, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(.white.opacity(0.12), lineWidth: 1)
+                .stroke(panelStroke, lineWidth: 1)
         }
     }
 
@@ -102,7 +98,7 @@ struct BoardingPassDetailView: View {
                         .font(.system(.caption, design: .monospaced, weight: .bold))
                         .tracking(3)
                         .foregroundStyle(.black.opacity(0.55))
-                    Text(boardingPassName)
+                    Text(displayValue(record.name))
                         .font(.title3.weight(.bold))
                         .foregroundStyle(.black)
                         .lineLimit(1)
@@ -135,11 +131,69 @@ struct BoardingPassDetailView: View {
     }
 
     private var walletButton: some View {
-        AddToWalletButton(addPassButtonStyle: .black) {
-            Action_addPass.presentForRecord(record)
+        ZStack {
+            AddToWalletButton(addPassButtonStyle: .black, isEnabled: !isAddingToWallet) {
+                addToWallet()
+            }
+            .allowsHitTesting(!isAddingToWallet)
+            .opacity(isAddingToWallet ? 0.55 : 1)
+
+            if showWalletSpinner {
+                ProgressView()
+                    .tint(.white)
+                    .controlSize(.regular)
+                    .padding(10)
+                    .background(.black.opacity(0.5), in: Circle())
+            }
         }
         .frame(maxWidth: .infinity, minHeight: 56, maxHeight: 56)
         .background(.white, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    private func addToWallet() {
+        guard !isAddingToWallet else { return }
+
+        isAddingToWallet = true
+        showWalletSpinner = false
+
+        Task {
+            let spinnerTask = Task {
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                guard !Task.isCancelled else { return }
+                await MainActor.run {
+                    showWalletSpinner = true
+                }
+            }
+
+            await Action_addPass.presentForRecord(record)
+            spinnerTask.cancel()
+
+            await MainActor.run {
+                isAddingToWallet = false
+                showWalletSpinner = false
+            }
+        }
+    }
+
+    private var walletDebugPanel: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("DEBUG: Apple Wallet request", systemImage: "ladybug")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(primaryText)
+
+            Text(Action_addPass.requestDebugDescription(for: record))
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(panelBackground, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(panelStroke, lineWidth: 1)
+        }
     }
 
     private var actionButtons: some View {
@@ -160,24 +214,58 @@ struct BoardingPassDetailView: View {
         }
     }
 
-    private var rawDataPanel: some View {
-        DisclosureGroup(isExpanded: $showRawData) {
-            Text(record.text)
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(.secondary)
-                .textSelection(.enabled)
-                .padding(.top, 12)
+    private var decodedDataButton: some View {
+        Button {
+            showDecodedSheet = true
         } label: {
-            Label("Raw IATA BCBP data", systemImage: "info.circle")
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(.secondary)
+            HStack(spacing: 12) {
+                Image(systemName: "info.circle")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                Text("Decoded IATA BCBP data")
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(primaryText)
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(panelBackground, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(panelStroke, lineWidth: 1)
+            }
         }
-        .padding(18)
-        .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(.white.opacity(0.12), lineWidth: 1)
-        }
+        .buttonStyle(.plain)
+    }
+
+    private func refreshDebugMode() {
+        debugMode = MagicUiBrisge.isDebugModeEnabled
+    }
+
+    private var isUpcomingBoardingPass: Bool {
+        Calendar.current.startOfDay(for: record.flightDate) >= Calendar.current.startOfDay(for: .now)
+    }
+
+    private var screenBackground: Color {
+        colorScheme == .dark ? .black : Color(uiColor: .systemGroupedBackground)
+    }
+
+    private var panelBackground: Color {
+        colorScheme == .dark ? Color.white.opacity(0.08) : .white
+    }
+
+    private var panelStroke: Color {
+        colorScheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.08)
+    }
+
+    private var primaryText: Color {
+        colorScheme == .dark ? .white : .black
     }
 
     private var departureTime: String {
@@ -192,16 +280,6 @@ struct BoardingPassDetailView: View {
         record.flightDate.formatted(.dateTime.weekday(.abbreviated))
     }
 
-    private var passengerInitial: String {
-        String(record.passengerGivenName.prefix(1))
-    }
-
-    private var boardingPassName: String {
-        [record.passengerSurname, passengerInitial]
-            .filter { !$0.isEmpty }
-            .joined(separator: "/")
-    }
-
     private func detailBlock(title: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
@@ -210,7 +288,7 @@ struct BoardingPassDetailView: View {
                 .foregroundStyle(.secondary)
             Text(displayValue(value))
                 .font(.system(.title3, design: .rounded, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(primaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
@@ -222,18 +300,32 @@ struct BoardingPassDetailView: View {
 }
 
 private struct DetailActionButtonStyle: ButtonStyle {
-    var foregroundColor: Color = .white
+    @Environment(\.colorScheme) private var colorScheme
+
+    var foregroundColor: Color = .primary
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline.weight(.semibold))
             .foregroundStyle(foregroundColor)
             .frame(height: 58)
-            .background(.white.opacity(configuration.isPressed ? 0.16 : 0.08), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .background(buttonBackground(isPressed: configuration.isPressed), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(.white.opacity(0.12), lineWidth: 1)
+                    .stroke(buttonStroke, lineWidth: 1)
             }
+    }
+
+    private func buttonBackground(isPressed: Bool) -> Color {
+        if colorScheme == .dark {
+            return Color.white.opacity(isPressed ? 0.16 : 0.08)
+        }
+
+        return Color.white.opacity(isPressed ? 0.72 : 1)
+    }
+
+    private var buttonStroke: Color {
+        colorScheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.08)
     }
 }
 

@@ -25,20 +25,8 @@ struct HomeView: View {
         }
     }
 
-    private func currentDebugModeValue() -> Bool {
-        if let value = SxMagicVariables.shared.value(forKey: "DEBUG_MODE") as? Bool {
-            return value
-        }
-
-        if let value = SxMagicVariables.shared.value(forKey: "DEBUG_MODE") as? String {
-            return ["1", "true", "yes"].contains(value.lowercased())
-        }
-
-        return UserDefaults.standard.bool(forKey: "DEBUG_MODE")
-    }
-
     private func refreshDebugMode() {
-        isDebugModeEnabled = currentDebugModeValue()
+        isDebugModeEnabled = MagicUiBrisge.isDebugModeEnabled
     }
 
     var body: some View {

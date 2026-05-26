@@ -17,9 +17,9 @@ struct MyBoardingPassesView: View {
     @Query(sort: \BoardingPassRecord.scannedDate, order: .reverse)
     private var records: [BoardingPassRecord]
 
-    @AppStorage("isReversed") private var isReversed: Bool = false
-    @AppStorage("DEBUG_MODE") private var debugMode: Bool = false
+    @AppStorage("boardingPassSortOrder") private var sortOrderRawValue = PassSortOrder.descending.rawValue
 
+    @State private var debugMode = false
     @State private var searchText = ""
     @State private var showDeleteAllAlert = false
     @State private var isShowingExporter = false
@@ -27,7 +27,12 @@ struct MyBoardingPassesView: View {
     @State private var selectedSegment: PassSegment = .upcoming
 
     private var orderedRecords: [BoardingPassRecord] {
-        isReversed ? records.reversed() : records
+        switch PassSortOrder(rawValue: sortOrderRawValue) ?? .descending {
+        case .descending:
+            records
+        case .ascending:
+            Array(records.reversed())
+        }
     }
 
     private var upcomingRecords: [BoardingPassRecord] {
@@ -138,6 +143,8 @@ struct MyBoardingPassesView: View {
             Text("Are you sure you want to delete all saved boarding passes?\n\nPlease note, this action is irreversible.")
         }
         .onAppear {
+            refreshDebugMode()
+
             if upcomingRecords.isEmpty, !pastRecords.isEmpty {
                 selectedSegment = .past
             }
@@ -146,6 +153,13 @@ struct MyBoardingPassesView: View {
                 try? await DataUpdater().checkForDataUpdate()
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
+            refreshDebugMode()
+        }
+    }
+
+    private func refreshDebugMode() {
+        debugMode = MagicUiBrisge.isDebugModeEnabled
     }
 
     private var screenBackground: Color {
@@ -258,7 +272,12 @@ struct MyBoardingPassesView: View {
 
             Divider()
 
-            Toggle(isOn: $isReversed) { Text("Reverse Order") }
+            Picker("Sort order", selection: $sortOrderRawValue) {
+                ForEach(PassSortOrder.allCases) { order in
+                    Label(order.title, systemImage: order.systemImage)
+                        .tag(order.rawValue)
+                }
+            }
         } label: {
             Image(systemName: "ellipsis.circle")
                 .foregroundStyle(primaryText)
@@ -294,6 +313,31 @@ private enum PassSegment {
             "Upcoming"
         case .past:
             "Past"
+        }
+    }
+}
+
+private enum PassSortOrder: String, CaseIterable, Identifiable {
+    case descending
+    case ascending
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .descending:
+            "Descending"
+        case .ascending:
+            "Ascending"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .descending:
+            "arrow.down"
+        case .ascending:
+            "arrow.up"
         }
     }
 }

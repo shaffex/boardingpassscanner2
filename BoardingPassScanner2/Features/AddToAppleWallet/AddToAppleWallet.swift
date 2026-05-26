@@ -11,6 +11,7 @@ import MagicUiFramework
 
 struct AddToWalletButton: UIViewRepresentable {
     let addPassButtonStyle: PKAddPassButtonStyle
+    var isEnabled: Bool = true
     var onTap: (() -> Void)? = nil
 
     func makeUIView(context: Context) -> PKAddPassButton {
@@ -22,6 +23,7 @@ struct AddToWalletButton: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: PKAddPassButton, context: Context) {
+        uiView.isEnabled = isEnabled
         context.coordinator.onTap = onTap
     }
 
@@ -76,14 +78,37 @@ struct AddPassView: UIViewControllerRepresentable {
 struct Action_addPass: SxActionProtocol {
     let node: MagicUiFramework.MagicNode?
 
-    static func presentForRecord(_ record: BoardingPassRecord) {
+    static let debugFlag = "0"
+    static let walletEndpointURLString = "https://shaffex.com/api/boardingpass2/generateBoardingPass.php"
+
+    static func presentForRecord(_ record: BoardingPassRecord) async {
         let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
-        Task {
-            await Action_addPass(node: nil).presentWallet(
-                barcodeText: record.text,
-                flightDate: flightDateString
-            )
-        }
+        await Action_addPass(node: nil).presentWallet(
+            barcodeText: record.text,
+            flightDate: flightDateString
+        )
+    }
+
+    static func requestDebugDescription(for record: BoardingPassRecord) -> String {
+        let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
+        let fields = requestFields(
+            barcodeText: record.text,
+            flightDate: flightDateString,
+            debug: Self.debugFlag
+        )
+        let body = formBodyString(fields) ?? ""
+
+        return """
+        POST \(walletEndpointURLString)
+        Content-Type: application/x-www-form-urlencoded
+
+        barcodeText=\(fields["barcodeText"] ?? "")
+        flightDate=\(fields["flightDate"] ?? "")
+        debug=\(fields["debug"] ?? "")
+
+        Body:
+        \(body)
+        """
     }
 
     func execute(_ actionString: String) {
@@ -117,25 +142,18 @@ struct Action_addPass: SxActionProtocol {
 //        }
 //    }
     
-    var debugFlag: String {
-        if let val = SxMagicVariables.shared.value(forKey: "_tempDebugPasskit") as? Bool {
-            return val ? "1" : "0"
-        }
-        return "0"
-    }
-    
     func presentWallet(barcodeText: String, flightDate: String) async {
             do {
-                let url = URL(string: "https://shaffex.com/api/boardingpass2/generateBoardingPassTest.php")!
+                let url = URL(string: Self.walletEndpointURLString)!
                 //let url = URL(string: "https://shaffex.com/api/boardingpass2/Tests/generateBoardingPass.php")!
                 var request = URLRequest(url: url)
                 request.httpMethod = "POST"
                 request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-                request.httpBody = formBody([
-                    "barcodeText": barcodeText,
-                    "flightDate": flightDate,
-                    "debug": debugFlag
-                ])
+                request.httpBody = Self.formBody(Self.requestFields(
+                    barcodeText: barcodeText,
+                    flightDate: flightDate,
+                    debug: Self.debugFlag
+                ))
 
                 let (data, _) = try await URLSession.shared.data(for: request)
                 logResponseBody(data)
@@ -149,9 +167,7 @@ struct Action_addPass: SxActionProtocol {
                 }
 
                 await MainActor.run {
-
-                    rootViewController()?.present(vc, animated: true)
-
+                    topViewController()?.present(vc, animated: true)
                 }
 
             } catch {
@@ -174,34 +190,63 @@ struct Action_addPass: SxActionProtocol {
         }
     }
 
-    private func formBody(_ fields: [String: String]) -> Data? {
+    static func requestFields(barcodeText: String, flightDate: String, debug: String) -> [String: String] {
+        [
+            "barcodeText": barcodeText,
+            "flightDate": flightDate,
+            "debug": debug
+        ]
+    }
+
+    static func formBody(_ fields: [String: String]) -> Data? {
+        formBodyString(fields)?.data(using: .utf8)
+    }
+
+    static func formBodyString(_ fields: [String: String]) -> String? {
         fields
             .map { key, value in
                 "\(percentEncoded(key))=\(percentEncoded(value))"
             }
             .joined(separator: "&")
-            .data(using: .utf8)
     }
 
-    private func percentEncoded(_ value: String) -> String {
+    static func percentEncoded(_ value: String) -> String {
         var allowedCharacters = CharacterSet.urlQueryAllowed
         allowedCharacters.remove(charactersIn: "+&=")
         return value.addingPercentEncoding(withAllowedCharacters: allowedCharacters) ?? value
     }
     
-    func rootViewController() -> UIViewController? {
-
-            UIApplication.shared.connectedScenes
-
-                .compactMap { $0 as? UIWindowScene }
-
-                .flatMap { $0.windows }
-
-                .first(where: \.isKeyWindow)?
-
-                .rootViewController
-
+    @MainActor
+    func topViewController() -> UIViewController? {
+        guard let rootViewController = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: \.isKeyWindow)?
+            .rootViewController else {
+            return nil
         }
+
+        return topViewController(from: rootViewController)
+    }
+
+    @MainActor
+    private func topViewController(from viewController: UIViewController) -> UIViewController {
+        if let presentedViewController = viewController.presentedViewController {
+            return topViewController(from: presentedViewController)
+        }
+
+        if let navigationController = viewController as? UINavigationController,
+           let visibleViewController = navigationController.visibleViewController {
+            return topViewController(from: visibleViewController)
+        }
+
+        if let tabBarController = viewController as? UITabBarController,
+           let selectedViewController = tabBarController.selectedViewController {
+            return topViewController(from: selectedViewController)
+        }
+
+        return viewController
+    }
 }
 
 //struct AddPassView: UIViewControllerRepresentable {
