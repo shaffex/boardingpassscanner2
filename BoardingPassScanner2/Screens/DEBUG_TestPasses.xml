@@ -1,0 +1,20 @@
+<body>
+
+<group>
+<section header="DEBUG: M1 (1 leg)">
+<customview src="debugCopyButton" bp="M1STARR/MICHAEL       E9L3KEI ATHTLVLY 0546 131Y045C0109 100"/>
+<customview src="debugCopyButton" bp="M1HOSSOVA/DANA         UIQDKI TATLTNW9 5458 153Y035D0018 100"/>
+</section>
+
+<section header="DEBUG: M2 (2 legs)">
+<customview src="debugCopyButton" bp="M2VLASIUK/DIANA       E8ABI6J WAWAUHEY 0160 142Y040H0030 349>5180 O6142BEY 06071152910012A60792366202810                           NN8ABI6J AUHMLEEY 0376 143Y021G0002 32D2A60792366202810                           NN"/>
+</section>
+</group>
+
+<customview id="debugCopyButton">
+<button action="copy:$bp">
+<text monospaced="" font="caption">$bp</text>
+</button>
+</customview>
+
+</body>

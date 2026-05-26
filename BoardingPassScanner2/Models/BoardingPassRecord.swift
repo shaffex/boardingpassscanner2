@@ -113,8 +113,13 @@ final class BoardingPassRecord {
 }
 
 extension BoardingPassRecord {
-    static func from(barcodeText: String, barcodeType: String, scannedDate: Date = .now) -> BoardingPassRecord? {
-        guard let boardingPass = try? BoardingPass(parsing: barcodeText) else {
+    static func from(
+        barcodeText: String,
+        barcodeType: String,
+        scannedDate: Date = .now,
+        flightDateYear: Int? = nil
+    ) -> BoardingPassRecord? {
+        guard let boardingPass = try? BoardingPass(parsing: barcodeText, flightDateYear: flightDateYear) else {
             return BoardingPassRecord(
                 text: barcodeText,
                 name: "Unknown passenger",

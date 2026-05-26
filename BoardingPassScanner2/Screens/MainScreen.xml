@@ -2,7 +2,7 @@
     <zstack viewId="THIS_VIEW" alignment="top"  animation="animation:easeInOut;duration:0.5;value:$isShowingBanner">
     <tabview key="selectedTab" value="Home" alert="item:alertItem" alert2="KEY_SHOW_BARCODE_INPUT_ALERT" sheet="item:sheetItem" photospicker2="isShowingImagePicker" onFirstAppear="setString:selectedTab=$settingsStartupTab">
         <navigationstack tabItem="label:$TEXT_HOME;systemImage:house" tag="Home">
-           <remoteview src="resource:Home"/>
+           <homeview/>
         </navigationstack>
        
         <navigationstack tabItem="label:$TEXT_MYPASSES;systemImage:qrcode" tag="MyCodes">

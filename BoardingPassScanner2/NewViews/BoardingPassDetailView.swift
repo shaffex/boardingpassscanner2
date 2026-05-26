@@ -16,45 +16,43 @@ struct BoardingPassDetailView: View {
 
     @State private var showDecodedSheet = false
     @State private var showDeleteAlert = false
+    @State private var showRawData = false
 
     var body: some View {
-        List {
-            Section("Pass") {
-                Text(record.text)
-                    .font(.caption.monospaced())
-                Text("Code Type: \(record.type)")
-                Text("Seat Number: \(record.seatNumber)")
-                Text("flightDate: \(record.flightDate.formatted(date: .abbreviated, time: .shortened))")
-            }
+        ZStack {
+            Color.black.ignoresSafeArea()
 
-            Section {
-                MagicUiView(string: "<body><barcode barcodeType=\"\(record.type)\">\(record.text)</barcode></body>")
-                    .frame(maxWidth: .infinity, minHeight: 120)
-            }
-
-            Section {
-                AddToWalletButton(addPassButtonStyle: .black) {
-                    Action_addPass.presentForRecord(record)
+            ScrollView {
+                VStack(spacing: 26) {
+                    BoardingPassCard(record: record)
+                    tripDetails
+                    barcodeCard
+                    walletButton
+                    actionButtons
+                    rawDataPanel
                 }
-                .frame(maxWidth: .infinity, minHeight: 44)
+                .padding(.horizontal, 18)
+                .padding(.top, 18)
+                .padding(.bottom, 34)
             }
         }
-        .navigationTitle("Letenka")
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button {
-                        showDecodedSheet = true
-                    } label: {
-                        Label("Decode fields", systemImage: "tray.and.arrow.up")
-                    }
-                    Button(role: .destructive) {
-                        showDeleteAlert = true
-                    } label: {
-                        Label("Delete", systemImage: "trash")
-                    }
+                Button {
+                    showDecodedSheet = true
                 } label: {
-                    Image(systemName: "ellipsis.circle")
+                    Image(systemName: "ellipsis")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .background(.white.opacity(0.1), in: Circle())
+                        .overlay {
+                            Circle().stroke(.white.opacity(0.12), lineWidth: 1)
+                        }
                 }
             }
         }
@@ -78,51 +76,164 @@ struct BoardingPassDetailView: View {
             }
         }
     }
-}
 
-struct BoardingPassDecodedView: View {
-    let record: BoardingPassRecord
-
-    var body: some View {
-        List {
-            field("Format Code (M)", record.formatCode)
-            field("Number of Legs", String(record.numberOfLegs))
-            field("Passenger Name", record.name)
-            field("Surname", record.passengerSurname)
-            field("Given Name", record.passengerGivenName)
-            field("Electronic Ticket Indicator", record.electronicTicketIndicator)
-            field("Operating Carrier PNR", record.pnr)
-            field("From Airport", record.fromAirport)
-            field("From Airport Name", record.fromAirportName)
-            field("From Airport City", record.fromAirportCity)
-            field("From Airport Country", record.fromAirportCountry)
-            field("To Airport", record.toAirport)
-            field("To Airport Name", record.toAirportName)
-            field("To Airport City", record.toAirportCity)
-            field("To Airport Country", record.toAirportCountry)
-            field("Operating Carrier", record.operatingCarrier)
-            field("Airline Name", record.airlineName)
-            field("Airline Country", record.airlineCountry)
-            field("Flight Number", record.flightNumber)
-            field("Flight Date (Julian)", String(record.flightDateJulian))
-            field("Flight Date", record.flightDate.formatted(date: .abbreviated, time: .shortened))
-            field("Compartment Code", record.compartmentCode)
-            field("Seat Number", record.seatNumber)
-            field("Check-in Sequence Number", record.checkInSequenceNumber)
-            field("Passenger Status", record.passengerStatus)
-        }
-        .navigationTitle("Decoded fields")
-    }
-
-    private func field(_ label: String, _ value: String) -> some View {
+    private var tripDetails: some View {
         HStack {
-            Text(label)
+            detailBlock(title: "DEPARTURE", value: departureTime)
             Spacer()
-            Text(value)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.trailing)
+            detailBlock(title: "DATE", value: dateText)
+            Spacer()
+            detailBlock(title: "DAY", value: dayText)
         }
+        .padding(22)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(.white.opacity(0.12), lineWidth: 1)
+        }
+    }
+
+    private var barcodeCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("BOARDING PASS")
+                        .font(.system(.caption, design: .monospaced, weight: .bold))
+                        .tracking(3)
+                        .foregroundStyle(.black.opacity(0.55))
+                    Text(boardingPassName)
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(.black)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                }
+
+                Spacer()
+
+                Text(record.type.isEmpty ? "CODE" : record.type.uppercased())
+                    .font(.system(.caption, design: .monospaced, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .frame(height: 34)
+                    .background(.black, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            }
+
+            MagicUiView(string: "<body><barcode barcodeType=\"\(record.type)\">\(record.text)</barcode></body>")
+                .frame(maxWidth: .infinity, minHeight: 132)
+                .background(.white)
+
+            Text(record.text)
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.black.opacity(0.58))
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+        }
+        .padding(22)
+        .background(.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    private var walletButton: some View {
+        AddToWalletButton(addPassButtonStyle: .black) {
+            Action_addPass.presentForRecord(record)
+        }
+        .frame(maxWidth: .infinity, minHeight: 56, maxHeight: 56)
+        .background(.white, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    private var actionButtons: some View {
+        HStack(spacing: 14) {
+            ShareLink(item: record.text) {
+                Label("Share", systemImage: "square.and.arrow.up")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(DetailActionButtonStyle())
+
+            Button(role: .destructive) {
+                showDeleteAlert = true
+            } label: {
+                Label("Delete", systemImage: "trash")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(DetailActionButtonStyle(foregroundColor: .red))
+        }
+    }
+
+    private var rawDataPanel: some View {
+        DisclosureGroup(isExpanded: $showRawData) {
+            Text(record.text)
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+                .padding(.top, 12)
+        } label: {
+            Label("Raw IATA BCBP data", systemImage: "info.circle")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.secondary)
+        }
+        .padding(18)
+        .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(.white.opacity(0.12), lineWidth: 1)
+        }
+    }
+
+    private var departureTime: String {
+        record.flightDate.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits))
+    }
+
+    private var dateText: String {
+        record.flightDate.formatted(.dateTime.day().month(.abbreviated))
+    }
+
+    private var dayText: String {
+        record.flightDate.formatted(.dateTime.weekday(.abbreviated))
+    }
+
+    private var passengerInitial: String {
+        String(record.passengerGivenName.prefix(1))
+    }
+
+    private var boardingPassName: String {
+        [record.passengerSurname, passengerInitial]
+            .filter { !$0.isEmpty }
+            .joined(separator: "/")
+    }
+
+    private func detailBlock(title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(.caption, design: .monospaced, weight: .bold))
+                .tracking(3)
+                .foregroundStyle(.secondary)
+            Text(displayValue(value))
+                .font(.system(.title3, design: .rounded, weight: .bold))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+    }
+
+    private func displayValue(_ value: String) -> String {
+        value.isEmpty ? "--" : value
     }
 }
 
+private struct DetailActionButtonStyle: ButtonStyle {
+    var foregroundColor: Color = .white
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headline.weight(.semibold))
+            .foregroundStyle(foregroundColor)
+            .frame(height: 58)
+            .background(.white.opacity(configuration.isPressed ? 0.16 : 0.08), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(.white.opacity(0.12), lineWidth: 1)
+            }
+    }
+}
 

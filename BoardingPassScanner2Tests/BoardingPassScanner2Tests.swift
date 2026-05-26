@@ -62,6 +62,8 @@ struct BoardingPassScanner2Tests {
         )
     ]
 
+    private let multiLegBoardingPassText = "M2VLASIUK/DIANA       E8ABI6J WAWAUHEY 0160 142Y040H0030 349>5180 O6142BEY 06071152910012A60792366202810                           NN8ABI6J AUHMLEEY 0376 143Y021G0002 32D2A60792366202810                           NN"
+
     private let invalidBoardingPassTexts = [
         "not-a-boarding-pass"
     ]
@@ -103,6 +105,60 @@ struct BoardingPassScanner2Tests {
             #expect(record?.name == "Unknown passenger")
             #expect(record?.text == text)
         }
+    }
+
+    @Test func parsesMultiLegBoardingPass() throws {
+        let boardingPass = try BoardingPass(parsing: multiLegBoardingPassText, flightDateYear: 2026)
+
+        #expect(boardingPass.numberOfLegs == 2)
+        #expect(boardingPass.legs.count == 2)
+        #expect(boardingPass.summary == "EY0160 WAW-AUH")
+        #expect(boardingPass.passengerName.displayName == "DIANA VLASIUK")
+
+        #expect(boardingPass.legs[0].flightCode == "EY0160")
+        #expect(boardingPass.legs[0].route == "WAW-AUH")
+        #expect(boardingPass.legs[0].flightDateJulian == 142)
+        #expect(boardingPass.legs[0].seatNumber == "040H")
+        #expect(boardingPass.legs[0].checkInSequenceNumber == "0030")
+        #expect(boardingPass.legs[0].passengerStatus == "3")
+
+        #expect(boardingPass.legs[1].flightCode == "EY0376")
+        #expect(boardingPass.legs[1].route == "AUH-MLE")
+        #expect(boardingPass.legs[1].flightDateJulian == 143)
+        #expect(boardingPass.legs[1].seatNumber == "021G")
+        #expect(boardingPass.legs[1].checkInSequenceNumber == "0002")
+        #expect(boardingPass.legs[1].passengerStatus == "3")
+    }
+
+    @Test func recordFromMultiLegBoardingPassUsesFirstLegForDisplay() throws {
+        let record = try #require(BoardingPassRecord.from(
+            barcodeText: multiLegBoardingPassText,
+            barcodeType: "pdf417",
+            flightDateYear: 2026
+        ))
+
+        #expect(record.numberOfLegs == 2)
+        #expect(record.name == "DIANA VLASIUK")
+        #expect(record.type == "pdf417")
+        #expect(record.summary == "EY0160 WAW-AUH")
+        #expect(record.fromAirport == "WAW")
+        #expect(record.toAirport == "AUH")
+        #expect(record.operatingCarrier == "EY")
+        #expect(record.flightNumber == "0160")
+        #expect(record.flightDateJulian == 142)
+        #expect(record.seatNumber == "040H")
+        #expect(record.checkInSequenceNumber == "0030")
+        #expect(record.passengerStatus == "3")
+    }
+
+    @Test func recordUsesImportedYearForJulianFlightDate() throws {
+        let record = try #require(BoardingPassRecord.from(
+            barcodeText: validBoardingPasses[0].text,
+            barcodeType: "qr",
+            flightDateYear: 2024
+        ))
+
+        #expect(record.flightDate == ISO8601DateFormatter().date(from: "2024-05-10T13:30:00Z"))
     }
 
     private func assertRecord(_ record: BoardingPassRecord, matches expected: [String: String]) {

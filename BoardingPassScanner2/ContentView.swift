@@ -22,6 +22,7 @@ struct ContentView: View {
         MagicUiView.installViewPlugin(name: "barcodeicon", plugin: SxView_BarcodeIcon.self)
         MagicUiView.installViewPlugin(name: "buttonAddToAppleWallet", plugin: ButtonAddToAppleWallet.self)
         MagicUiView.installViewPlugin(name: "ViewFinderCorners", plugin: SxView_ViewFinderCorners.self)
+        MagicUiView.installViewPlugin(name: "homeview", plugin: HomePluginView())
         MagicUiView.installViewPlugin(name: "myBoardingPassesList", plugin: MyBoardingPassesPluginView())
         
         // modifiers

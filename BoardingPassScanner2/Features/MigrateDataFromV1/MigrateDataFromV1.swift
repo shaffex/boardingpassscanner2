@@ -35,7 +35,11 @@ struct MigrateDataFromV1 {
 
             let store = BoardingPassStore.shared
             for barcode in importedBarcodes {
-                store.insertIfMissing(barcodeText: barcode.barcodeText, barcodeType: barcode.barcodeType)
+                store.insertIfMissing(
+                    barcodeText: barcode.barcodeText,
+                    barcodeType: barcode.barcodeType,
+                    flightDateYear: barcode.flightDateYear
+                )
             }
 
             print("Import completed, \(importedBarcodes.count) barcodes imported")

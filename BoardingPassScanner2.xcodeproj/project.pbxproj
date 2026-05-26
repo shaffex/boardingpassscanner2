@@ -44,11 +44,22 @@
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		2F3BF0FC2FC5B6A5005FC882 /* Exceptions for "BoardingPassScanner2" folder in "Compile Sources" phase from "BoardingPassScanner2" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 2FABFA022FAE284400A66D55 /* Sources */;
+			membershipExceptions = (
+				Screens/DEBUG_TestPasses.xml,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2FABFA082FAE284400A66D55 /* BoardingPassScanner2 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				2FC674A82FBCD9D80060548C /* Exceptions for "BoardingPassScanner2" folder in "BoardingPassScanner2" target */,
+				2F3BF0FC2FC5B6A5005FC882 /* Exceptions for "BoardingPassScanner2" folder in "Compile Sources" phase from "BoardingPassScanner2" target */,
 			);
 			path = BoardingPassScanner2;
 			sourceTree = "<group>";
@@ -438,6 +449,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -474,6 +486,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -14,6 +14,10 @@ final class BoardingPassBarcodeV1: NSObject, NSSecureCoding, Decodable {
     var barcodeYear: Int = 0
     var barcodeDepartureDate = Date()
 
+    var flightDateYear: Int? {
+        barcodeYear > 0 ? barcodeYear : nil
+    }
+
     override init() {
         super.init()
     }

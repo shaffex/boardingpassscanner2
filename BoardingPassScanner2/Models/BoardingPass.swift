@@ -7,6 +7,12 @@
 
 import Foundation
 
+enum BoardingPassConfig {
+    // If an inferred Julian flight date is more than this many days in the past,
+    // treat it as next year's flight. Imported passes with an explicit year skip this rollover.
+    static let pastJulianDateRolloverThresholdDays = 30
+}
+
 struct BoardingPass: Equatable {
     let rawValue: String
     let formatCode: String
@@ -24,6 +30,7 @@ struct BoardingPass: Equatable {
     let seatNumber: String
     let checkInSequenceNumber: String
     let passengerStatus: String
+    let legs: [Leg]
 }
 
 extension BoardingPass {
@@ -38,6 +45,28 @@ extension BoardingPass {
         }
     }
 
+    struct Leg: Equatable {
+        let operatingCarrierPNR: String
+        let fromAirport: String
+        let toAirport: String
+        let operatingCarrierDesignator: String
+        let flightNumber: String
+        let flightDateJulian: Int
+        let flightDate: String
+        let compartmentCode: String
+        let seatNumber: String
+        let checkInSequenceNumber: String
+        let passengerStatus: String
+
+        var route: String {
+            "\(fromAirport)-\(toAirport)"
+        }
+
+        var flightCode: String {
+            "\(operatingCarrierDesignator)\(flightNumber)"
+        }
+    }
+
     enum ParseError: Error, Equatable {
         case tooShort
         case invalidFormatCode(String)
@@ -47,7 +76,9 @@ extension BoardingPass {
 
     init(
         parsing rawValue: String,
-        flightDateYear: Int = Calendar.current.component(.year, from: Date())
+        flightDateYear: Int? = nil,
+        referenceDate: Date = Date(),
+        pastDateRolloverThresholdDays: Int = BoardingPassConfig.pastJulianDateRolloverThresholdDays
     ) throws {
         let scanner = FixedWidthScanner(rawValue)
 
@@ -78,6 +109,32 @@ extension BoardingPass {
             throw ParseError.invalidFlightDate(flightDateText)
         }
 
+        let flightDate = Self.isoString(
+            from: Self.flightDate(
+                fromJulianDay: flightDateJulian,
+                explicitYear: flightDateYear,
+                referenceDate: referenceDate,
+                pastDateRolloverThresholdDays: pastDateRolloverThresholdDays
+            ) ?? Self.todayAt1430()
+        )
+        let compartmentCode = scanner.read(1).trimmed
+        let seatNumber = scanner.read(4).trimmed
+        let checkInSequenceNumber = scanner.read(5).trimmed
+        let passengerStatus = scanner.read(1).trimmed
+        let firstLeg = Leg(
+            operatingCarrierPNR: operatingCarrierPNR,
+            fromAirport: fromAirport,
+            toAirport: toAirport,
+            operatingCarrierDesignator: operatingCarrierDesignator,
+            flightNumber: flightNumber,
+            flightDateJulian: flightDateJulian,
+            flightDate: flightDate,
+            compartmentCode: compartmentCode,
+            seatNumber: seatNumber,
+            checkInSequenceNumber: checkInSequenceNumber,
+            passengerStatus: passengerStatus
+        )
+
         self.rawValue = rawValue
         self.formatCode = formatCode
         self.numberOfLegs = numberOfLegs
@@ -89,13 +146,18 @@ extension BoardingPass {
         self.operatingCarrierDesignator = operatingCarrierDesignator
         self.flightNumber = flightNumber
         self.flightDateJulian = flightDateJulian
-        self.flightDate = Self.isoString(
-            from: Self.flightDate(fromJulianDay: flightDateJulian, in: flightDateYear) ?? Self.todayAt1430()
+        self.flightDate = flightDate
+        self.compartmentCode = compartmentCode
+        self.seatNumber = seatNumber
+        self.checkInSequenceNumber = checkInSequenceNumber
+        self.passengerStatus = passengerStatus
+        self.legs = [firstLeg] + Self.parseAdditionalLegs(
+            in: rawValue,
+            startingAt: 58,
+            explicitYear: flightDateYear,
+            referenceDate: referenceDate,
+            pastDateRolloverThresholdDays: pastDateRolloverThresholdDays
         )
-        self.compartmentCode = scanner.read(1).trimmed
-        self.seatNumber = scanner.read(4).trimmed
-        self.checkInSequenceNumber = scanner.read(5).trimmed
-        self.passengerStatus = scanner.read(1).trimmed
     }
 
     var route: String {
@@ -110,9 +172,133 @@ extension BoardingPass {
         "\(flightCode) \(route)"
     }
 
+    private static func parseAdditionalLegs(
+        in rawValue: String,
+        startingAt startOffset: Int,
+        explicitYear: Int?,
+        referenceDate: Date,
+        pastDateRolloverThresholdDays: Int
+    ) -> [Leg] {
+        var legs: [Leg] = []
+        var offset = startOffset
+
+        while offset + 35 <= rawValue.count {
+            if let leg = parseLeg(
+                in: rawValue,
+                at: offset,
+                explicitYear: explicitYear,
+                referenceDate: referenceDate,
+                pastDateRolloverThresholdDays: pastDateRolloverThresholdDays
+            ) {
+                legs.append(leg)
+                offset += 35
+            } else {
+                offset += 1
+            }
+        }
+
+        return legs
+    }
+
+    private static func parseLeg(
+        in rawValue: String,
+        at offset: Int,
+        explicitYear: Int?,
+        referenceDate: Date,
+        pastDateRolloverThresholdDays: Int
+    ) -> Leg? {
+        let scanner = FixedWidthScanner(rawValue, offset: offset)
+
+        guard scanner.remainingCount >= 35 else {
+            return nil
+        }
+
+        let pnr = scanner.read(7).trimmed
+        let fromAirport = scanner.read(3).trimmed
+        let toAirport = scanner.read(3).trimmed
+        let carrier = scanner.read(3).trimmed
+        let flightNumber = scanner.read(5).trimmed
+        let flightDateText = scanner.read(3).trimmed
+        let compartmentCode = scanner.read(1).trimmed
+        let seatNumber = scanner.read(4).trimmed
+        let sequenceNumber = scanner.read(5).trimmed
+        let passengerStatus = scanner.read(1).trimmed
+
+        guard
+            !pnr.isEmpty,
+            isAirportCode(fromAirport),
+            isAirportCode(toAirport),
+            isCarrierDesignator(carrier),
+            !flightNumber.isEmpty,
+            let flightDateJulian = Int(flightDateText),
+            (1...366).contains(flightDateJulian)
+        else {
+            return nil
+        }
+
+        let flightDate = Self.isoString(
+            from: Self.flightDate(
+                fromJulianDay: flightDateJulian,
+                explicitYear: explicitYear,
+                referenceDate: referenceDate,
+                pastDateRolloverThresholdDays: pastDateRolloverThresholdDays
+            ) ?? Self.todayAt1430()
+        )
+
+        return Leg(
+            operatingCarrierPNR: pnr,
+            fromAirport: fromAirport,
+            toAirport: toAirport,
+            operatingCarrierDesignator: carrier,
+            flightNumber: flightNumber,
+            flightDateJulian: flightDateJulian,
+            flightDate: flightDate,
+            compartmentCode: compartmentCode,
+            seatNumber: seatNumber,
+            checkInSequenceNumber: sequenceNumber,
+            passengerStatus: passengerStatus
+        )
+    }
+
+    private static func isAirportCode(_ value: String) -> Bool {
+        value.count == 3 && value.allSatisfy { $0.isLetter }
+    }
+
+    private static func isCarrierDesignator(_ value: String) -> Bool {
+        (2...3).contains(value.count) && value.allSatisfy { $0.isLetter || $0.isNumber }
+    }
+
     private static func flightDate(
         fromJulianDay julianDay: Int,
-        in year: Int = Calendar.current.component(.year, from: Date())
+        explicitYear: Int?,
+        referenceDate: Date,
+        pastDateRolloverThresholdDays: Int
+    ) -> Date? {
+        let calendar = Calendar(identifier: .gregorian)
+        let currentYear = calendar.component(.year, from: referenceDate)
+
+        if let explicitYear {
+            return flightDate(fromJulianDay: julianDay, in: explicitYear)
+        }
+
+        guard let candidateDate = flightDate(fromJulianDay: julianDay, in: currentYear) else {
+            return nil
+        }
+
+        let candidateDay = calendar.startOfDay(for: candidateDate)
+        let referenceDay = calendar.startOfDay(for: referenceDate)
+        let daysInPast = calendar.dateComponents([.day], from: candidateDay, to: referenceDay).day ?? 0
+
+        if daysInPast > pastDateRolloverThresholdDays {
+            return flightDate(fromJulianDay: julianDay, in: currentYear + 1)
+        }
+
+        return candidateDate
+    }
+
+    private static func flightDate(
+        fromJulianDay julianDay: Int,
+        in year: Int
     ) -> Date? {
         let calendar = Calendar(identifier: .gregorian)
         let firstDayOfYear = DateComponents(year: year, month: 1, day: 1)
@@ -164,9 +350,13 @@ private final class FixedWidthScanner {
     private let value: String
     private var index: String.Index
 
-    init(_ value: String) {
+    init(_ value: String, offset: Int = 0) {
         self.value = value
-        self.index = value.startIndex
+        self.index = value.index(
+            value.startIndex,
+            offsetBy: min(offset, value.count),
+            limitedBy: value.endIndex
+        ) ?? value.endIndex
     }
 
     var remainingCount: Int {

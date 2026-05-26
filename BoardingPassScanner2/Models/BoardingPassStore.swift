@@ -46,9 +46,17 @@ final class BoardingPassStore {
     }
 
     @discardableResult
-    func insertIfMissing(barcodeText: String, barcodeType: String) -> BoardingPassRecord? {
+    func insertIfMissing(
+        barcodeText: String,
+        barcodeType: String,
+        flightDateYear: Int? = nil
+    ) -> BoardingPassRecord? {
         guard !contains(text: barcodeText),
-              let record = BoardingPassRecord.from(barcodeText: barcodeText, barcodeType: barcodeType) else {
+              let record = BoardingPassRecord.from(
+                barcodeText: barcodeText,
+                barcodeType: barcodeType,
+                flightDateYear: flightDateYear
+              ) else {
             return nil
         }
         context.insert(record)
