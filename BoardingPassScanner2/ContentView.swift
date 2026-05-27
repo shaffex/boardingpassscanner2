@@ -9,6 +9,8 @@ import SwiftUI
 import MagicUiFramework
 
 struct ContentView: View {
+    @StateObject private var bannerPresenter = BannerPresenter.shared
+
     init() {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -41,15 +43,16 @@ struct ContentView: View {
     }
 
     var body: some View {
-        MagicUiView(resource: "MainScreen")
-            .onFirstAppear {
-                
-                
-                
-                Task { @MainActor in
-                    MigrationAssistant.checkMigration()
+        ZStack(alignment: .top) {
+            MagicUiView(resource: "MainScreen")
+                .onFirstAppear {
+                    Task { @MainActor in
+                        MigrationAssistant.checkMigration()
+                    }
                 }
-            }
+
+            AppBannerOverlay(presenter: bannerPresenter)
+        }
     }
 }
 

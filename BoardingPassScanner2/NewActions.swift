@@ -54,6 +54,8 @@ struct Action_addNewBoardingPass: SxActionProtocol {
             return
         }
 
-        store.insertIfMissing(barcodeText: text, barcodeType: type)
+        if store.insertIfMissing(barcodeText: text, barcodeType: type) != nil {
+            PluginActions.shared.runAction("showBanner:type:success;text:Boarding pass added successfully.")
+        }
     }
 }

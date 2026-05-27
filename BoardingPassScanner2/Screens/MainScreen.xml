@@ -1,5 +1,4 @@
 <body>
-    <zstack viewId="THIS_VIEW" alignment="top"  animation="animation:easeInOut;duration:0.5;value:$isShowingBanner">
     <tabview key="selectedTab" value="Home" alert="item:alertItem" alert2="KEY_SHOW_BARCODE_INPUT_ALERT" sheet="item:sheetItem" photospicker2="isShowingImagePicker" onFirstAppear="setString:selectedTab=$settingsStartupTab">
         <navigationstack tabItem="label:$TEXT_HOME;systemImage:house" tag="Home">
            <homeview/>
@@ -17,13 +16,6 @@
             <remoteview src="resource:Settings"/>
         </navigationstack>
     </tabview>
-    
-    <!--    Banner-->
-    <vstack if="$isShowingBanner" xmaxWidth="infinity" transition="slide" zIndex="1" maxWidth="infinity" background="red" cornerRadius="8" padding="">
-       <text font="largeTitle">$bannerType</text>
-       <text font="body">$bannerText</text>
-       </vstack>
-    </zstack>
     
     <!--    For displaying camera scanner sheet-->
     <remoteview id="scannerView" src="resource:ScannerView"/>

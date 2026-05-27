@@ -34,13 +34,25 @@ struct Action_showBanner: SxActionProtocol {
     func execute(_ actionString: String) {
         let type = bannerType(actionString)
         let text = bannerText(actionString)
-        
-        SxMagicVariables.shared.setValue(type, forKey: "bannerType")
-        SxMagicVariables.shared.setValue(text, forKey: "bannerText")
-        
-        PluginActions.shared.runAction("setBool:isShowingBanner=true")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            PluginActions.shared.runAction("setBool:isShowingBanner=false")
+        let style = AppBanner.Style(rawValue: type) ?? .info
+
+        Task { @MainActor in
+            BannerPresenter.shared.show(
+                style: style,
+                title: title(for: style),
+                message: text
+            )
+        }
+    }
+
+    private func title(for style: AppBanner.Style) -> String {
+        switch style {
+        case .success:
+            "Success"
+        case .info:
+            "Info"
+        case .error:
+            "Error"
         }
     }
 }
