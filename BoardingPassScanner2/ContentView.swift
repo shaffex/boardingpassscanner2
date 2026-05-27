@@ -26,7 +26,6 @@ struct ContentView: View {
         }
         
         // views
-        MagicUiView.installViewPlugin(name: "menuitem", plugin: MenuItemView.self)
         MagicUiView.installViewPlugin(name: "barcodescannerlocal", plugin: SxView_BarcodeScanner.self)
         
         MagicUiView.installViewPlugin(name: "barcodeicon", plugin: SxView_BarcodeIcon.self)
@@ -65,4 +64,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(BoardingPassMapper.shared)
 }

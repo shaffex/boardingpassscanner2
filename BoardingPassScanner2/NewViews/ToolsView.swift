@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ToolsView: View {
+    @Environment(BoardingPassMapper.self) private var mapper
+
     @AppStorage("jsonVersion") private var dataVersion = 0
     @State private var isCheckingForUpdate = false
     @State private var lastUpdateResult: String?
@@ -25,13 +27,13 @@ struct ToolsView: View {
                 NavigationLink {
                     AirlinesDatabaseView()
                 } label: {
-                    Label("Airlines", systemImage: "airplane")
+                    Label("Airlines (\(mapper.airlines.count))", systemImage: "airplane")
                 }
 
                 NavigationLink {
                     AirportsDatabaseView()
                 } label: {
-                    Label("Airports", systemImage: "airplane.departure")
+                    Label("Airports (\(mapper.airports.count))", systemImage: "airplane.departure")
                 }
 
                 Button {
@@ -78,13 +80,13 @@ struct ToolsView: View {
 }
 
 struct AirlinesDatabaseView: View {
+    @Environment(BoardingPassMapper.self) private var mapper
     @State private var query = ""
-    @State private var airlines: [BoardingPassMapper.Airline] = BoardingPassMapper.allAirlines()
 
     private var filteredAirlines: [BoardingPassMapper.Airline] {
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !needle.isEmpty else { return airlines }
-        return airlines.filter {
+        guard !needle.isEmpty else { return mapper.airlines }
+        return mapper.airlines.filter {
             $0.name.lowercased().hasPrefix(needle) || $0.code.lowercased().hasPrefix(needle)
         }
     }
@@ -102,9 +104,9 @@ struct AirlinesDatabaseView: View {
         .searchable(text: $query)
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
-        .navigationTitle("Airlines (\(airlines.count))")
+        .navigationTitle("Airlines (\(mapper.airlines.count))")
         .overlay {
-            if airlines.isEmpty {
+            if mapper.airlines.isEmpty {
                 ContentUnavailableView(
                     "No Airlines",
                     systemImage: "airplane.circle",
@@ -112,20 +114,17 @@ struct AirlinesDatabaseView: View {
                 )
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .boardingPassMapperDidReload)) { _ in
-            airlines = BoardingPassMapper.allAirlines()
-        }
     }
 }
 
 struct AirportsDatabaseView: View {
+    @Environment(BoardingPassMapper.self) private var mapper
     @State private var query = ""
-    @State private var airports: [BoardingPassMapper.Airport] = BoardingPassMapper.allAirports()
 
     private var filteredAirports: [BoardingPassMapper.Airport] {
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !needle.isEmpty else { return airports }
-        return airports.filter {
+        guard !needle.isEmpty else { return mapper.airports }
+        return mapper.airports.filter {
             $0.name.lowercased().hasPrefix(needle) || $0.code.lowercased().hasPrefix(needle)
         }
     }
@@ -151,18 +150,15 @@ struct AirportsDatabaseView: View {
         .searchable(text: $query)
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
-        .navigationTitle("Airports (\(airports.count))")
+        .navigationTitle("Airports (\(mapper.airports.count))")
         .overlay {
-            if airports.isEmpty {
+            if mapper.airports.isEmpty {
                 ContentUnavailableView(
                     "No Airports",
                     systemImage: "airplane.departure",
                     description: Text("Use \"Check for data update\" to download the database.")
                 )
             }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .boardingPassMapperDidReload)) { _ in
-            airports = BoardingPassMapper.allAirports()
         }
     }
 }

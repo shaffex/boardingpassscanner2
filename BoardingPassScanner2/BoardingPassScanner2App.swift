@@ -12,6 +12,7 @@ struct BoardingPassScanner2App: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(BoardingPassMapper.shared)
         }
     }
 }

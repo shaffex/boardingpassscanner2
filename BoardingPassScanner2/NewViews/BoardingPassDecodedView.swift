@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct BoardingPassDecodedView: View {
+    @Environment(BoardingPassMapper.self) private var mapper
+
     let record: BoardingPassRecord
-    @State private var mapperRefreshToken = 0
 
     var body: some View {
         List {
@@ -29,9 +30,6 @@ struct BoardingPassDecodedView: View {
             }
         }
         .navigationTitle("Decoded fields")
-        .onReceive(NotificationCenter.default.publisher(for: .boardingPassMapperDidReload)) { _ in
-            mapperRefreshToken &+= 1
-        }
     }
 
     private var decodedLegs: [BoardingPass.Leg] {
@@ -40,9 +38,9 @@ struct BoardingPassDecodedView: View {
 
     @ViewBuilder
     private func legFields(_ leg: BoardingPass.Leg) -> some View {
-        let fromAirport = BoardingPassMapper.airport(for: leg.fromAirport)
-        let toAirport = BoardingPassMapper.airport(for: leg.toAirport)
-        let airline = BoardingPassMapper.airline(for: leg.operatingCarrierDesignator)
+        let fromAirport = mapper.airport(for: leg.fromAirport)
+        let toAirport = mapper.airport(for: leg.toAirport)
+        let airline = mapper.airline(for: leg.operatingCarrierDesignator)
         let flightDate = ISO8601DateFormatter().date(from: leg.flightDate)
 
         field("Operating Carrier PNR", leg.operatingCarrierPNR)

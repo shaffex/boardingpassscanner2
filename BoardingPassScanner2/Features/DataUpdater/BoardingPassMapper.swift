@@ -6,12 +6,10 @@
 //
 
 import Foundation
+import Observation
 
-extension Notification.Name {
-    static let boardingPassMapperDidReload = Notification.Name("BoardingPassMapperDidReload")
-}
-
-struct BoardingPassMapper {
+@Observable
+final class BoardingPassMapper {
     struct Airport {
         let code: String
         let name: String
@@ -25,53 +23,112 @@ struct BoardingPassMapper {
         let country: String
     }
 
-    static func airline(for code: String) -> Airline? {
+    static let shared = BoardingPassMapper()
+
+    private(set) var airlines: [Airline] = []
+    private(set) var airports: [Airport] = []
+
+    private var airlinesIndex: [String: Airline] = [:]
+    private var airportsIndex: [String: Airport] = [:]
+    private var didLoad = false
+
+    private init() {
+        reload()
+    }
+
+    func airline(for code: String) -> Airline? {
         guard !code.isEmpty else { return nil }
         loadIfNeeded()
         return airlinesIndex[code.uppercased()]
     }
 
-    static func airport(for code: String) -> Airport? {
+    func airport(for code: String) -> Airport? {
         guard !code.isEmpty else { return nil }
         loadIfNeeded()
         return airportsIndex[code.uppercased()]
     }
 
-    static func airlineName(for code: String) -> String {
+    func airlineName(for code: String) -> String {
         airline(for: code)?.name ?? code
     }
 
-    static func airportName(for code: String) -> String {
+    func airportName(for code: String) -> String {
         airport(for: code)?.name ?? code
     }
 
-    static func reload() {
-        airlinesIndex = parseAirlines(at: airlinesFileURL)
-        airportsIndex = parseAirports(at: airportsFileURL)
+    func reload() {
+        let newAirlinesIndex = Self.parseAirlines(at: Self.airlinesFileURL)
+        let newAirportsIndex = Self.parseAirports(at: Self.airportsFileURL)
+
+        airlinesIndex = newAirlinesIndex
+        airportsIndex = newAirportsIndex
+        airlines = Self.sortedAirlines(from: newAirlinesIndex)
+        airports = Self.sortedAirports(from: newAirportsIndex)
         didLoad = true
-        NotificationCenter.default.post(name: .boardingPassMapperDidReload, object: nil)
+
+        print("[BoardingPassMapper] Reloaded \(airlines.count) airlines and \(airports.count) airports")
+    }
+
+    func installForTesting(airlines: [Airline], airports: [Airport]) {
+        let newAirlinesIndex = Dictionary(uniqueKeysWithValues: airlines.map { ($0.code.uppercased(), $0) })
+        let newAirportsIndex = Dictionary(uniqueKeysWithValues: airports.map { ($0.code.uppercased(), $0) })
+
+        airlinesIndex = newAirlinesIndex
+        airportsIndex = newAirportsIndex
+        self.airlines = Self.sortedAirlines(from: newAirlinesIndex)
+        self.airports = Self.sortedAirports(from: newAirportsIndex)
+        didLoad = true
+    }
+
+    func resetForTesting() {
+        airlinesIndex = [:]
+        airportsIndex = [:]
+        airlines = []
+        airports = []
+        didLoad = false
+    }
+
+    private func loadIfNeeded() {
+        guard !didLoad else { return }
+        reload()
+    }
+
+    static func airline(for code: String) -> Airline? {
+        shared.airline(for: code)
+    }
+
+    static func airport(for code: String) -> Airport? {
+        shared.airport(for: code)
+    }
+
+    static func airlineName(for code: String) -> String {
+        shared.airlineName(for: code)
+    }
+
+    static func airportName(for code: String) -> String {
+        shared.airportName(for: code)
+    }
+
+    static func reload() {
+        shared.reload()
     }
 
     static func allAirlines() -> [Airline] {
-        loadIfNeeded()
-        return airlinesIndex.values.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        shared.loadIfNeeded()
+        return shared.airlines
     }
 
     static func allAirports() -> [Airport] {
-        loadIfNeeded()
-        return airportsIndex.values.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        shared.loadIfNeeded()
+        return shared.airports
     }
 
     static func installForTesting(airlines: [Airline], airports: [Airport]) {
-        airlinesIndex = Dictionary(uniqueKeysWithValues: airlines.map { ($0.code.uppercased(), $0) })
-        airportsIndex = Dictionary(uniqueKeysWithValues: airports.map { ($0.code.uppercased(), $0) })
-        didLoad = true
+        shared.installForTesting(airlines: airlines, airports: airports)
     }
 
     static func resetForTesting() {
-        airlinesIndex = [:]
-        airportsIndex = [:]
-        didLoad = false
+        shared.resetForTesting()
     }
 
     static var airlinesFileURL: URL {
@@ -103,13 +160,12 @@ struct BoardingPassMapper {
         return directory
     }
 
-    private static var airlinesIndex: [String: Airline] = [:]
-    private static var airportsIndex: [String: Airport] = [:]
-    private static var didLoad = false
+    private static func sortedAirlines(from index: [String: Airline]) -> [Airline] {
+        index.values.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
 
-    private static func loadIfNeeded() {
-        guard !didLoad else { return }
-        reload()
+    private static func sortedAirports(from index: [String: Airport]) -> [Airport] {
+        index.values.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
     private static func parseAirlines(at url: URL) -> [String: Airline] {

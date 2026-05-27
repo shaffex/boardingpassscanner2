@@ -14,7 +14,7 @@ struct BoardingPassCard: View {
     }
 
     @Environment(\.colorScheme) private var colorScheme
-    @State private var mapperRefreshToken = 0
+    @Environment(BoardingPassMapper.self) private var mapper
 
     let record: BoardingPassRecord
     var style: Style = .regular
@@ -46,9 +46,6 @@ struct BoardingPassCard: View {
                 .stroke(cardStroke, lineWidth: 1)
         }
         .shadow(color: shadowColor, radius: 18, x: 0, y: 10)
-        .onReceive(NotificationCenter.default.publisher(for: .boardingPassMapperDidReload)) { _ in
-            mapperRefreshToken &+= 1
-        }
     }
 
     private var header: some View {
@@ -63,7 +60,7 @@ struct BoardingPassCard: View {
                     .frame(height: 34)
                     .background(Color.cyan.opacity(0.18), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
 
-                Text(record.airlineName.isEmpty ? record.operatingCarrier : record.airlineName)
+                Text(airlineDisplayName)
                     .font(airlineFont)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -92,7 +89,7 @@ struct BoardingPassCard: View {
 
     private var route: some View {
         HStack(alignment: .center) {
-            airportBlock(code: record.fromAirport, city: record.fromAirportCity, alignment: .leading)
+            airportBlock(code: record.fromAirport, city: fromAirportCity, alignment: .leading)
 
             Spacer(minLength: style == .compact ? 16 : 18)
 
@@ -185,6 +182,14 @@ struct BoardingPassCard: View {
             .joined(separator: " ")
     }
 
+    private var airlineDisplayName: String {
+        mapper.airlineName(for: record.operatingCarrier)
+    }
+
+    private var fromAirportCity: String {
+        mapper.airport(for: record.fromAirport)?.city ?? ""
+    }
+
     private var parsedLegs: [BoardingPass.Leg] {
         record.decodedLegs
     }
@@ -199,10 +204,10 @@ struct BoardingPassCard: View {
 
     private var destinationAirportCity: String {
         guard let lastDestination = parsedLegs.last?.toAirport else {
-            return record.toAirportCity
+            return mapper.airport(for: record.toAirport)?.city ?? ""
         }
 
-        return BoardingPassMapper.airport(for: lastDestination)?.city ?? record.toAirportCity
+        return mapper.airport(for: lastDestination)?.city ?? ""
     }
 
     private var routeCodes: [String] {

@@ -38,7 +38,7 @@ struct DataUpdater {
         debugLog("Updated local version to \(remote.version)")
 
         await MainActor.run {
-            BoardingPassMapper.reload()
+            BoardingPassMapper.shared.reload()
         }
 
         debugLog("Data update finished")
