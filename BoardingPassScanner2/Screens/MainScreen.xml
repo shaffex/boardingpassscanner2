@@ -9,8 +9,8 @@
            <myBoardingPassesList/>
         </navigationstack>
         
-        <navigationstack tabItem="label:$TEXT_MISC;systemImage:widget.small" tag="Skusky">
-           <remoteview src="resource:Skusky"/>
+        <navigationstack tabItem="label:$TEXT_TOOLS;systemImage:wrench.and.screwdriver" tag="Tools">
+           <remoteview src="resource:Tools"/>
         </navigationstack>
                
         <navigationstack tabItem="label:$TEXT_SETTINGS;systemImage:gear" tag="Settings">

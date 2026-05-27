@@ -23,7 +23,10 @@ struct MyBoardingPassesView: View {
     @State private var searchText = ""
     @State private var showDeleteAllAlert = false
     @State private var isShowingExporter = false
+    @State private var isShowingImporter = false
     @State private var exportDocument = BoardingPassCSVDocument(records: [])
+    @State private var importErrorMessage = ""
+    @State private var isShowingImportError = false
     @State private var selectedSegment: PassSegment = .upcoming
 
     private var orderedRecords: [BoardingPassRecord] {
@@ -134,6 +137,17 @@ struct MyBoardingPassesView: View {
                 print("[MyBoardingPassesView] CSV export failed: \(error)")
             }
         }
+        .fileImporter(
+            isPresented: $isShowingImporter,
+            allowedContentTypes: [.json, .commaSeparatedText]
+        ) { result in
+            importCodes(from: result)
+        }
+        .alert("Import failed", isPresented: $isShowingImportError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(importErrorMessage)
+        }
         .alert("Warning", isPresented: $showDeleteAllAlert) {
             Button("No", role: .cancel) {}
             Button("Yes", role: .destructive) {
@@ -160,6 +174,34 @@ struct MyBoardingPassesView: View {
 
     private func refreshDebugMode() {
         debugMode = MagicUiBrisge.isDebugModeEnabled
+    }
+
+    private func importCodes(from result: Result<URL, Error>) {
+        do {
+            let url = try result.get()
+            let didAccess = url.startAccessingSecurityScopedResource()
+            defer {
+                if didAccess {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+
+            let text = try String(contentsOf: url, encoding: .utf8)
+            switch url.pathExtension.lowercased() {
+            case "json":
+                MigrateDataFromV1().importBarcodes(jsonString: text)
+            case "csv":
+                try BoardingPassCSVImporter.importCSV(text)
+            default:
+                throw BoardingPassCSVImportError.unsupportedFileType
+            }
+        } catch is CancellationError {
+            return
+        } catch {
+            importErrorMessage = error.localizedDescription
+            isShowingImportError = true
+            print("[MyBoardingPassesView] Import failed: \(error)")
+        }
     }
 
     private var screenBackground: Color {
@@ -246,13 +288,8 @@ struct MyBoardingPassesView: View {
 
     private var optionsMenu: some View {
         Menu {
-            if debugMode {
-                Button("DEBUG: ScanSimulator") {
-                    PluginActions.shared.runAction("presentSheet:item:sheetItem;id:sheetScanSimulatorView")
-                }
-            }
             Button {
-                PluginActions.shared.runAction("importCodes")
+                isShowingImporter = true
             } label: {
                 Label("Import codes", systemImage: "tray.and.arrow.down")
             }
@@ -439,5 +476,116 @@ struct BoardingPassCSVDocument: FileDocument {
     private static func csvEscaped(_ value: String) -> String {
         let escaped = value.replacingOccurrences(of: "\"", with: "\"\"")
         return "\"\(escaped)\""
+    }
+}
+
+private enum BoardingPassCSVImportError: LocalizedError {
+    case unsupportedFileType
+    case emptyFile
+    case missingRequiredColumns
+
+    var errorDescription: String? {
+        switch self {
+        case .unsupportedFileType:
+            "Please choose a JSON or CSV file."
+        case .emptyFile:
+            "The selected CSV file is empty."
+        case .missingRequiredColumns:
+            "The CSV file must contain at least text and type columns."
+        }
+    }
+}
+
+private enum BoardingPassCSVImporter {
+    @MainActor
+    static func importCSV(_ csvText: String) throws {
+        let rows = parse(csvText)
+        guard let headers = rows.first else {
+            throw BoardingPassCSVImportError.emptyFile
+        }
+
+        let normalizedHeaders = headers.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        guard let textIndex = normalizedHeaders.firstIndex(of: "text"),
+              let typeIndex = normalizedHeaders.firstIndex(of: "type") else {
+            throw BoardingPassCSVImportError.missingRequiredColumns
+        }
+
+        let flightDateIndex = normalizedHeaders.firstIndex(of: "flightDate")
+        let store = BoardingPassStore.shared
+
+        for row in rows.dropFirst() {
+            guard textIndex < row.count, typeIndex < row.count else { continue }
+
+            let barcodeText = row[textIndex].trimmingCharacters(in: .whitespacesAndNewlines)
+            let barcodeType = row[typeIndex].trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !barcodeText.isEmpty else { continue }
+
+            let flightDateYear = flightDateIndex.flatMap { index -> Int? in
+                guard index < row.count,
+                      let date = ISO8601DateFormatter().date(from: row[index]) else {
+                    return nil
+                }
+                return Calendar.current.component(.year, from: date)
+            }
+
+            store.insertIfMissing(
+                barcodeText: barcodeText,
+                barcodeType: barcodeType.isEmpty ? "Boarding pass" : barcodeType,
+                flightDateYear: flightDateYear
+            )
+        }
+    }
+
+    private static func parse(_ text: String) -> [[String]] {
+        var rows: [[String]] = []
+        var row: [String] = []
+        var field = ""
+        var isInsideQuotes = false
+        var index = text.startIndex
+
+        while index < text.endIndex {
+            let character = text[index]
+
+            if character == "\"" {
+                let nextIndex = text.index(after: index)
+                if isInsideQuotes, nextIndex < text.endIndex, text[nextIndex] == "\"" {
+                    field.append(character)
+                    index = nextIndex
+                } else {
+                    isInsideQuotes.toggle()
+                }
+            } else if character == ",", !isInsideQuotes {
+                row.append(field)
+                field = ""
+            } else if character == "\n", !isInsideQuotes {
+                row.append(field)
+                appendRow(row, to: &rows)
+                row = []
+                field = ""
+            } else if character == "\r", !isInsideQuotes {
+                let nextIndex = text.index(after: index)
+                if nextIndex < text.endIndex, text[nextIndex] == "\n" {
+                    index = nextIndex
+                }
+                row.append(field)
+                appendRow(row, to: &rows)
+                row = []
+                field = ""
+            } else {
+                field.append(character)
+            }
+
+            index = text.index(after: index)
+        }
+
+        row.append(field)
+        appendRow(row, to: &rows)
+        return rows
+    }
+
+    private static func appendRow(_ row: [String], to rows: inout [[String]]) {
+        if row.contains(where: { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
+            rows.append(row)
+        }
     }
 }

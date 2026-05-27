@@ -13,10 +13,10 @@ struct MagicLocalisation {
         // Bottom Tabs
         addKey("TEXT_HOME")
         addKey("TEXT_MYPASSES")
-        addKey("TEXT_MISC")
+        addKey("TEXT_TOOLS")
         addKey("TEXT_SETTINGS")
         
-        
+        // Home Tab
         addKey("TEXT_SCAN_BOARDING_PASS")
         addKey("TEXT_SCAN_BOARDING_DESCRIPTION")
         addKey("TEXT_IMPORT_BOARDING_PASS")
