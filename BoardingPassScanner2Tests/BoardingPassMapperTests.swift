@@ -122,6 +122,63 @@ struct BoardingPassMapperTests {
         #expect(BoardingPassMapper.airportName(for: "ATH") == "Athens Intl")
     }
 
+    @Test func airlineLookupPerformance() {
+        let airlineCount = 1500
+        let rows = (0..<airlineCount).map { index -> [String: String] in
+            [
+                "code": String(format: "A%04d", index),
+                "name": "Airline \(index)",
+                "country": "Country \(index % 200)"
+            ]
+        }
+        installAirlines(rows)
+
+        let codes = (0..<1000).map { index in
+            String(format: "A%04d", (index * 37) % airlineCount)
+        }
+
+        let start = ContinuousClock.now
+        var hits = 0
+        for code in codes {
+            if BoardingPassMapper.airline(for: code) != nil {
+                hits += 1
+            }
+        }
+        let elapsed = ContinuousClock.now - start
+
+        print("airlineLookupPerformance: \(hits) hits / \(codes.count) lookups over \(airlineCount) entries in \(elapsed)")
+        #expect(hits == codes.count)
+    }
+
+    @Test func airportLookupPerformance() {
+        let airportCount = 5000
+        let rows = (0..<airportCount).map { index -> [String: String] in
+            [
+                "code": String(format: "P%04d", index),
+                "name": "Airport \(index)",
+                "city": "City \(index)",
+                "country": "Country \(index % 200)"
+            ]
+        }
+        installAirports(rows)
+
+        let codes = (0..<1000).map { index in
+            String(format: "P%04d", (index * 37) % airportCount)
+        }
+
+        let start = ContinuousClock.now
+        var hits = 0
+        for code in codes {
+            if BoardingPassMapper.airport(for: code) != nil {
+                hits += 1
+            }
+        }
+        let elapsed = ContinuousClock.now - start
+
+        print("airportLookupPerformance: \(hits) hits / \(codes.count) lookups over \(airportCount) entries in \(elapsed)")
+        #expect(hits == codes.count)
+    }
+
     @discardableResult
     private func installAirlines(_ rows: [[String: String]]) -> SxDataModel {
         installDataModel(key: BoardingPassMapper.dataModelAirlinesKey, rows: rows)

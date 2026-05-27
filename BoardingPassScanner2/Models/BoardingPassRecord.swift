@@ -27,7 +27,7 @@ final class BoardingPassRecord {
 
 extension BoardingPassRecord {
     var boardingPass: BoardingPass? {
-        try? BoardingPass(parsing: text, flightDateYear: resolvedFlightDateYear)
+        BoardingPassParseCache.shared.boardingPass(for: text, flightDateYear: resolvedFlightDateYear)
     }
 
     var decodedLegs: [BoardingPass.Leg] {
@@ -118,8 +118,10 @@ extension BoardingPassRecord {
         guard let flightDate = boardingPass?.flightDate else {
             return .distantPast
         }
-        return ISO8601DateFormatter().date(from: flightDate) ?? .distantPast
+        return Self.iso8601Formatter.date(from: flightDate) ?? .distantPast
     }
+
+    private static let iso8601Formatter = ISO8601DateFormatter()
 
     var compartmentCode: String {
         boardingPass?.compartmentCode ?? ""
@@ -168,5 +170,36 @@ extension BoardingPassRecord {
 
     func applyMapperRefresh() {
         // Mapping fields are derived at display time, so refreshed airline/airport data is visible immediately.
+    }
+}
+
+final class BoardingPassParseCache {
+    static let shared = BoardingPassParseCache()
+
+    private struct Key: Hashable {
+        let text: String
+        let flightDateYear: Int
+    }
+
+    private var cache: [Key: BoardingPass] = [:]
+
+    func boardingPass(for text: String, flightDateYear: Int?) -> BoardingPass? {
+        let key = Key(text: text, flightDateYear: flightDateYear ?? 0)
+        if let cached = cache[key] {
+            return cached
+        }
+        guard let parsed = try? BoardingPass(parsing: text, flightDateYear: flightDateYear) else {
+            return nil
+        }
+        cache[key] = parsed
+        return parsed
+    }
+
+    func warm(text: String, flightDateYear: Int?) {
+        _ = boardingPass(for: text, flightDateYear: flightDateYear)
+    }
+
+    func invalidate(text: String) {
+        cache = cache.filter { $0.key.text != text }
     }
 }

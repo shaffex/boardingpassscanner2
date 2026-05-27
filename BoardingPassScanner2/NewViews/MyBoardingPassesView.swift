@@ -28,21 +28,28 @@ struct MyBoardingPassesView: View {
     @State private var isShowingImportError = false
     @State private var selectedSegment: PassSegment = .upcoming
 
-    private var orderedRecords: [BoardingPassRecord] {
+    private var orderedDatedRecords: [(record: BoardingPassRecord, date: Date)] {
+        let dated = records.map { (record: $0, date: $0.flightDate) }
         switch PassSortOrder(rawValue: sortOrderRawValue) ?? .descending {
         case .descending:
-            records.sorted { $0.flightDate > $1.flightDate }
+            return dated.sorted { $0.date > $1.date }
         case .ascending:
-            records.sorted { $0.flightDate < $1.flightDate }
+            return dated.sorted { $0.date < $1.date }
         }
     }
 
     private var upcomingRecords: [BoardingPassRecord] {
-        orderedRecords.filter { Calendar.current.startOfDay(for: $0.flightDate) >= Calendar.current.startOfDay(for: .now) }
+        let today = Calendar.current.startOfDay(for: .now)
+        return orderedDatedRecords
+            .filter { Calendar.current.startOfDay(for: $0.date) >= today }
+            .map(\.record)
     }
 
     private var pastRecords: [BoardingPassRecord] {
-        orderedRecords.filter { Calendar.current.startOfDay(for: $0.flightDate) < Calendar.current.startOfDay(for: .now) }
+        let today = Calendar.current.startOfDay(for: .now)
+        return orderedDatedRecords
+            .filter { Calendar.current.startOfDay(for: $0.date) < today }
+            .map(\.record)
     }
 
     private var visibleRecords: [BoardingPassRecord] {

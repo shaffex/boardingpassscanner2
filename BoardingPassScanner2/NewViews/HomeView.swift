@@ -20,8 +20,10 @@ struct HomeView: View {
     private var upcomingFlight: BoardingPassRecord? {
         let today = Calendar.current.startOfDay(for: .now)
         return records
-            .filter { Calendar.current.startOfDay(for: $0.flightDate) >= today }
-            .min { $0.flightDate < $1.flightDate }
+            .map { (record: $0, date: $0.flightDate) }
+            .filter { Calendar.current.startOfDay(for: $0.date) >= today }
+            .min { $0.date < $1.date }?
+            .record
     }
 
     private func refreshDebugMode() {

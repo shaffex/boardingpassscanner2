@@ -32,6 +32,15 @@ final class BoardingPassStore {
         return (try? context.fetch(descriptor)) ?? []
     }
 
+    func prefetchParsed() {
+        for record in allRecords() {
+            BoardingPassParseCache.shared.warm(
+                text: record.text,
+                flightDateYear: record.flightDateYear > 0 ? record.flightDateYear : nil
+            )
+        }
+    }
+
     func record(forText text: String) -> BoardingPassRecord? {
         let descriptor = FetchDescriptor<BoardingPassRecord>(
             predicate: #Predicate { $0.text == text }
@@ -59,19 +68,29 @@ final class BoardingPassStore {
         }
         context.insert(record)
         save()
+        BoardingPassParseCache.shared.warm(
+            text: record.text,
+            flightDateYear: record.flightDateYear > 0 ? record.flightDateYear : nil
+        )
         return record
     }
 
     func delete(_ record: BoardingPassRecord) {
+        let text = record.text
         context.delete(record)
         save()
+        BoardingPassParseCache.shared.invalidate(text: text)
     }
 
     func deleteAll() {
+        let texts = allRecords().map(\.text)
         for record in allRecords() {
             context.delete(record)
         }
         save()
+        for text in texts {
+            BoardingPassParseCache.shared.invalidate(text: text)
+        }
     }
 
     func refreshMappings() {
