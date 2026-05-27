@@ -14,8 +14,7 @@ struct MyBoardingPassesView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
 
-    @Query(sort: \BoardingPassRecord.scannedDate, order: .reverse)
-    private var records: [BoardingPassRecord]
+    @Query private var records: [BoardingPassRecord]
 
     @AppStorage("boardingPassSortOrder") private var sortOrderRawValue = PassSortOrder.descending.rawValue
 
@@ -32,9 +31,9 @@ struct MyBoardingPassesView: View {
     private var orderedRecords: [BoardingPassRecord] {
         switch PassSortOrder(rawValue: sortOrderRawValue) ?? .descending {
         case .descending:
-            records
+            records.sorted { $0.flightDate > $1.flightDate }
         case .ascending:
-            Array(records.reversed())
+            records.sorted { $0.flightDate < $1.flightDate }
         }
     }
 
@@ -406,7 +405,6 @@ struct BoardingPassCSVDocument: FileDocument {
     private static func makeCSV(records: [BoardingPassRecord]) -> String {
         let headers = [
             "type",
-            "scannedDate",
             "passengerName",
             "passengerSurname",
             "passengerGivenName",
@@ -429,14 +427,12 @@ struct BoardingPassCSVDocument: FileDocument {
             "seatNumber",
             "checkInSequenceNumber",
             "passengerStatus",
-            "summary",
             "text"
         ]
 
         let rows = records.map { record in
             [
                 record.type,
-                isoDate(record.scannedDate),
                 record.name,
                 record.passengerSurname,
                 record.passengerGivenName,
@@ -459,7 +455,6 @@ struct BoardingPassCSVDocument: FileDocument {
                 record.seatNumber,
                 record.checkInSequenceNumber,
                 record.passengerStatus,
-                record.summary,
                 record.text
             ]
         }

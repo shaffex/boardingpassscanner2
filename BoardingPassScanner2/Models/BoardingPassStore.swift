@@ -28,9 +28,7 @@ final class BoardingPassStore {
     }
 
     func allRecords() -> [BoardingPassRecord] {
-        let descriptor = FetchDescriptor<BoardingPassRecord>(
-            sortBy: [SortDescriptor(\.scannedDate, order: .reverse)]
-        )
+        let descriptor = FetchDescriptor<BoardingPassRecord>()
         return (try? context.fetch(descriptor)) ?? []
     }
 

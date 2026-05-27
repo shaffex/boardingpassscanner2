@@ -31,24 +31,7 @@ struct BoardingPassDecodedView: View {
     }
 
     private var decodedLegs: [BoardingPass.Leg] {
-        let year = Calendar.current.component(.year, from: record.flightDate)
-        return (try? BoardingPass(parsing: record.text, flightDateYear: year).legs) ?? [storedLeg]
-    }
-
-    private var storedLeg: BoardingPass.Leg {
-        BoardingPass.Leg(
-            operatingCarrierPNR: record.pnr,
-            fromAirport: record.fromAirport,
-            toAirport: record.toAirport,
-            operatingCarrierDesignator: record.operatingCarrier,
-            flightNumber: record.flightNumber,
-            flightDateJulian: record.flightDateJulian,
-            flightDate: ISO8601DateFormatter().string(from: record.flightDate),
-            compartmentCode: record.compartmentCode,
-            seatNumber: record.seatNumber,
-            checkInSequenceNumber: record.checkInSequenceNumber,
-            passengerStatus: record.passengerStatus
-        )
+        record.decodedLegs
     }
 
     @ViewBuilder

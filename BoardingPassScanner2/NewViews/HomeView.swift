@@ -12,17 +12,16 @@ import MagicUiFramework
 struct HomeView: View {
     @Environment(\.colorScheme) private var colorScheme
 
-    @Query(sort: \BoardingPassRecord.flightDate, order: .forward)
-    private var records: [BoardingPassRecord]
+    @Query private var records: [BoardingPassRecord]
 
     @State private var selectedUpcomingFlight: SelectedFlight?
     @State private var isDebugModeEnabled = false
 
     private var upcomingFlight: BoardingPassRecord? {
         let today = Calendar.current.startOfDay(for: .now)
-        return records.first { record in
-            Calendar.current.startOfDay(for: record.flightDate) >= today
-        }
+        return records
+            .filter { Calendar.current.startOfDay(for: $0.flightDate) >= today }
+            .min { $0.flightDate < $1.flightDate }
     }
 
     private func refreshDebugMode() {

@@ -23,7 +23,6 @@ struct BoardingPassScanner2Tests {
             expectedFields: [
                 "name": "MICHAEL STARR",
                 "type": "qr",
-                "summary": "LY0546 ATH-TLV",
                 "passengerSurname": "STARR",
                 "passengerGivenName": "MICHAEL",
                 "electronicTicketIndicator": "E",
@@ -44,7 +43,6 @@ struct BoardingPassScanner2Tests {
             expectedFields: [
                 "name": "DANA HOSSOVA",
                 "type": "qr",
-                "summary": "W95457 LTN-TAT",
                 "passengerSurname": "HOSSOVA",
                 "passengerGivenName": "DANA",
                 "electronicTicketIndicator": "",
@@ -112,7 +110,6 @@ struct BoardingPassScanner2Tests {
 
         #expect(boardingPass.numberOfLegs == 2)
         #expect(boardingPass.legs.count == 2)
-        #expect(boardingPass.summary == "EY0160 WAW-AUH")
         #expect(boardingPass.passengerName.displayName == "DIANA VLASIUK")
 
         #expect(boardingPass.legs[0].flightCode == "EY0160")
@@ -140,7 +137,6 @@ struct BoardingPassScanner2Tests {
         #expect(record.numberOfLegs == 2)
         #expect(record.name == "DIANA VLASIUK")
         #expect(record.type == "pdf417")
-        #expect(record.summary == "EY0160 WAW-AUH")
         #expect(record.fromAirport == "WAW")
         #expect(record.toAirport == "AUH")
         #expect(record.operatingCarrier == "EY")
@@ -167,7 +163,6 @@ struct BoardingPassScanner2Tests {
             switch key {
             case "name": actual = record.name
             case "type": actual = record.type
-            case "summary": actual = record.summary
             case "passengerSurname": actual = record.passengerSurname
             case "passengerGivenName": actual = record.passengerGivenName
             case "electronicTicketIndicator": actual = record.electronicTicketIndicator

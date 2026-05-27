@@ -168,10 +168,6 @@ extension BoardingPass {
         "\(operatingCarrierDesignator)\(flightNumber)"
     }
 
-    var summary: String {
-        "\(flightCode) \(route)"
-    }
-
     private static func parseAdditionalLegs(
         in rawValue: String,
         startingAt startOffset: Int,

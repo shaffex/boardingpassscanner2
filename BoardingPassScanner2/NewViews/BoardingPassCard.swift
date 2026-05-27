@@ -182,8 +182,7 @@ struct BoardingPassCard: View {
     }
 
     private var parsedLegs: [BoardingPass.Leg] {
-        let year = Calendar.current.component(.year, from: record.flightDate)
-        return (try? BoardingPass(parsing: record.text, flightDateYear: year).legs) ?? []
+        record.decodedLegs
     }
 
     private var isMultiLeg: Bool {
