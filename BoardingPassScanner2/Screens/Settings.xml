@@ -3,8 +3,6 @@
         <toggle key="DEBUG_MODE">DEBUG_MODE</toggle>
         
         <button action="showBanner:type:error;text:This is a test message">showBanner:type:error</button>
-        <button action="setBool:isShowingBanner=true">isShowingBanner true</button>
-        <button action="setBool:isShowingBanner=false">isShowingBanner false</button>
         
         <section header="working">
             <toggle key="barcodeRectSound">Sound on scan</toggle>
@@ -36,8 +34,5 @@
     
     <!-- Privacy Policy HTML-->
     <webview id="settings_contactUs" navigationTitle="Contact Us">url:https://shaffex.com/api/boardingpass2/Links/contactUs.php</webview>
-    
-    
-<!-- dataModelAirlines and dataModelAirports are declared in MainScreen.xml so they are available app-wide. -->
     
 </body>

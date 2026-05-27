@@ -5,16 +5,20 @@
 //  Created by Peter Popovec on 24/05/2026.
 //
 
-import MagicUiFramework
+import Foundation
 import Testing
 @testable import BoardingPassScanner2
 
 @MainActor
 struct BoardingPassMapperTests {
+    init() {
+        BoardingPassMapper.resetForTesting()
+    }
+
     @Test func airlineReturnsMatchingEntry() {
         installAirlines([
-            ["code": "FR", "name": "Ryanair", "country": "Ireland"],
-            ["code": "LY", "name": "El Al", "country": "Israel"]
+            .init(code: "FR", name: "Ryanair", country: "Ireland"),
+            .init(code: "LY", name: "El Al", country: "Israel")
         ])
 
         let airline = BoardingPassMapper.airline(for: "FR")
@@ -26,7 +30,7 @@ struct BoardingPassMapperTests {
 
     @Test func airlineMatchesCodeCaseInsensitively() {
         installAirlines([
-            ["code": "FR", "name": "Ryanair", "country": "Ireland"]
+            .init(code: "FR", name: "Ryanair", country: "Ireland")
         ])
 
         #expect(BoardingPassMapper.airline(for: "fr")?.name == "Ryanair")
@@ -34,7 +38,7 @@ struct BoardingPassMapperTests {
 
     @Test func airlineReturnsNilForUnknownCode() {
         installAirlines([
-            ["code": "FR", "name": "Ryanair", "country": "Ireland"]
+            .init(code: "FR", name: "Ryanair", country: "Ireland")
         ])
 
         #expect(BoardingPassMapper.airline(for: "ZZ") == nil)
@@ -42,21 +46,22 @@ struct BoardingPassMapperTests {
 
     @Test func airlineReturnsNilForEmptyCode() {
         installAirlines([
-            ["code": "FR", "name": "Ryanair", "country": "Ireland"]
+            .init(code: "FR", name: "Ryanair", country: "Ireland")
         ])
 
         #expect(BoardingPassMapper.airline(for: "") == nil)
     }
 
-    @Test func airlineReturnsNilWhenDataModelMissing() {
-        clearDataModel(key: BoardingPassMapper.dataModelAirlinesKey)
+    @Test func airlineReturnsNilWhenDatabaseEmpty() {
+        BoardingPassMapper.resetForTesting()
+        BoardingPassMapper.installForTesting(airlines: [], airports: [])
 
         #expect(BoardingPassMapper.airline(for: "FR") == nil)
     }
 
     @Test func airlineNameFallsBackToCodeWhenNotFound() {
         installAirlines([
-            ["code": "FR", "name": "Ryanair", "country": "Ireland"]
+            .init(code: "FR", name: "Ryanair", country: "Ireland")
         ])
 
         #expect(BoardingPassMapper.airlineName(for: "ZZ") == "ZZ")
@@ -64,7 +69,7 @@ struct BoardingPassMapperTests {
 
     @Test func airlineNameReturnsResolvedNameWhenFound() {
         installAirlines([
-            ["code": "FR", "name": "Ryanair", "country": "Ireland"]
+            .init(code: "FR", name: "Ryanair", country: "Ireland")
         ])
 
         #expect(BoardingPassMapper.airlineName(for: "FR") == "Ryanair")
@@ -72,8 +77,8 @@ struct BoardingPassMapperTests {
 
     @Test func airportReturnsMatchingEntry() {
         installAirports([
-            ["code": "ATH", "name": "Athens Intl", "city": "Athens", "country": "Greece"],
-            ["code": "TLV", "name": "Ben Gurion", "city": "Tel Aviv", "country": "Israel"]
+            .init(code: "ATH", name: "Athens Intl", city: "Athens", country: "Greece"),
+            .init(code: "TLV", name: "Ben Gurion", city: "Tel Aviv", country: "Israel")
         ])
 
         let airport = BoardingPassMapper.airport(for: "TLV")
@@ -86,7 +91,7 @@ struct BoardingPassMapperTests {
 
     @Test func airportMatchesCodeCaseInsensitively() {
         installAirports([
-            ["code": "ATH", "name": "Athens Intl", "city": "Athens", "country": "Greece"]
+            .init(code: "ATH", name: "Athens Intl", city: "Athens", country: "Greece")
         ])
 
         #expect(BoardingPassMapper.airport(for: "ath")?.name == "Athens Intl")
@@ -94,21 +99,22 @@ struct BoardingPassMapperTests {
 
     @Test func airportReturnsNilForUnknownCode() {
         installAirports([
-            ["code": "ATH", "name": "Athens Intl", "city": "Athens", "country": "Greece"]
+            .init(code: "ATH", name: "Athens Intl", city: "Athens", country: "Greece")
         ])
 
         #expect(BoardingPassMapper.airport(for: "XXX") == nil)
     }
 
-    @Test func airportReturnsNilWhenDataModelMissing() {
-        clearDataModel(key: BoardingPassMapper.dataModelAirportsKey)
+    @Test func airportReturnsNilWhenDatabaseEmpty() {
+        BoardingPassMapper.resetForTesting()
+        BoardingPassMapper.installForTesting(airlines: [], airports: [])
 
         #expect(BoardingPassMapper.airport(for: "ATH") == nil)
     }
 
     @Test func airportNameFallsBackToCodeWhenNotFound() {
         installAirports([
-            ["code": "ATH", "name": "Athens Intl", "city": "Athens", "country": "Greece"]
+            .init(code: "ATH", name: "Athens Intl", city: "Athens", country: "Greece")
         ])
 
         #expect(BoardingPassMapper.airportName(for: "XXX") == "XXX")
@@ -116,7 +122,7 @@ struct BoardingPassMapperTests {
 
     @Test func airportNameReturnsResolvedNameWhenFound() {
         installAirports([
-            ["code": "ATH", "name": "Athens Intl", "city": "Athens", "country": "Greece"]
+            .init(code: "ATH", name: "Athens Intl", city: "Athens", country: "Greece")
         ])
 
         #expect(BoardingPassMapper.airportName(for: "ATH") == "Athens Intl")
@@ -124,14 +130,14 @@ struct BoardingPassMapperTests {
 
     @Test func airlineLookupPerformance() {
         let airlineCount = 1500
-        let rows = (0..<airlineCount).map { index -> [String: String] in
-            [
-                "code": String(format: "A%04d", index),
-                "name": "Airline \(index)",
-                "country": "Country \(index % 200)"
-            ]
+        let airlines = (0..<airlineCount).map { index in
+            BoardingPassMapper.Airline(
+                code: String(format: "A%04d", index),
+                name: "Airline \(index)",
+                country: "Country \(index % 200)"
+            )
         }
-        installAirlines(rows)
+        BoardingPassMapper.installForTesting(airlines: airlines, airports: [])
 
         let codes = (0..<1000).map { index in
             String(format: "A%04d", (index * 37) % airlineCount)
@@ -152,15 +158,15 @@ struct BoardingPassMapperTests {
 
     @Test func airportLookupPerformance() {
         let airportCount = 5000
-        let rows = (0..<airportCount).map { index -> [String: String] in
-            [
-                "code": String(format: "P%04d", index),
-                "name": "Airport \(index)",
-                "city": "City \(index)",
-                "country": "Country \(index % 200)"
-            ]
+        let airports = (0..<airportCount).map { index in
+            BoardingPassMapper.Airport(
+                code: String(format: "P%04d", index),
+                name: "Airport \(index)",
+                city: "City \(index)",
+                country: "Country \(index % 200)"
+            )
         }
-        installAirports(rows)
+        BoardingPassMapper.installForTesting(airlines: [], airports: airports)
 
         let codes = (0..<1000).map { index in
             String(format: "P%04d", (index * 37) % airportCount)
@@ -179,28 +185,11 @@ struct BoardingPassMapperTests {
         #expect(hits == codes.count)
     }
 
-    @discardableResult
-    private func installAirlines(_ rows: [[String: String]]) -> SxDataModel {
-        installDataModel(key: BoardingPassMapper.dataModelAirlinesKey, rows: rows)
+    private func installAirlines(_ airlines: [BoardingPassMapper.Airline]) {
+        BoardingPassMapper.installForTesting(airlines: airlines, airports: [])
     }
 
-    @discardableResult
-    private func installAirports(_ rows: [[String: String]]) -> SxDataModel {
-        installDataModel(key: BoardingPassMapper.dataModelAirportsKey, rows: rows)
-    }
-
-    private func installDataModel(key: String, rows: [[String: String]]) -> SxDataModel {
-        let model = SxDataModel(name: key, type: .embedded)
-        model.items = rows.map { row in
-            SxDataModelItem(item: row.reduce(into: [String: Any]()) { result, entry in
-                result[entry.key] = entry.value
-            })
-        }
-        SxMagicVariables.shared.setValue(model, forKey: key)
-        return model
-    }
-
-    private func clearDataModel(key: String) {
-        SxMagicVariables.shared.setValue(nil, forKey: key)
+    private func installAirports(_ airports: [BoardingPassMapper.Airport]) {
+        BoardingPassMapper.installForTesting(airlines: [], airports: airports)
     }
 }

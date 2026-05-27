@@ -9,7 +9,7 @@
         </navigationstack>
         
         <navigationstack tabItem="label:$TEXT_TOOLS;systemImage:wrench.and.screwdriver" tag="Tools">
-           <remoteview src="resource:Tools"/>
+           <toolsview/>
         </navigationstack>
                
         <navigationstack tabItem="label:$TEXT_SETTINGS;systemImage:gear" tag="Settings">
@@ -24,16 +24,13 @@
     
     <remoteview id="sheetPremiumFeatures" src="file:live/SXML/Sheets/PremiumFeatures.xml"/>
     
-    <datamodel key="dataModelAirlines" type="csv" src="urlCache:https://shaffex.com/api/boardingpass2/Data/airlines.csv"/>
-    <datamodel key="dataModelAirports" type="csv" src="urlCache:https://shaffex.com/api/boardingpass2/Data/airports.csv"/>
-    
     
     <event onValueUpdated="xxtorchActivated" action="torch:$torchActivated;level:$torchLevel"/>
     <event onValueUpdated="xxtorchLevel" action="torch:$torchActivated;level:$torchLevel"/>
     
     
 <!--    <event onBarcodeDetected="" action="js:generateAction('$barcodeRectDelay', $barcodeRectSound)"/>-->
-    <event onBarcodeDetected="" action="playSystemSound:1017\\addNewBoardingPass:type:$barcodeObject.type;text:$barcodeObject.text"/>
+    <event onBarcodeDetected="" action="playSystemSound:4095\\addNewBoardingPass:type:$barcodeObject.type;text:$barcodeObject.text"/>
     
     <dialogs>
         <alert id="myAlertCode" alertTitle="Detected barcode" alertMessage="$barcodeObject.text">

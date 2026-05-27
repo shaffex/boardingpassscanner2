@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BoardingPassDecodedView: View {
     let record: BoardingPassRecord
+    @State private var mapperRefreshToken = 0
 
     var body: some View {
         List {
@@ -28,6 +29,9 @@ struct BoardingPassDecodedView: View {
             }
         }
         .navigationTitle("Decoded fields")
+        .onReceive(NotificationCenter.default.publisher(for: .boardingPassMapperDidReload)) { _ in
+            mapperRefreshToken &+= 1
+        }
     }
 
     private var decodedLegs: [BoardingPass.Leg] {

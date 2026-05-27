@@ -168,10 +168,6 @@ struct MyBoardingPassesView: View {
             if upcomingRecords.isEmpty, !pastRecords.isEmpty {
                 selectedSegment = .past
             }
-
-            Task {
-                try? await DataUpdater().checkForDataUpdate()
-            }
         }
         .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
             refreshDebugMode()

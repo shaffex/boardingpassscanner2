@@ -14,6 +14,7 @@ struct BoardingPassCard: View {
     }
 
     @Environment(\.colorScheme) private var colorScheme
+    @State private var mapperRefreshToken = 0
 
     let record: BoardingPassRecord
     var style: Style = .regular
@@ -45,6 +46,9 @@ struct BoardingPassCard: View {
                 .stroke(cardStroke, lineWidth: 1)
         }
         .shadow(color: shadowColor, radius: 18, x: 0, y: 10)
+        .onReceive(NotificationCenter.default.publisher(for: .boardingPassMapperDidReload)) { _ in
+            mapperRefreshToken &+= 1
+        }
     }
 
     private var header: some View {

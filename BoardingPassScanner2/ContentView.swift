@@ -21,6 +21,10 @@ struct ContentView: View {
             BoardingPassStore.shared.prefetchParsed()
         }
         
+        Task {
+            try? await DataUpdater().checkForDataUpdate()
+        }
+        
         // views
         MagicUiView.installViewPlugin(name: "menuitem", plugin: MenuItemView.self)
         MagicUiView.installViewPlugin(name: "barcodescannerlocal", plugin: SxView_BarcodeScanner.self)
@@ -30,6 +34,7 @@ struct ContentView: View {
         MagicUiView.installViewPlugin(name: "ViewFinderCorners", plugin: SxView_ViewFinderCorners.self)
         MagicUiView.installViewPlugin(name: "homeview", plugin: HomePluginView())
         MagicUiView.installViewPlugin(name: "myBoardingPassesList", plugin: MyBoardingPassesPluginView())
+        MagicUiView.installViewPlugin(name: "toolsview", plugin: ToolsPluginView())
         
         // modifiers
         MagicUiView.installModifierPlugin(name: "photospicker2", plugin: SxModifier_photosPicker2.self)
@@ -42,8 +47,6 @@ struct ContentView: View {
         MagicUiView.installActionPlugin(name: "detectFromClipboard", plugin: Action_detectFromClipboard.self)
         
         MagicUiView.installActionPlugin(name: "importFromV1", plugin: Action_importFromV1.self)
-        
-        MagicUiView.installActionPlugin(name: "checkForDataUpdate", plugin: Action_checkForDataUpdate.self)
     }
 
     var body: some View {
