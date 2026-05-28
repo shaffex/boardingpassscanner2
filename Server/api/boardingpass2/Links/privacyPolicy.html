@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Boarding Pass Scanner | shaffex</title>
+  <style>
+    :root{--bg:#000000;--ink:#ffffff;--muted:#8e8e93;--card:#1c1c1e;--line:#38383a;--brand:#0a84ff;--code-bg:rgba(255,255,255,0.1);--shadow:rgba(0,0,0,0.3);--brand-bg:rgba(10,132,255,0.15);--brand-border:rgba(10,132,255,0.3)}
+    @media (prefers-color-scheme: light){:root{--bg:#ffffff;--ink:#000000;--muted:#8e8e93;--card:#f2f2f7;--line:#c6c6c8;--brand:#007aff;--code-bg:rgba(0,0,0,0.05);--shadow:rgba(0,0,0,0.1);--brand-bg:rgba(0,122,255,0.1);--brand-border:rgba(0,122,255,0.2)}}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Roboto,Inter,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+    .wrap{max-width:880px;margin:0 auto;padding:32px 20px 80px}
+    header{background:linear-gradient(135deg, var(--brand-bg), transparent);border:1px solid var(--brand-border);border-radius:18px;padding:20px 18px 16px;box-shadow:0 16px 36px var(--shadow)}
+    h1{margin:0 0 6px;font-size:clamp(1.6rem,3.2vw,2.2rem)}
+    .muted{color:var(--muted)}
+    .card{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 24px var(--shadow)}
+    .pad{padding:18px}
+    h2{margin:.2rem 0 .6rem;font-size:1.2rem}
+    a{color:var(--brand)}
+    ul{margin:0;padding-left:18px}
+    .small{font-size:.92rem}
+    footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+    code{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--code-bg);padding:2px 6px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Boarding Pass Scanner</h1>
+      <div class="muted">Last updated: <span id="updated">2026‑05‑19</span></div>
+    </header>
+
+    <section class="card"><div class="pad">
+      <h2>Summary</h2>
+      <p><strong>We do not collect, store or share any personal data.</strong> Your boarding passes, flight details and settings are kept on your device. They are never uploaded to our servers because we don’t run any servers for Boarding Pass Scanner.</p>
+    </div></section>
+
+    <section class="card"><div class="pad">
+      <h2>What the app does</h2>
+      <ul>
+        <li>Scan boarding pass barcodes (PDF417, Aztec, QR) with your camera and decode the IATA BCBP data they contain — passenger name, flight number, origin/destination, seat, sequence number and similar fields.</li>
+        <li>Display your scanned passes and let you organize them in the app.</li>
+        <li>All content (boarding passes, flight details and labels) is stored locally on your device.</li>
+        <li>We use Google AdMob to display advertisements within the app.</li>
+      </ul>
+    </div></section>
+
+    <section class="card"><div class="pad">
+      <h2>Advertising</h2>
+      <p>We use Google AdMob to display advertisements within the app. AdMob may collect and use the following information:</p>
+      <ul>
+        <li>Advertising identifier (IDFA on iOS)</li>
+        <li>Device information (model, operating system, screen size)</li>
+        <li>General location (country/region level, not precise location)</li>
+        <li>App usage data for ad performance</li>
+      </ul>
+      <p>You can limit ad tracking in your device settings (Settings &gt; Privacy &amp; Security &gt; Apple Advertising &gt; Personalized Ads). For more information about Google's data practices, please visit <a href="https://policies.google.com/privacy">Google's Privacy Policy</a>.</p>
+    </div></section>
+
+    <section class="card"><div class="pad">
+      <h2>Data we <em>do not</em> collect</h2>
+      <p><strong>We do not directly collect:</strong></p>
+      <ul>
+        <li>Personal identifiers (name, email, phone number)</li>
+        <li>Precise location, contacts, photos or files</li>
+        <li>The contents of your boarding passes, flight history or scan history</li>
+        <li>Passenger names, frequent flyer numbers, PNR/booking references or any data decoded from your boarding passes</li>
+        <li>Usage analytics beyond what AdMob collects for advertising</li>
+      </ul>
+      <p>If you choose to share a boarding pass using the iOS share sheet (for example, sending it to Apple Wallet, Mail or Messages), the content you send is handled by the apps you select under their own policies.</p>
+    </div></section>
+
+    <section class="card"><div class="pad">
+      <h2>On‑device storage</h2>
+      <p>Boarding passes and preferences are saved in the app’s local storage. This storage is sandboxed by iOS and is removed if you delete the app or its data.</p>
+    </div></section>
+
+    <section class="card"><div class="pad">
+      <h2>Permissions</h2>
+      <ul>
+        <li><strong>Camera (required for scanning):</strong> used only to scan boarding pass barcodes at your request. Live camera images are processed on‑device and are not saved or sent anywhere by the app.</li>
+        <li><strong>Photo Library (optional):</strong> if you choose to import a boarding pass from an existing image or PDF, the selected file is read on‑device only. Nothing is uploaded.</li>
+      </ul>
+    </div></section>
+
+    <section class="card"><div class="pad">
+      <h2>Your choices</h2>
+      <ul>
+        <li>You can delete boarding passes at any time inside the app.</li>
+        <li>Delete the app to remove all app data from your device.</li>
+      </ul>
+    </div></section>
+
+    <section class="card"><div class="pad small">
+      <h2>Children’s privacy</h2>
+      <p>Boarding Pass Scanner is suitable for general audiences and does not collect personal data from anyone, including children.</p>
+    </div></section>
+
+    <section class="card"><div class="pad small">
+      <h2>Changes to this policy</h2>
+      <p>If our app’s behavior changes (for example, if we add cloud sync or analytics), we will update this policy and the app before any change takes effect.</p>
+    </div></section>
+
+    <section class="card"><div class="pad">
+      <h2>Contact</h2>
+      <p>If you have questions about this policy, please contact <a href="mailto:support@shaffex.com">support@shaffex.com</a>.</p>
+    </div></section>
+
+    <footer>
+      © <span id="year"></span> shaffex. All rights reserved.
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
