@@ -121,7 +121,7 @@ struct BoardingPassCard: View {
         HStack(alignment: .top) {
             detailBlock(title: "PASSENGER", value: record.name)
             Spacer()
-            detailBlock(title: "SEAT", value: displayValue(record.seatNumber))
+            detailBlock(title: "SEAT", value: displayValue(formattedSeatNumber(record.seatNumber)))
             Spacer()
             detailBlock(title: "DATE", value: dateText)
                 .frame(alignment: .trailing)
@@ -294,5 +294,13 @@ struct BoardingPassCard: View {
 
     private func displayValue(_ value: String) -> String {
         value.isEmpty ? "--" : value
+    }
+
+    private func formattedSeatNumber(_ seat: String) -> String {
+        let trimmed = seat.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return trimmed }
+        let digits = trimmed.prefix(while: \.isNumber)
+        guard !digits.isEmpty, let number = Int(digits) else { return trimmed }
+        return "\(number)\(trimmed.dropFirst(digits.count))"
     }
 }

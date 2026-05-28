@@ -36,6 +36,7 @@ struct HomeView: View {
                 Section("Next Flight") {
                     if let upcomingFlight {
                         Button {
+                            Haptics.tap()
                             selectedUpcomingFlight = SelectedFlight(record: upcomingFlight)
                         } label: {
                             BoardingPassCard(record: upcomingFlight, style: .compact)
@@ -108,7 +109,10 @@ struct HomeView: View {
         systemImage: String,
         action: @escaping () -> Void
     ) -> some View {
-        Button(action: action) {
+        Button {
+            Haptics.tap()
+            action()
+        } label: {
             HStack(spacing: 14) {
                 Image(systemName: systemImage)
                     .font(.system(size: 24, weight: .semibold))

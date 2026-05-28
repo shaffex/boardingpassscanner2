@@ -105,8 +105,10 @@ struct MyBoardingPassesView: View {
                                     BoardingPassCard(record: record)
                                 }
                                 .buttonStyle(.plain)
+                                .hapticTap()
                                 .contextMenu {
                                     Button(role: .destructive) {
+                                        Haptics.success()
                                         BoardingPassStore.shared.delete(record)
                                     } label: {
                                         Label("Delete", systemImage: "trash")
@@ -157,6 +159,7 @@ struct MyBoardingPassesView: View {
         .alert("Warning", isPresented: $showDeleteAllAlert) {
             Button("No", role: .cancel) {}
             Button("Yes", role: .destructive) {
+                Haptics.success()
                 BoardingPassStore.shared.deleteAll()
             }
         } message: {
@@ -262,6 +265,9 @@ struct MyBoardingPassesView: View {
 
     private func segmentButton(_ segment: PassSegment, count: Int) -> some View {
         Button {
+            if selectedSegment != segment {
+                Haptics.selection()
+            }
             selectedSegment = segment
         } label: {
             HStack(spacing: 10) {
@@ -291,11 +297,13 @@ struct MyBoardingPassesView: View {
     private var optionsMenu: some View {
         Menu {
             Button {
+                Haptics.tap()
                 isShowingImporter = true
             } label: {
                 Label("Import codes", systemImage: "tray.and.arrow.down")
             }
             Button {
+                Haptics.tap()
                 exportDocument = BoardingPassCSVDocument(records: Array(records))
                 isShowingExporter = true
             } label: {
@@ -303,6 +311,7 @@ struct MyBoardingPassesView: View {
             }
             .disabled(records.isEmpty)
             Button(role: .destructive) {
+                Haptics.warning()
                 showDeleteAllAlert = true
             } label: {
                 Label("Delete all boarding passes", systemImage: "trash")
@@ -326,11 +335,13 @@ struct MyBoardingPassesView: View {
     private var addMenu: some View {
         Menu {
             Button {
+                Haptics.tap()
                 PluginActions.shared.runAction("presentSheet:item:sheetItem;id:barcodeScannerView")
             } label: {
                 Label("Scan New Barcode", systemImage: "qrcode.viewfinder")
             }
             Button {
+                Haptics.tap()
                 PluginActions.shared.runAction("setBool:isShowingImagePicker=true")
             } label: {
                 Label("Import From Photo", systemImage: "photo.on.rectangle")

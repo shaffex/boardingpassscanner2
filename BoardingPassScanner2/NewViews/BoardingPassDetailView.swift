@@ -55,6 +55,7 @@ struct BoardingPassDetailView: View {
         .alert("Warning", isPresented: $showDeleteAlert) {
             Button("No", role: .cancel) {}
             Button("Yes", role: .destructive) {
+                Haptics.success()
                 BoardingPassStore.shared.delete(record)
                 dismiss()
             }
@@ -203,8 +204,10 @@ struct BoardingPassDetailView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(DetailActionButtonStyle())
+            .hapticTap()
 
             Button(role: .destructive) {
+                Haptics.warning()
                 showDeleteAlert = true
             } label: {
                 Label("Delete", systemImage: "trash")
@@ -216,6 +219,7 @@ struct BoardingPassDetailView: View {
 
     private var decodedDataButton: some View {
         Button {
+            Haptics.tap()
             showDecodedSheet = true
         } label: {
             HStack(spacing: 12) {

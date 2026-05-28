@@ -126,7 +126,10 @@ private struct AppBannerView: View {
 
             Spacer(minLength: 8)
 
-            Button(action: onDismiss) {
+            Button {
+                Haptics.tap()
+                onDismiss()
+            } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(.secondary)

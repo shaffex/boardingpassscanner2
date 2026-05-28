@@ -37,6 +37,7 @@ struct ToolsView: View {
                 }
 
                 Button {
+                    Haptics.tap()
                     checkForUpdate()
                 } label: {
                     HStack {
