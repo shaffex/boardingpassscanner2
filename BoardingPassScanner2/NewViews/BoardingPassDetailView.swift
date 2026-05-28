@@ -20,6 +20,10 @@ struct BoardingPassDetailView: View {
     @State private var showDeleteAlert = false
     @State private var isAddingToWallet = false
     @State private var showWalletSpinner = false
+    @State private var passForegroundColor: Color = .white
+    @State private var passBackgroundColor: Color = Color(red: 0.10, green: 0.22, blue: 0.45)
+    @State private var passLabelColor: Color = Color(red: 0.85, green: 0.88, blue: 0.95)
+    @State private var passSemanticsEnabled: Bool = false
 
     var body: some View {
         ZStack {
@@ -34,6 +38,7 @@ struct BoardingPassDetailView: View {
                         if debugMode {
                             walletDebugPanel
                         }
+                        customizePanel
                         walletButton
                     }
                     actionButtons
@@ -95,10 +100,6 @@ struct BoardingPassDetailView: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("BOARDING PASS")
-                        .font(.system(.caption, design: .monospaced, weight: .bold))
-                        .tracking(3)
-                        .foregroundStyle(.black.opacity(0.55))
                     Text(displayValue(record.name))
                         .font(.title3.weight(.bold))
                         .foregroundStyle(.black)
@@ -129,6 +130,59 @@ struct BoardingPassDetailView: View {
         }
         .padding(22)
         .background(.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    private var customizePanel: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Label("Customize", systemImage: "paintpalette")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(primaryText)
+
+            HStack {
+                Text("Foreground")
+                    .font(.subheadline)
+                    .foregroundStyle(primaryText)
+                Spacer()
+                ColorPicker("", selection: $passForegroundColor, supportsOpacity: false)
+                    .labelsHidden()
+            }
+
+            HStack {
+                Text("Background")
+                    .font(.subheadline)
+                    .foregroundStyle(primaryText)
+                Spacer()
+                ColorPicker("", selection: $passBackgroundColor, supportsOpacity: false)
+                    .labelsHidden()
+            }
+
+            HStack {
+                Text("Label")
+                    .font(.subheadline)
+                    .foregroundStyle(primaryText)
+                Spacer()
+                ColorPicker("", selection: $passLabelColor, supportsOpacity: false)
+                    .labelsHidden()
+            }
+
+            Toggle(isOn: $passSemanticsEnabled) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Semantics")
+                        .font(.subheadline)
+                        .foregroundStyle(primaryText)
+                    Text("Enable live Apple tracking")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(panelBackground, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(panelStroke, lineWidth: 1)
+        }
     }
 
     private var walletButton: some View {
@@ -166,7 +220,13 @@ struct BoardingPassDetailView: View {
                 }
             }
 
-            await Action_addPass.presentForRecord(record)
+            await Action_addPass.presentForRecord(
+                record,
+                foregroundColor: passForegroundColor.passKitRgbString,
+                backgroundColor: passBackgroundColor.passKitRgbString,
+                labelColor: passLabelColor.passKitRgbString,
+                semantics: passSemanticsEnabled
+            )
             spinnerTask.cancel()
 
             await MainActor.run {
@@ -182,7 +242,13 @@ struct BoardingPassDetailView: View {
                 .font(.headline.weight(.semibold))
                 .foregroundStyle(primaryText)
 
-            Text(Action_addPass.requestDebugDescription(for: record))
+            Text(Action_addPass.requestDebugDescription(
+                for: record,
+                foregroundColor: passForegroundColor.passKitRgbString,
+                backgroundColor: passBackgroundColor.passKitRgbString,
+                labelColor: passLabelColor.passKitRgbString,
+                semantics: passSemanticsEnabled
+            ))
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.secondary)
                 .textSelection(.enabled)
@@ -330,6 +396,20 @@ private struct DetailActionButtonStyle: ButtonStyle {
 
     private var buttonStroke: Color {
         colorScheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.08)
+    }
+}
+
+extension Color {
+    var passKitRgbString: String {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        UIColor(self).getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        let r = Int((red * 255).rounded())
+        let g = Int((green * 255).rounded())
+        let b = Int((blue * 255).rounded())
+        return "rgb(\(r),\(g),\(b))"
     }
 }
 

@@ -81,20 +81,40 @@ struct Action_addPass: SxActionProtocol {
     static let debugFlag = "0"
     static let walletEndpointURLString = "https://shaffex.com/api/boardingpass2/generateBoardingPass.php"
 
-    static func presentForRecord(_ record: BoardingPassRecord) async {
+    static func presentForRecord(
+        _ record: BoardingPassRecord,
+        foregroundColor: String,
+        backgroundColor: String,
+        labelColor: String,
+        semantics: Bool
+    ) async {
         let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
         await Action_addPass(node: nil).presentWallet(
             barcodeText: record.text,
-            flightDate: flightDateString
+            flightDate: flightDateString,
+            foregroundColor: foregroundColor,
+            backgroundColor: backgroundColor,
+            labelColor: labelColor,
+            semantics: semantics
         )
     }
 
-    static func requestDebugDescription(for record: BoardingPassRecord) -> String {
+    static func requestDebugDescription(
+        for record: BoardingPassRecord,
+        foregroundColor: String,
+        backgroundColor: String,
+        labelColor: String,
+        semantics: Bool
+    ) -> String {
         let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
         let fields = requestFields(
             barcodeText: record.text,
             flightDate: flightDateString,
-            debug: Self.debugFlag
+            debug: Self.debugFlag,
+            foregroundColor: foregroundColor,
+            backgroundColor: backgroundColor,
+            labelColor: labelColor,
+            semantics: semantics
         )
         let body = formBodyString(fields) ?? ""
 
@@ -105,6 +125,10 @@ struct Action_addPass: SxActionProtocol {
         barcodeText=\(fields["barcodeText"] ?? "")
         flightDate=\(fields["flightDate"] ?? "")
         debug=\(fields["debug"] ?? "")
+        foregroundColor=\(fields["foregroundColor"] ?? "")
+        backgroundColor=\(fields["backgroundColor"] ?? "")
+        labelColor=\(fields["labelColor"] ?? "")
+        semantics=\(fields["semantics"] ?? "")
 
         Body:
         \(body)
@@ -115,7 +139,11 @@ struct Action_addPass: SxActionProtocol {
         Task {
             await presentWallet(
                 barcodeText: SxMagicVariables.shared.value(forKey: "selectedCode.text") as? String ?? "",
-                flightDate: SxMagicVariables.shared.value(forKey: "selectedCode.flightDate") as? String ?? ""
+                flightDate: SxMagicVariables.shared.value(forKey: "selectedCode.flightDate") as? String ?? "",
+                foregroundColor: "rgb(255,255,255)",
+                backgroundColor: "rgb(26,56,115)",
+                labelColor: "rgb(217,224,242)",
+                semantics: false
             )
         }
     }
@@ -142,7 +170,14 @@ struct Action_addPass: SxActionProtocol {
 //        }
 //    }
     
-    func presentWallet(barcodeText: String, flightDate: String) async {
+    func presentWallet(
+        barcodeText: String,
+        flightDate: String,
+        foregroundColor: String,
+        backgroundColor: String,
+        labelColor: String,
+        semantics: Bool
+    ) async {
             do {
                 let url = URL(string: Self.walletEndpointURLString)!
                 //let url = URL(string: "https://shaffex.com/api/boardingpass2/Tests/generateBoardingPass.php")!
@@ -152,7 +187,11 @@ struct Action_addPass: SxActionProtocol {
                 request.httpBody = Self.formBody(Self.requestFields(
                     barcodeText: barcodeText,
                     flightDate: flightDate,
-                    debug: Self.debugFlag
+                    debug: Self.debugFlag,
+                    foregroundColor: foregroundColor,
+                    backgroundColor: backgroundColor,
+                    labelColor: labelColor,
+                    semantics: semantics
                 ))
 
                 let (data, _) = try await URLSession.shared.data(for: request)
@@ -190,11 +229,23 @@ struct Action_addPass: SxActionProtocol {
         }
     }
 
-    static func requestFields(barcodeText: String, flightDate: String, debug: String) -> [String: String] {
+    static func requestFields(
+        barcodeText: String,
+        flightDate: String,
+        debug: String,
+        foregroundColor: String,
+        backgroundColor: String,
+        labelColor: String,
+        semantics: Bool
+    ) -> [String: String] {
         [
             "barcodeText": barcodeText,
             "flightDate": flightDate,
-            "debug": debug
+            "debug": debug,
+            "foregroundColor": foregroundColor,
+            "backgroundColor": backgroundColor,
+            "labelColor": labelColor,
+            "semantics": semantics ? "true" : "false"
         ]
     }
 

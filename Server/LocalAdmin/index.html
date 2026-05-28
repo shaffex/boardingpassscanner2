@@ -208,6 +208,26 @@
       box-shadow: 0 0 0 3px rgba(15, 118, 110, .16);
     }
 
+    input[type="color"] {
+      height: 44px;
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+      border: 0;
+      border-radius: 5px;
+    }
+
+    input[type="color"]::-moz-color-swatch {
+      border: 0;
+      border-radius: 5px;
+    }
+
     textarea {
       min-height: 92px;
       resize: vertical;
@@ -312,6 +332,47 @@
       color: #344054;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       font-size: 13px;
+    }
+
+    .params-preview {
+      margin-bottom: 14px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .params-preview table {
+      min-width: 0;
+    }
+
+    .params-preview th,
+    .params-preview td {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .params-preview th {
+      width: 132px;
+    }
+
+    .advanced-options {
+      margin-bottom: 14px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #ffffff;
+    }
+
+    .advanced-options summary {
+      padding: 10px 12px;
+      cursor: pointer;
+      color: #344054;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .advanced-options-body {
+      padding: 0 12px 12px;
     }
 
     pre {
@@ -613,35 +674,71 @@
         <section class="panel" aria-labelledby="boardingpass-title">
           <div class="panel-header">
             <h2 id="boardingpass-title">Generate Boarding Pass</h2>
-            <span class="status-pill" id="boardingPassModeLabel">Test endpoint</span>
+            <span class="status-pill" id="boardingPassModeLabel">Production endpoint</span>
           </div>
           <div class="panel-body">
-            <p class="source-note">POSTs a mock barcode to <code>generateBoardingPassTest.php</code> with the flight code + date you supply. Passenger / PNR / seat are mocked. Toggle debug to receive the script's trace instead of downloading the .pkpass.</p>
+            <p class="source-note">POSTs barcode text and flight date to <code>generateBoardingPass.php</code>. Toggle debug to receive the script's trace instead of downloading the .pkpass.</p>
 
             <form id="boardingPassForm">
-              <div class="grid">
-                <div class="field">
-                  <label for="bpFlightCode">Flight code</label>
-                  <input id="bpFlightCode" value="LY546" autocomplete="off" placeholder="LY546">
-                  <span>Carrier + flight number combined, e.g. LY546 or FR0287. Used as a debug override and to build the mock barcode when the field below is empty.</span>
-                </div>
-                <div class="field">
-                  <label for="bpDate">Flight date</label>
-                  <input id="bpDate" type="date" value="2026-05-11">
-                </div>
+              <div class="field">
+                <label for="bpDate">Flight date</label>
+                <input id="bpDate" type="date">
+                <span>Sent as <code>flightDate</code>.</span>
               </div>
 
               <div class="field">
                 <label for="bpBarcodeText">Barcode text</label>
                 <textarea id="bpBarcodeText" spellcheck="false">M1HOSSOVA/DANA         UIQDKI TATLTNW9 5458 139Y035D0018 100</textarea>
-                <span>Sent as <code>barcodeText</code>. Clear to fall back to a mock built from the flight code above.</span>
+                <span>Sent as <code>barcodeText</code>.</span>
               </div>
+
+              <div class="field">
+                <label for="bpBarcodeType">Barcode type</label>
+                <select id="bpBarcodeType">
+                  <option value="pdf417" selected>PDF417</option>
+                  <option value="qr">QR</option>
+                  <option value="aztec">Aztec</option>
+                </select>
+                <span>Sent as <code>barcodeType</code>. Accepted values are <code>pdf417</code>, <code>qr</code>, and <code>aztec</code>.</span>
+              </div>
+
+              <details class="advanced-options" id="bpColorOptions">
+                <summary>Pass colors</summary>
+                <div class="advanced-options-body">
+                  <div class="grid">
+                    <div class="field">
+                      <label for="bpForegroundColor">Foreground color</label>
+                      <input id="bpForegroundColor" type="color" value="#ffffff">
+                      <span>Optional. Sent as <code>foregroundColor</code>; default is <code>rgb(255,255,255)</code>.</span>
+                    </div>
+                    <div class="field">
+                      <label for="bpBackgroundColor">Background color</label>
+                      <input id="bpBackgroundColor" type="color" value="#073590">
+                      <span>Optional. Sent as <code>backgroundColor</code>; default is <code>rgb(7,53,144)</code>.</span>
+                    </div>
+                    <div class="field">
+                      <label for="bpLabelColor">Label color</label>
+                      <input id="bpLabelColor" type="color" value="#ffffff">
+                      <span>Optional. Sent as <code>labelColor</code>; default is <code>rgb(255,255,255)</code>.</span>
+                    </div>
+                  </div>
+                </div>
+              </details>
 
               <div class="field">
                 <label style="font-weight: 400; display: flex; gap: 8px; align-items: center;">
                   <input type="checkbox" id="bpDebug" style="width: auto;" checked>
                   <span style="color: var(--text); font-size: 13px;">Debug mode &mdash; show server trace instead of downloading the .pkpass</span>
                 </label>
+                <span>Sent as <code>debug</code> when checked.</span>
+              </div>
+
+              <div class="field">
+                <label style="font-weight: 400; display: flex; gap: 8px; align-items: center;">
+                  <input type="checkbox" id="bpSemantics" style="width: auto;" checked>
+                  <span style="color: var(--text); font-size: 13px;">Semantics &mdash; fill semantic boarding pass data instead of generating only a generic pass</span>
+                </label>
+                <span>Sent as <code>semantics</code>. Supported from iOS 26.</span>
               </div>
 
               <div class="actions">
@@ -663,6 +760,17 @@
             <div class="request-line">
               <span class="method">POST</span>
               <span class="url" id="boardingPassUrl"></span>
+            </div>
+            <div class="params-preview" aria-label="POST parameters">
+              <table>
+                <thead>
+                  <tr>
+                    <th>POST param</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody id="boardingPassParams"></tbody>
+              </table>
             </div>
             <pre id="boardingPassOutput">Submit to see the trace or download the .pkpass.</pre>
           </div>
@@ -690,12 +798,18 @@
       apiPanel: document.getElementById("apiPanel"),
       departuresPanel: document.getElementById("departuresPanel"),
       boardingPassPanel: document.getElementById("boardingPassPanel"),
-      bpFlightCode: document.getElementById("bpFlightCode"),
       bpDate: document.getElementById("bpDate"),
       bpBarcodeText: document.getElementById("bpBarcodeText"),
+      bpBarcodeType: document.getElementById("bpBarcodeType"),
+      bpForegroundColor: document.getElementById("bpForegroundColor"),
+      bpBackgroundColor: document.getElementById("bpBackgroundColor"),
+      bpLabelColor: document.getElementById("bpLabelColor"),
+      bpColorOptions: document.getElementById("bpColorOptions"),
       bpDebug: document.getElementById("bpDebug"),
+      bpSemantics: document.getElementById("bpSemantics"),
       boardingPassForm: document.getElementById("boardingPassForm"),
       boardingPassUrl: document.getElementById("boardingPassUrl"),
+      boardingPassParams: document.getElementById("boardingPassParams"),
       boardingPassOutput: document.getElementById("boardingPassOutput"),
       boardingPassStatus: document.getElementById("boardingPassStatus"),
       boardingPassStatusPill: document.getElementById("boardingPassStatusPill"),
@@ -1082,6 +1196,12 @@
       return String(dayOfYear).padStart(3, "0");
     }
 
+    function todayIsoDate() {
+      const now = new Date();
+      const offsetMs = now.getTimezoneOffset() * 60000;
+      return new Date(now.getTime() - offsetMs).toISOString().slice(0, 10);
+    }
+
     // Mock BCBP — passenger/PNR/seat/airports are placeholders; only the
     // flight code and julian date are user-driven. Total length = 60 chars.
     function buildMockBarcode(flightCode, isoDate) {
@@ -1109,16 +1229,80 @@
 
     function buildBoardingPassUrl() {
       const baseUrl = normalizeBaseUrl(nodes.baseUrl.value);
-      const url = new URL(`${baseUrl}/generateBoardingPassTest.php`);
-      if (nodes.bpDebug.checked) {
-        url.searchParams.set("debug", "1");
+      return new URL(`${baseUrl}/generateBoardingPass.php`).toString();
+    }
+
+    function getBoardingPassBarcode() {
+      const typed = nodes.bpBarcodeText.value;
+      if (typed.trim()) {
+        return { value: typed, source: "typed" };
       }
-      return url.toString();
+      return { value: "", source: "missing" };
+    }
+
+    function hexToRgbColor(hex) {
+      const clean = hex.replace("#", "");
+      const red = parseInt(clean.slice(0, 2), 16);
+      const green = parseInt(clean.slice(2, 4), 16);
+      const blue = parseInt(clean.slice(4, 6), 16);
+      return `rgb(${red},${green},${blue})`;
+    }
+
+    function getBoardingPassColors() {
+      if (!nodes.bpColorOptions.open) {
+        return {};
+      }
+      return {
+        foregroundColor: hexToRgbColor(nodes.bpForegroundColor.value),
+        backgroundColor: hexToRgbColor(nodes.bpBackgroundColor.value),
+        labelColor: hexToRgbColor(nodes.bpLabelColor.value)
+      };
+    }
+
+    function buildBoardingPassBody(barcode, date, barcodeType, debug, semantics, colors) {
+      const body = new URLSearchParams({
+        barcodeText: barcode,
+        flightDate:  date,
+        barcodeType,
+        semantics: semantics ? "1" : "0"
+      });
+      for (const [name, value] of Object.entries(colors)) {
+        if (value) {
+          body.set(name, value);
+        }
+      }
+      if (debug) {
+        body.set("debug", "1");
+      }
+      return body;
+    }
+
+    function renderBoardingPassParams(body) {
+      const rows = Array.from(body.entries()).map(([name, value]) => {
+        const row = document.createElement("tr");
+        const nameCell = document.createElement("th");
+        const valueCell = document.createElement("td");
+        nameCell.scope = "row";
+        nameCell.textContent = name;
+        valueCell.textContent = value || "(empty)";
+        row.append(nameCell, valueCell);
+        return row;
+      });
+      nodes.boardingPassParams.replaceChildren(...rows);
     }
 
     function updateBoardingPassPreview() {
       try {
         nodes.boardingPassUrl.textContent = buildBoardingPassUrl();
+        const barcode = getBoardingPassBarcode();
+        renderBoardingPassParams(buildBoardingPassBody(
+          barcode.value,
+          nodes.bpDate.value,
+          nodes.bpBarcodeType.value,
+          nodes.bpDebug.checked,
+          nodes.bpSemantics.checked,
+          getBoardingPassColors()
+        ));
       } catch (error) {
         nodes.boardingPassUrl.textContent = "Invalid base URL";
       }
@@ -1132,10 +1316,11 @@
 
     async function submitBoardingPass(event) {
       event.preventDefault();
-      const flightCode = nodes.bpFlightCode.value.trim().toUpperCase();
       const date       = nodes.bpDate.value;
+      const barcodeType = nodes.bpBarcodeType.value;
       const debug      = nodes.bpDebug.checked;
-      const typed      = nodes.bpBarcodeText.value;
+      const semantics  = nodes.bpSemantics.checked;
+      const colors     = getBoardingPassColors();
 
       if (!date) {
         setBoardingPassStatus("Missing inputs", "error");
@@ -1143,24 +1328,11 @@
         return;
       }
 
-      let barcode;
-      let barcodeSource;
-      if (typed.trim()) {
-        barcode = typed;
-        barcodeSource = "typed";
-      } else {
-        if (!flightCode) {
-          setBoardingPassStatus("Missing inputs", "error");
-          nodes.boardingPassStatus.textContent = "Provide a barcode text, or a flight code to build a mock from.";
-          return;
-        }
-        barcode = buildMockBarcode(flightCode, date);
-        if (!barcode) {
-          setBoardingPassStatus("Bad flight code", "error");
-          nodes.boardingPassStatus.textContent = "Flight code must look like LY546 or FR0287.";
-          return;
-        }
-        barcodeSource = "mock";
+      const barcode = getBoardingPassBarcode();
+      if (barcode.source === "missing") {
+        setBoardingPassStatus("Missing inputs", "error");
+        nodes.boardingPassStatus.textContent = "Barcode text is required.";
+        return;
       }
 
       const url = buildBoardingPassUrl();
@@ -1169,10 +1341,8 @@
       setBoardingPassStatus("Sending", "");
       nodes.boardingPassStatus.textContent = "Request in progress.";
 
-      const body = new URLSearchParams({
-        barcodeText: barcode,
-        flightDate:  date
-      });
+      const body = buildBoardingPassBody(barcode.value, date, barcodeType, debug, semantics, colors);
+      renderBoardingPassParams(body);
 
       const startedAt = performance.now();
       try {
@@ -1189,7 +1359,7 @@
           const text = await response.text();
           nodes.boardingPassOutput.textContent = text || "(empty response)";
           setBoardingPassStatus(`${response.status} ${response.statusText || ""}`.trim(), response.ok ? "ok" : "error");
-          nodes.boardingPassStatus.textContent = `Completed in ${elapsed} ms. Barcode (${barcodeSource}): ${barcode}`;
+          nodes.boardingPassStatus.textContent = `Completed in ${elapsed} ms. Barcode (${barcode.source}): ${barcode.value}`;
           return;
         }
 
@@ -1197,13 +1367,13 @@
         const objectUrl = URL.createObjectURL(blob);
         const anchor = document.createElement("a");
         anchor.href = objectUrl;
-        anchor.download = `${flightCode}-${date}.pkpass`;
+        anchor.download = `boarding-pass-${date}.pkpass`;
         document.body.appendChild(anchor);
         anchor.click();
         document.body.removeChild(anchor);
         setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 
-        nodes.boardingPassOutput.textContent = `Downloaded ${flightCode}-${date}.pkpass (${blob.size} bytes, ${contentType || "no content-type"}).\nBarcode (${barcodeSource}) used: ${barcode}`;
+        nodes.boardingPassOutput.textContent = `Downloaded boarding-pass-${date}.pkpass (${blob.size} bytes, ${contentType || "no content-type"}).\nBarcode (${barcode.source}) used: ${barcode.value}`;
         setBoardingPassStatus(`${response.status} ${response.statusText || ""}`.trim(), "ok");
         nodes.boardingPassStatus.textContent = `Completed in ${elapsed} ms.`;
       } catch (error) {
@@ -1226,10 +1396,22 @@
       setBoardingPassStatus("Not sent", "");
       nodes.boardingPassStatus.textContent = "Ready.";
     });
-    for (const input of [nodes.bpFlightCode, nodes.bpDate, nodes.bpDebug, nodes.baseUrl]) {
+    nodes.bpDate.value = todayIsoDate();
+    for (const input of [
+      nodes.bpDate,
+      nodes.bpBarcodeText,
+      nodes.bpBarcodeType,
+      nodes.bpForegroundColor,
+      nodes.bpBackgroundColor,
+      nodes.bpLabelColor,
+      nodes.bpDebug,
+      nodes.bpSemantics,
+      nodes.baseUrl
+    ]) {
       input.addEventListener("input", updateBoardingPassPreview);
       input.addEventListener("change", updateBoardingPassPreview);
     }
+    nodes.bpColorOptions.addEventListener("toggle", updateBoardingPassPreview);
     updateBoardingPassPreview();
     nodes.flightCodeMode.addEventListener("click", () => setMode("flightCode"));
     nodes.carrierMode.addEventListener("click", () => setMode("carrier"));

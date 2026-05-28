@@ -46,6 +46,7 @@ struct BoardingPassCard: View {
                 .stroke(cardStroke, lineWidth: 1)
         }
         .shadow(color: shadowColor, radius: 18, x: 0, y: 10)
+        .dynamicTypeSize(...DynamicTypeSize.xxLarge)
     }
 
     private var header: some View {
@@ -88,33 +89,53 @@ struct BoardingPassCard: View {
     }
 
     private var route: some View {
-        HStack(alignment: .center) {
-            airportBlock(code: record.fromAirport, city: fromAirportCity, alignment: .leading)
+        VStack(spacing: 4) {
+            HStack(spacing: 8) {
+                airportCode(record.fromAirport)
 
-            Spacer(minLength: style == .compact ? 16 : 18)
+                Spacer(minLength: 8)
 
-            if style == .compact {
-                Image(systemName: "airplane")
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-            } else {
                 HStack(spacing: 8) {
                     Rectangle()
                         .fill(.secondary.opacity(0.55))
-                        .frame(width: 36, height: 1)
+                        .frame(width: style == .compact ? 18 : 22, height: 1)
                     Image(systemName: "airplane")
-                        .font(.title3)
+                        .font(.system(size: style == .compact ? 28 : 32, weight: .regular))
                         .foregroundStyle(.secondary)
                     Rectangle()
                         .fill(.secondary.opacity(0.55))
-                        .frame(width: 36, height: 1)
+                        .frame(width: style == .compact ? 18 : 22, height: 1)
                 }
+
+                Spacer(minLength: 8)
+
+                airportCode(destinationAirportCode)
             }
 
-            Spacer(minLength: style == .compact ? 16 : 18)
-
-            airportBlock(code: destinationAirportCode, city: destinationAirportCity, alignment: .trailing)
+            HStack(spacing: 8) {
+                cityText(fromAirportCity, alignment: .leading)
+                Spacer(minLength: 8)
+                cityText(destinationAirportCity, alignment: .trailing)
+            }
         }
+    }
+
+    private func airportCode(_ code: String) -> some View {
+        Text(displayValue(code))
+            .font(.system(size: airportCodeSize, weight: .bold, design: .default))
+            .foregroundStyle(primaryText)
+            .minimumScaleFactor(0.75)
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
+    }
+
+    private func cityText(_ city: String, alignment: HorizontalAlignment) -> some View {
+        Text(displayValue(city))
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .frame(alignment: alignment == .leading ? .leading : .trailing)
     }
 
     private var details: some View {
@@ -170,10 +191,6 @@ struct BoardingPassCard: View {
 
     private var airportCodeSize: CGFloat {
         style == .compact ? 34 : 38
-    }
-
-    private var airportMinWidth: CGFloat {
-        style == .compact ? 82 : 86
     }
 
     private var flightCode: String {
@@ -263,21 +280,6 @@ struct BoardingPassCard: View {
         .background(Color.cyan.opacity(colorScheme == .dark ? 0.1 : 0.08), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
     }
 
-    private func airportBlock(code: String, city: String, alignment: HorizontalAlignment) -> some View {
-        VStack(alignment: alignment, spacing: 4) {
-            Text(displayValue(code))
-                .font(.system(size: airportCodeSize, weight: .bold, design: .default))
-                .foregroundStyle(primaryText)
-                .minimumScaleFactor(0.75)
-                .lineLimit(1)
-            Text(displayValue(city))
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-        }
-        .frame(minWidth: airportMinWidth, alignment: alignment == .leading ? .leading : .trailing)
-    }
-
     private func detailBlock(title: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: style == .compact ? 5 : 6) {
             Text(title)
@@ -304,3 +306,4 @@ struct BoardingPassCard: View {
         return "\(number)\(trimmed.dropFirst(digits.count))"
     }
 }
+
