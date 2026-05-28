@@ -692,6 +692,16 @@
                 <span>Sent as <code>barcodeText</code>.</span>
               </div>
 
+              <div class="field">
+                <label for="bpBarcodeType">Barcode type</label>
+                <select id="bpBarcodeType">
+                  <option value="pdf417" selected>PDF417</option>
+                  <option value="qr">QR</option>
+                  <option value="aztec">Aztec</option>
+                </select>
+                <span>Sent as <code>barcodeType</code>. Accepted values are <code>pdf417</code>, <code>qr</code>, and <code>aztec</code>.</span>
+              </div>
+
               <details class="advanced-options" id="bpColorOptions">
                 <summary>Pass colors</summary>
                 <div class="advanced-options-body">
@@ -790,6 +800,7 @@
       boardingPassPanel: document.getElementById("boardingPassPanel"),
       bpDate: document.getElementById("bpDate"),
       bpBarcodeText: document.getElementById("bpBarcodeText"),
+      bpBarcodeType: document.getElementById("bpBarcodeType"),
       bpForegroundColor: document.getElementById("bpForegroundColor"),
       bpBackgroundColor: document.getElementById("bpBackgroundColor"),
       bpLabelColor: document.getElementById("bpLabelColor"),
@@ -1248,10 +1259,11 @@
       };
     }
 
-    function buildBoardingPassBody(barcode, date, debug, semantics, colors) {
+    function buildBoardingPassBody(barcode, date, barcodeType, debug, semantics, colors) {
       const body = new URLSearchParams({
         barcodeText: barcode,
         flightDate:  date,
+        barcodeType,
         semantics: semantics ? "1" : "0"
       });
       for (const [name, value] of Object.entries(colors)) {
@@ -1286,6 +1298,7 @@
         renderBoardingPassParams(buildBoardingPassBody(
           barcode.value,
           nodes.bpDate.value,
+          nodes.bpBarcodeType.value,
           nodes.bpDebug.checked,
           nodes.bpSemantics.checked,
           getBoardingPassColors()
@@ -1304,6 +1317,7 @@
     async function submitBoardingPass(event) {
       event.preventDefault();
       const date       = nodes.bpDate.value;
+      const barcodeType = nodes.bpBarcodeType.value;
       const debug      = nodes.bpDebug.checked;
       const semantics  = nodes.bpSemantics.checked;
       const colors     = getBoardingPassColors();
@@ -1327,7 +1341,7 @@
       setBoardingPassStatus("Sending", "");
       nodes.boardingPassStatus.textContent = "Request in progress.";
 
-      const body = buildBoardingPassBody(barcode.value, date, debug, semantics, colors);
+      const body = buildBoardingPassBody(barcode.value, date, barcodeType, debug, semantics, colors);
       renderBoardingPassParams(body);
 
       const startedAt = performance.now();
@@ -1386,6 +1400,7 @@
     for (const input of [
       nodes.bpDate,
       nodes.bpBarcodeText,
+      nodes.bpBarcodeType,
       nodes.bpForegroundColor,
       nodes.bpBackgroundColor,
       nodes.bpLabelColor,
