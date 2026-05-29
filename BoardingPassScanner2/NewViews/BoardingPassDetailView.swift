@@ -29,30 +29,28 @@ struct BoardingPassDetailView: View {
     @AppStorage("passFieldsConfigJSON") private var passFieldsConfigJSON: String = ""
 
     var body: some View {
-        ZStack {
-            screenBackground.ignoresSafeArea()
-
-            ScrollView {
-                VStack(spacing: 26) {
-                    barcodeCard
-                    BoardingPassCard(record: record)
-                    tripDetails
-                    // KOKOCE: remove || true
-                    if isUpcomingBoardingPass || true {
-                        if debugMode {
-                            walletDebugPanel
-                        }
-                        customizePanel
-                        walletButton
+        ScrollView {
+            VStack(spacing: 26) {
+                barcodeCard
+                BoardingPassCard(record: record)
+                tripDetails
+                // KOKOCE: remove || true
+                if isUpcomingBoardingPass || true {
+                    if debugMode {
+                        walletDebugPanel
                     }
-                    actionButtons
-                    decodedDataButton
+                    customizePanel
+                    walletButton
                 }
-                .padding(.horizontal, 18)
-                .padding(.top, 18)
-                .padding(.bottom, 34)
+                actionButtons
+                decodedDataButton
             }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 18)
+            .padding(.top, 18)
+            .padding(.bottom, 34)
         }
+        .background(screenBackground.ignoresSafeArea())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
@@ -111,44 +109,7 @@ struct BoardingPassDetailView: View {
     }
 
     private var barcodeCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(displayValue(record.name))
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(.black)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.75)
-                }
-
-                Spacer()
-
-                Text(record.type.isEmpty ? "CODE" : record.type.uppercased())
-                    .font(.system(.caption, design: .monospaced, weight: .bold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 12)
-                    .frame(height: 34)
-                    .background(.black, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            }
-            
-            Color.clear
-                .frame(maxWidth: .infinity, minHeight: 132)
-                .overlay {
-                    SxView_BarCode(barCodeType: record.type, barcodeText: record.text, foregroundColor: .black, backgroundColor: .white)
-                }
-
-            Text(record.text)
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(.black.opacity(0.58))
-                .lineLimit(2)
-                .truncationMode(.middle)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity)
-        }
-        .padding(22)
-        .frame(maxWidth: .infinity)
-        .background(.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        BarcodeCard(record: record)
     }
 
     private var customizePanel: some View {

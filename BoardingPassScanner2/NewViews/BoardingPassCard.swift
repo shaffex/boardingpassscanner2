@@ -34,6 +34,7 @@ struct BoardingPassCard: View {
             details
         }
         .padding(cardPadding)
+        .frame(maxWidth: .infinity)
         .background(cardBackground, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .overlay(alignment: .leading) {
             RoundedRectangle(cornerRadius: 3, style: .continuous)
