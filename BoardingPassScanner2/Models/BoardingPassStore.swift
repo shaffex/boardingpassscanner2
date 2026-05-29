@@ -75,6 +75,13 @@ final class BoardingPassStore {
         return record
     }
 
+    func updateFlightYear(_ year: Int, for record: BoardingPassRecord) {
+        BoardingPassParseCache.shared.invalidate(text: record.text)
+        record.flightDateYear = year
+        save()
+        BoardingPassParseCache.shared.warm(text: record.text, flightDateYear: year > 0 ? year : nil)
+    }
+
     func delete(_ record: BoardingPassRecord) {
         let text = record.text
         context.delete(record)

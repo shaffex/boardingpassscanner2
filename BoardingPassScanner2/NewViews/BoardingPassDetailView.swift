@@ -25,6 +25,7 @@ struct BoardingPassDetailView: View {
     @State private var passLabelColor: Color = Color(red: 0.85, green: 0.88, blue: 0.95)
     @State private var passSemanticsEnabled: Bool = false
     @State private var showFieldsEditor = false
+    @State private var showYearInfo = false
 
     @AppStorage("passFieldsConfigJSON") private var passFieldsConfigJSON: String = ""
 
@@ -92,12 +93,19 @@ struct BoardingPassDetailView: View {
     }
 
     private var tripDetails: some View {
-        HStack {
-            detailBlock(title: "DEPARTURE", value: departureTime)
-            Spacer()
-            detailBlock(title: "DATE", value: dateText)
-            Spacer()
-            detailBlock(title: "DAY", value: dayText)
+        VStack(spacing: 16) {
+            HStack {
+                detailBlock(title: "DEPARTURE", value: departureTime)
+                Spacer()
+                detailBlock(title: "DATE", value: dateText)
+                Spacer()
+                detailBlock(title: "DAY", value: dayText)
+            }
+
+            Divider()
+                .overlay(panelStroke)
+
+            yearRow
         }
         .padding(22)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -105,6 +113,75 @@ struct BoardingPassDetailView: View {
         .overlay {
             RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .stroke(panelStroke, lineWidth: 1)
+        }
+        .sheet(isPresented: $showYearInfo) {
+            VStack(alignment: .leading, spacing: 14) {
+                Label("About the flight year", systemImage: "calendar.badge.exclamationmark")
+                    .font(.headline.weight(.semibold))
+
+                Text("BCBP barcodes encode the flight date as a **Julian day** (day of the year, e.g. 131 = May 11) but do **not** include the year.")
+                    .font(.subheadline)
+
+                Text("The app picks the most likely year automatically — correct for recent boarding passes. If you scanned an older pass, tap **‹** or **›** to set the right year.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .presentationDetents([.fraction(0.38)])
+            .presentationDragIndicator(.visible)
+        }
+    }
+
+    private var yearRow: some View {
+        HStack(spacing: 0) {
+            Text("YEAR")
+                .font(.system(.caption, design: .monospaced, weight: .bold))
+                .tracking(3)
+                .foregroundStyle(.secondary)
+
+            Spacer()
+
+            HStack(spacing: 4) {
+                Button {
+                    adjustYear(-1)
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(primaryText)
+                        .frame(width: 32, height: 32)
+                        .background(panelStroke.opacity(0.8), in: Circle())
+                }
+                .buttonStyle(.plain)
+
+                Text("\(currentFlightYear)")
+                    .font(.system(.title3, design: .rounded, weight: .bold))
+                    .foregroundStyle(primaryText)
+                    .frame(minWidth: 52)
+                    .multilineTextAlignment(.center)
+
+                Button {
+                    adjustYear(1)
+                } label: {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(primaryText)
+                        .frame(width: 32, height: 32)
+                        .background(panelStroke.opacity(0.8), in: Circle())
+                }
+                .buttonStyle(.plain)
+            }
+
+            Button {
+                showYearInfo = true
+            } label: {
+                Image(systemName: "info.circle")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 32, height: 32)
+            }
+            .buttonStyle(.plain)
+            .padding(.leading, 8)
         }
     }
 
@@ -369,6 +446,20 @@ struct BoardingPassDetailView: View {
 
     private var dayText: String {
         record.flightDate.formatted(.dateTime.weekday(.abbreviated))
+    }
+
+    private var currentFlightYear: Int {
+        if record.flightDateYear > 0 { return record.flightDateYear }
+        let date = record.flightDate
+        guard date != .distantPast else { return Calendar.current.component(.year, from: .now) }
+        return Calendar.current.component(.year, from: date)
+    }
+
+    private func adjustYear(_ delta: Int) {
+        Haptics.tap()
+        let newYear = currentFlightYear + delta
+        guard newYear >= 2000, newYear <= 2100 else { return }
+        BoardingPassStore.shared.updateFlightYear(newYear, for: record)
     }
 
     private func detailBlock(title: String, value: String) -> some View {
