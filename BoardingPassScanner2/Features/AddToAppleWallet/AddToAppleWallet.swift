@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PassKit
+internal import PassKit
 import MagicUiFramework
 
 struct AddToWalletButton: UIViewRepresentable {
@@ -80,13 +80,16 @@ struct Action_addPass: SxActionProtocol {
 
     static let debugFlag = "0"
     static let walletEndpointURLString = "https://shaffex.com/api/boardingpass2/generateBoardingPass.php"
+    static let customWalletEndpointURLString = "https://shaffex.com/api/boardingpass2/generateCustomBoardingPass.php"
 
-    static func presentForRecord(
+    static func presentCustomForRecord(
         _ record: BoardingPassRecord,
         foregroundColor: String,
         backgroundColor: String,
         labelColor: String,
-        semantics: Bool
+        semantics: Bool,
+        logoText: String,
+        fieldsJSON: String
     ) async {
         let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
         await Action_addPass(node: nil).presentWallet(
@@ -95,7 +98,32 @@ struct Action_addPass: SxActionProtocol {
             foregroundColor: foregroundColor,
             backgroundColor: backgroundColor,
             labelColor: labelColor,
-            semantics: semantics
+            semantics: semantics,
+            logoText: logoText,
+            fieldsJSON: fieldsJSON,
+            endpointURL: URL(string: customWalletEndpointURLString)
+        )
+    }
+
+    static func presentForRecord(
+        _ record: BoardingPassRecord,
+        foregroundColor: String,
+        backgroundColor: String,
+        labelColor: String,
+        semantics: Bool,
+        logoText: String,
+        fieldsJSON: String
+    ) async {
+        let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
+        await Action_addPass(node: nil).presentWallet(
+            barcodeText: record.text,
+            flightDate: flightDateString,
+            foregroundColor: foregroundColor,
+            backgroundColor: backgroundColor,
+            labelColor: labelColor,
+            semantics: semantics,
+            logoText: logoText,
+            fieldsJSON: fieldsJSON
         )
     }
 
@@ -104,7 +132,9 @@ struct Action_addPass: SxActionProtocol {
         foregroundColor: String,
         backgroundColor: String,
         labelColor: String,
-        semantics: Bool
+        semantics: Bool,
+        logoText: String,
+        fieldsJSON: String
     ) -> String {
         let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
         let fields = requestFields(
@@ -114,7 +144,9 @@ struct Action_addPass: SxActionProtocol {
             foregroundColor: foregroundColor,
             backgroundColor: backgroundColor,
             labelColor: labelColor,
-            semantics: semantics
+            semantics: semantics,
+            logoText: logoText,
+            fieldsJSON: fieldsJSON
         )
         let body = formBodyString(fields) ?? ""
 
@@ -129,6 +161,8 @@ struct Action_addPass: SxActionProtocol {
         backgroundColor=\(fields["backgroundColor"] ?? "")
         labelColor=\(fields["labelColor"] ?? "")
         semantics=\(fields["semantics"] ?? "")
+        logoText=\(fields["logoText"] ?? "")
+        fieldsConfig=\(fields["fieldsConfig"] ?? "")
 
         Body:
         \(body)
@@ -143,7 +177,9 @@ struct Action_addPass: SxActionProtocol {
                 foregroundColor: "rgb(255,255,255)",
                 backgroundColor: "rgb(26,56,115)",
                 labelColor: "rgb(217,224,242)",
-                semantics: false
+                semantics: false,
+                logoText: "",
+                fieldsJSON: "{}"
             )
         }
     }
@@ -176,11 +212,13 @@ struct Action_addPass: SxActionProtocol {
         foregroundColor: String,
         backgroundColor: String,
         labelColor: String,
-        semantics: Bool
+        semantics: Bool,
+        logoText: String,
+        fieldsJSON: String,
+        endpointURL: URL? = nil
     ) async {
             do {
-                let url = URL(string: Self.walletEndpointURLString)!
-                //let url = URL(string: "https://shaffex.com/api/boardingpass2/Tests/generateBoardingPass.php")!
+                let url = endpointURL ?? URL(string: Self.walletEndpointURLString)!
                 var request = URLRequest(url: url)
                 request.httpMethod = "POST"
                 request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
@@ -191,7 +229,9 @@ struct Action_addPass: SxActionProtocol {
                     foregroundColor: foregroundColor,
                     backgroundColor: backgroundColor,
                     labelColor: labelColor,
-                    semantics: semantics
+                    semantics: semantics,
+                    logoText: logoText,
+                    fieldsJSON: fieldsJSON
                 ))
 
                 let (data, _) = try await URLSession.shared.data(for: request)
@@ -236,7 +276,9 @@ struct Action_addPass: SxActionProtocol {
         foregroundColor: String,
         backgroundColor: String,
         labelColor: String,
-        semantics: Bool
+        semantics: Bool,
+        logoText: String,
+        fieldsJSON: String
     ) -> [String: String] {
         [
             "barcodeText": barcodeText,
@@ -245,7 +287,9 @@ struct Action_addPass: SxActionProtocol {
             "foregroundColor": foregroundColor,
             "backgroundColor": backgroundColor,
             "labelColor": labelColor,
-            "semantics": semantics ? "true" : "false"
+            "semantics": semantics ? "true" : "false",
+            "logoText": logoText,
+            "fieldsConfig": fieldsJSON
         ]
     }
 

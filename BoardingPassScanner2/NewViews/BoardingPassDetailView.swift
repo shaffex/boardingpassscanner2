@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PassKit
+internal import PassKit
 import MagicUiFramework
 
 struct BoardingPassDetailView: View {
@@ -24,6 +24,9 @@ struct BoardingPassDetailView: View {
     @State private var passBackgroundColor: Color = Color(red: 0.10, green: 0.22, blue: 0.45)
     @State private var passLabelColor: Color = Color(red: 0.85, green: 0.88, blue: 0.95)
     @State private var passSemanticsEnabled: Bool = false
+    @State private var showFieldsEditor = false
+
+    @AppStorage("passFieldsConfigJSON") private var passFieldsConfigJSON: String = ""
 
     var body: some View {
         ZStack {
@@ -76,6 +79,16 @@ struct BoardingPassDetailView: View {
                         }
                     }
             }
+        }
+        .sheet(isPresented: $showFieldsEditor) {
+            PassFieldsEditorView(
+                config: passFieldsConfigBinding,
+                record: record,
+                foregroundColor: passForegroundColor,
+                backgroundColor: passBackgroundColor,
+                labelColor: passLabelColor,
+                semantics: passSemanticsEnabled
+            )
         }
     }
 
@@ -175,6 +188,23 @@ struct BoardingPassDetailView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+
+            Button {
+                Haptics.tap()
+                showFieldsEditor = true
+            } label: {
+                HStack {
+                    Label("Reorder pass fields", systemImage: "list.bullet.rectangle")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(primaryText)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.vertical, 6)
+            }
+            .buttonStyle(.plain)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -225,7 +255,9 @@ struct BoardingPassDetailView: View {
                 foregroundColor: passForegroundColor.passKitRgbString,
                 backgroundColor: passBackgroundColor.passKitRgbString,
                 labelColor: passLabelColor.passKitRgbString,
-                semantics: passSemanticsEnabled
+                semantics: passSemanticsEnabled,
+                logoText: passFieldsConfig.logoText,
+                fieldsJSON: passFieldsConfig.jsonString(for: record)
             )
             spinnerTask.cancel()
 
@@ -247,7 +279,9 @@ struct BoardingPassDetailView: View {
                 foregroundColor: passForegroundColor.passKitRgbString,
                 backgroundColor: passBackgroundColor.passKitRgbString,
                 labelColor: passLabelColor.passKitRgbString,
-                semantics: passSemanticsEnabled
+                semantics: passSemanticsEnabled,
+                logoText: passFieldsConfig.logoText,
+                fieldsJSON: passFieldsConfig.jsonString(for: record)
             ))
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.secondary)
@@ -316,6 +350,26 @@ struct BoardingPassDetailView: View {
 
     private func refreshDebugMode() {
         debugMode = MagicUiBrisge.isDebugModeEnabled
+    }
+
+    private var passFieldsConfig: PassFieldsConfig {
+        guard let data = passFieldsConfigJSON.data(using: .utf8),
+              let decoded = try? JSONDecoder().decode(PassFieldsConfig.self, from: data) else {
+            return .default
+        }
+        return decoded
+    }
+
+    private var passFieldsConfigBinding: Binding<PassFieldsConfig> {
+        Binding(
+            get: { passFieldsConfig },
+            set: { newValue in
+                if let data = try? JSONEncoder().encode(newValue),
+                   let json = String(data: data, encoding: .utf8) {
+                    passFieldsConfigJSON = json
+                }
+            }
+        )
     }
 
     private var isUpcomingBoardingPass: Bool {
@@ -412,4 +466,3 @@ extension Color {
         return "rgb(\(r),\(g),\(b))"
     }
 }
-

@@ -5,7 +5,7 @@
 //  Created by Peter Popovec on 08/05/2026.
 //
 
-import PassKit
+internal import PassKit
 import MagicUiFramework
 
 struct SxPassKit {
