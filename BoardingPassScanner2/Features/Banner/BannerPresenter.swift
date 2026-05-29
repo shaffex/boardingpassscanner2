@@ -52,7 +52,7 @@ final class BannerPresenter: ObservableObject {
 
     private init() {}
 
-    func show(style: AppBanner.Style, title: String, message: String, duration: TimeInterval = 3.0) {
+    func show(style: AppBanner.Style, title: String, message: String, duration: TimeInterval = 4.0) {
         hideTask?.cancel()
 
         withAnimation(.spring(response: 0.42, dampingFraction: 0.86)) {

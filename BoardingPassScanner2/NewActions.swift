@@ -7,6 +7,7 @@
 
 import Foundation
 import MagicUiFramework
+import SwiftUI
 
 
 struct Action_addNewBoardingPass: SxActionProtocol {
@@ -15,11 +16,10 @@ struct Action_addNewBoardingPass: SxActionProtocol {
     func barcodeType(_ str: String) -> String {
         let type = actionParts(str).first?
             .replacingOccurrences(of: "type:", with: "") ?? ""
-        switch type {
-        case "org.iso.PDF417": return "pdf417"
-        case "org.iso.Aztec": return "aztec"
-        default: return "qr"
-        }
+        if type == "org.iso.PDF417" { return "pdf417" }
+        if type == "org.iso.Aztec" { return "aztec" }
+        if type == "org.iso.QRCode" { return "qr" }
+        return type
     }
 
     func barcodeText(_ str: String) -> String {
@@ -45,6 +45,23 @@ struct Action_addNewBoardingPass: SxActionProtocol {
         }
     }
 
+    private func bannerMessage(for record: BoardingPassRecord) -> String {
+        var parts: [String] = []
+
+        let flight = [record.operatingCarrier, record.flightNumber]
+            .filter { !$0.isEmpty }.joined(separator: " ")
+        if !flight.isEmpty { parts.append(flight) }
+
+        let route = [record.fromAirport, record.toAirport]
+            .filter { !$0.isEmpty }.joined(separator: " → ")
+        if !route.isEmpty { parts.append(route) }
+
+        let date = record.flightDate.formatted(.dateTime.day().month(.abbreviated))
+        parts.append(date)
+
+        return parts.joined(separator: " · ")
+    }
+
     @MainActor
     private func addBoardingPass(text: String, type: String) async {
         let store = BoardingPassStore.shared
@@ -59,8 +76,10 @@ struct Action_addNewBoardingPass: SxActionProtocol {
             return
         }
 
-        if store.insertIfMissing(barcodeText: text, barcodeType: type) != nil {
-            PluginActions.shared.runAction("showBanner:type:success;text:Boarding pass added successfully.")
+        if let record = store.insertIfMissing(barcodeText: text, barcodeType: type) {
+            let title = record.name.isEmpty ? "Boarding pass added" : record.name
+            let message = bannerMessage(for: record)
+            BannerPresenter.shared.show(style: .success, title: title, message: message)
         }
     }
 }

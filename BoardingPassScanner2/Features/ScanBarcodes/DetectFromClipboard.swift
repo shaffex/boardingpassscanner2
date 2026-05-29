@@ -15,7 +15,7 @@ struct DetectFromClipboard {
 
     func detectBarcode(in pasteboard: UIPasteboard, handler: @escaping ((String, String)?, Error?) -> Void) {
         if let text = pasteboard.string, let barcodeText = validBoardingPassText(from: text) {
-            handler((barcodeText, "text"), nil)
+            handler((barcodeText, "pdf417"), nil)
             return
         }
 

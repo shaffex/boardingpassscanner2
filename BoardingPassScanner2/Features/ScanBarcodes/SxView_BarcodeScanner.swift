@@ -143,7 +143,7 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
 
 struct SxView_BarcodeScanner: SxViewProtocol {
     @DynamicNode var node: MagicNode
-    
+
     var body: some View {
         if let key = node.getAttribute("key") {
             BarcodeScannerView(key: key, rectColor: node.getAttribute("rectColor") ?? "red", rectWidth: node.getAttribute("rectWidth")?.convertToDouble() ?? 2.0)

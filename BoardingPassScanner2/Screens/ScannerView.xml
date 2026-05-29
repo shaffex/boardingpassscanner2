@@ -6,8 +6,8 @@
     
     
     <spacer/>
-    <text if="js:'$barcodeObject.text'!=''" foregroundColor="white">Detected text: $barcodeObject.text</text>
-    <text if="js:'$barcodeObject.type'!=''" foregroundColor="orange">Detected text: $barcodeObject.type</text>
+<!--    <text if="js:'$barcodeObject.text'!=''" foregroundColor="white">Detected text: $barcodeObject.text</text>-->
+<!--    <text if="js:'$barcodeObject.type'!=''" foregroundColor="orange">Detected text: $barcodeObject.type</text>-->
     <text if="$isShowingViewFinder" foregroundColor="$settingsViewfinderColor" animationOpacity="animation:linear;duration:1;from:0;to:1;repeatForever:true;autoreverses:true">Scanning</text>
     
     </vstack>

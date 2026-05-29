@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import AVFoundation
 import MagicUiFramework
 
 struct HomeView: View {
@@ -16,6 +17,7 @@ struct HomeView: View {
 
     @State private var selectedUpcomingFlight: SelectedFlight?
     @State private var isDebugModeEnabled = false
+    @State private var showCameraPermissionSheet = false
 
     private var upcomingFlight: BoardingPassRecord? {
         let today = Calendar.current.startOfDay(for: .now)
@@ -57,7 +59,7 @@ struct HomeView: View {
                             description: String(localized: "TEXT_SCAN_BOARDING_DESCRIPTION"),
                             systemImage: "camera.viewfinder"
                         ) {
-                            PluginActions.shared.runAction("presentSheet:item:sheetItem;id:scannerView")
+                            requestCameraAndScan()
                         }
 
                         actionButton(
@@ -100,6 +102,29 @@ struct HomeView: View {
                     BoardingPassDetailView(record: selectedFlight.record)
                 }
             }
+            .sheet(isPresented: $showCameraPermissionSheet) {
+                CameraPermissionDeniedView()
+                    .presentationDetents([.medium])
+            }
+        }
+    }
+
+    private func requestCameraAndScan() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            PluginActions.shared.runAction("presentSheet:item:sheetItem;id:scannerView")
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        PluginActions.shared.runAction("presentSheet:item:sheetItem;id:scannerView")
+                    } else {
+                        showCameraPermissionSheet = true
+                    }
+                }
+            }
+        default:
+            showCameraPermissionSheet = true
         }
     }
 
