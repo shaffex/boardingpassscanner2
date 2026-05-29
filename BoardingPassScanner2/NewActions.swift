@@ -13,8 +13,13 @@ struct Action_addNewBoardingPass: SxActionProtocol {
     let node: MagicNode?
 
     func barcodeType(_ str: String) -> String {
-        actionParts(str).first?
+        let type = actionParts(str).first?
             .replacingOccurrences(of: "type:", with: "") ?? ""
+        switch type {
+        case "org.iso.PDF417": return "pdf417"
+        case "org.iso.Aztec": return "aztec"
+        default: return "qr"
+        }
     }
 
     func barcodeText(_ str: String) -> String {
