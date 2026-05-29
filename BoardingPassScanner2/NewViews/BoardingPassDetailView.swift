@@ -37,7 +37,8 @@ struct BoardingPassDetailView: View {
                     barcodeCard
                     BoardingPassCard(record: record)
                     tripDetails
-                    if isUpcomingBoardingPass {
+                    // KOKOCE: remove || true
+                    if isUpcomingBoardingPass || true {
                         if debugMode {
                             walletDebugPanel
                         }
@@ -129,19 +130,24 @@ struct BoardingPassDetailView: View {
                     .frame(height: 34)
                     .background(.black, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             }
-
-            MagicUiView(string: "<body><barcode barcodeType=\"\(record.type)\">\(record.text)</barcode></body>")
+            
+            Color.clear
                 .frame(maxWidth: .infinity, minHeight: 132)
-                .background(.white)
+                .overlay {
+                    SxView_BarCode(barCodeType: record.type, barcodeText: record.text, foregroundColor: .black, backgroundColor: .white)
+                }
 
             Text(record.text)
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.black.opacity(0.58))
                 .lineLimit(2)
+                .truncationMode(.middle)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity)
         }
         .padding(22)
+        .frame(maxWidth: .infinity)
         .background(.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 

@@ -94,6 +94,7 @@ struct Action_addPass: SxActionProtocol {
         let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
         await Action_addPass(node: nil).presentWallet(
             barcodeText: record.text,
+            barcodeType: record.type,
             flightDate: flightDateString,
             foregroundColor: foregroundColor,
             backgroundColor: backgroundColor,
@@ -117,6 +118,7 @@ struct Action_addPass: SxActionProtocol {
         let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
         await Action_addPass(node: nil).presentWallet(
             barcodeText: record.text,
+            barcodeType: record.type,
             flightDate: flightDateString,
             foregroundColor: foregroundColor,
             backgroundColor: backgroundColor,
@@ -139,6 +141,7 @@ struct Action_addPass: SxActionProtocol {
         let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
         let fields = requestFields(
             barcodeText: record.text,
+            barcodeType: record.type,
             flightDate: flightDateString,
             debug: Self.debugFlag,
             foregroundColor: foregroundColor,
@@ -155,6 +158,7 @@ struct Action_addPass: SxActionProtocol {
         Content-Type: application/x-www-form-urlencoded
 
         barcodeText=\(fields["barcodeText"] ?? "")
+        barcodeType=\(fields["barcodeType"] ?? "")
         flightDate=\(fields["flightDate"] ?? "")
         debug=\(fields["debug"] ?? "")
         foregroundColor=\(fields["foregroundColor"] ?? "")
@@ -173,6 +177,7 @@ struct Action_addPass: SxActionProtocol {
         Task {
             await presentWallet(
                 barcodeText: SxMagicVariables.shared.value(forKey: "selectedCode.text") as? String ?? "",
+                barcodeType: SxMagicVariables.shared.value(forKey: "selectedCode.type") as? String ?? "",
                 flightDate: SxMagicVariables.shared.value(forKey: "selectedCode.flightDate") as? String ?? "",
                 foregroundColor: "rgb(255,255,255)",
                 backgroundColor: "rgb(26,56,115)",
@@ -208,6 +213,7 @@ struct Action_addPass: SxActionProtocol {
     
     func presentWallet(
         barcodeText: String,
+        barcodeType: String,
         flightDate: String,
         foregroundColor: String,
         backgroundColor: String,
@@ -224,6 +230,7 @@ struct Action_addPass: SxActionProtocol {
                 request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
                 request.httpBody = Self.formBody(Self.requestFields(
                     barcodeText: barcodeText,
+                    barcodeType: barcodeType,
                     flightDate: flightDate,
                     debug: Self.debugFlag,
                     foregroundColor: foregroundColor,
@@ -271,6 +278,7 @@ struct Action_addPass: SxActionProtocol {
 
     static func requestFields(
         barcodeText: String,
+        barcodeType: String,
         flightDate: String,
         debug: String,
         foregroundColor: String,
@@ -282,6 +290,7 @@ struct Action_addPass: SxActionProtocol {
     ) -> [String: String] {
         [
             "barcodeText": barcodeText,
+            "barcodeType": barcodeType,
             "flightDate": flightDate,
             "debug": debug,
             "foregroundColor": foregroundColor,
