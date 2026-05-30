@@ -15,6 +15,7 @@ struct PassFieldsEditorView: View {
     let backgroundColor: Color
     let labelColor: Color
     let semantics: Bool
+    var departureTimeOverride: Date? = nil
 
     @Environment(\.dismiss) private var dismiss
     @State private var logoText: String
@@ -32,7 +33,8 @@ struct PassFieldsEditorView: View {
         foregroundColor: Color = .white,
         backgroundColor: Color = Color(red: 0.10, green: 0.22, blue: 0.45),
         labelColor: Color = Color(red: 0.85, green: 0.88, blue: 0.95),
-        semantics: Bool = false
+        semantics: Bool = false,
+        departureTimeOverride: Date? = nil
     ) {
         self._config = config
         self.record = record
@@ -40,6 +42,7 @@ struct PassFieldsEditorView: View {
         self.backgroundColor = backgroundColor
         self.labelColor = labelColor
         self.semantics = semantics
+        self.departureTimeOverride = departureTimeOverride
         let storedLogo = config.wrappedValue.logoText
         let fallbackLogo = record.airlineName.isEmpty ? record.operatingCarrier : record.airlineName
         self._logoText = State(initialValue: storedLogo.isEmpty ? fallbackLogo : storedLogo)
@@ -143,7 +146,8 @@ struct PassFieldsEditorView: View {
                     availableAttributesForEntry: availableAttributes(for:),
                     onDrop: { entry, idx in drop(entry, to: .auxiliary, at: idx) },
                     onDelete: { id in removeField(id, from: .auxiliary) },
-                    onAdd: { attr in auxiliaryFields.append(Self.newEntry(attr)) }
+                    onAdd: { attr in auxiliaryFields.append(Self.newEntry(attr)) },
+                    departureTimeOverride: departureTimeOverride
                 )
             }
 
@@ -158,7 +162,8 @@ struct PassFieldsEditorView: View {
                     availableAttributesForEntry: availableAttributes(for:),
                     onDrop: { entry, idx in drop(entry, to: .secondary, at: idx) },
                     onDelete: { id in removeField(id, from: .secondary) },
-                    onAdd: { attr in secondaryFields.append(Self.newEntry(attr)) }
+                    onAdd: { attr in secondaryFields.append(Self.newEntry(attr)) },
+                    departureTimeOverride: departureTimeOverride
                 )
             }
         }
@@ -198,6 +203,7 @@ struct PassFieldsEditorView: View {
                     record: record,
                     tint: .blue,
                     availableAttributes: availableAttributes(for: entry),
+                    departureTimeOverride: departureTimeOverride,
                     onDelete: { removeField(entry.id, from: .header) }
                 )
                     .draggable(entry)
@@ -380,12 +386,13 @@ struct PassFieldsEditorView: View {
             }
             await Action_addPass.presentCustomForRecord(
                 record,
+                departureTime: departureTimeOverride,
                 foregroundColor: foregroundColor.passKitRgbString,
                 backgroundColor: backgroundColor.passKitRgbString,
                 labelColor: labelColor.passKitRgbString,
                 semantics: semantics,
                 logoText: config.logoText,
-                fieldsJSON: config.jsonString(for: record)
+                fieldsJSON: config.jsonString(for: record, departureTimeOverride: departureTimeOverride)
             )
             spinnerTask.cancel()
             await MainActor.run {
@@ -578,7 +585,7 @@ struct PassFieldsEditorView: View {
     }
 
     private func fieldValue(_ entry: PassFieldEntry) -> String {
-        let json = PassFieldsConfig(headerFields: [], primaryFields: [entry], secondaryFields: [], auxiliaryFields: [], backFields: []).resolved(for: record)
+        let json = PassFieldsConfig(headerFields: [], primaryFields: [entry], secondaryFields: [], auxiliaryFields: [], backFields: []).resolved(for: record, departureTimeOverride: departureTimeOverride)
         if let arr = json["primaryFields"] as? [[String: String]], let v = arr.first?["value"], !v.isEmpty { return v }
         return entry.attribute == .custom ? (entry.customValue.isEmpty ? "--" : entry.customValue) : "--"
     }
@@ -596,6 +603,7 @@ private struct ChipRow: View {
     let onDrop: (PassFieldEntry, Int) -> Bool
     let onDelete: (UUID) -> Void
     let onAdd: (PassFieldAttribute) -> Void
+    var departureTimeOverride: Date? = nil
 
     var body: some View {
         GeometryReader { geo in
@@ -608,6 +616,7 @@ private struct ChipRow: View {
                         record: record,
                         tint: tint,
                         availableAttributes: availableAttributesForEntry(entry),
+                        departureTimeOverride: departureTimeOverride,
                         onDelete: { onDelete(entry.id) }
                     )
                         .frame(width: w, height: 66)
@@ -662,6 +671,7 @@ private struct EditableChip: View {
     let record: BoardingPassRecord
     let tint: Color
     let availableAttributes: [PassFieldAttribute]
+    var departureTimeOverride: Date? = nil
     var onDelete: (() -> Void)? = nil
 
     @FocusState private var labelFocused: Bool
@@ -756,7 +766,7 @@ private struct EditableChip: View {
     }
 
     private var previewValue: String {
-        let json = PassFieldsConfig(headerFields: [], primaryFields: [entry], secondaryFields: [], auxiliaryFields: [], backFields: []).resolved(for: record)
+        let json = PassFieldsConfig(headerFields: [], primaryFields: [entry], secondaryFields: [], auxiliaryFields: [], backFields: []).resolved(for: record, departureTimeOverride: departureTimeOverride)
         if let arr = json["primaryFields"] as? [[String: String]], let v = arr.first?["value"], !v.isEmpty { return v }
         return "--"
     }
@@ -767,10 +777,10 @@ private struct EditableChip: View {
 private extension PassFieldAttribute {
     // Custom first, then all other sources alphabetically by display order
     static var menuSources: [PassFieldAttribute] {
-        [.custom] + allCases.filter { $0 != .none && $0 != .custom }
+        [.custom] + allCases.filter { $0 != .none && $0 != .custom && $0 != .flightCode && $0 != .passengerSurname && $0 != .passengerGivenName }
     }
 
     static var availableFieldSources: [PassFieldAttribute] {
-        allCases.filter { $0 != .none }
+        allCases.filter { $0 != .none && $0 != .flightCode && $0 != .passengerSurname && $0 != .passengerGivenName }
     }
 }

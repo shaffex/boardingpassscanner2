@@ -19,6 +19,8 @@ struct BoardingPassCard: View {
     let record: BoardingPassRecord
     var style: Style = .regular
 
+    @State private var now: Date = .now
+
     var body: some View {
         VStack(spacing: verticalSpacing) {
             header
@@ -48,6 +50,13 @@ struct BoardingPassCard: View {
         }
         .shadow(color: shadowColor, radius: 18, x: 0, y: 10)
         .dynamicTypeSize(...DynamicTypeSize.xxLarge)
+        .onAppear { now = .now }
+        .onReceive(NotificationCenter.default.publisher(
+            for: NSNotification.Name.NSCalendarDayChanged
+        )) { _ in
+            now = .now
+        }
+
     }
 
     private var header: some View {
@@ -236,24 +245,20 @@ struct BoardingPassCard: View {
         return [firstLeg.fromAirport] + parsedLegs.map(\.toAirport)
     }
 
+
     private var relativeDateText: String {
+        guard record.flightDate != .distantPast else { return "UNKNOWN DATE" }
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: .now)
+        let today = calendar.startOfDay(for: now)
         let flightDay = calendar.startOfDay(for: record.flightDate)
         let days = calendar.dateComponents([.day], from: today, to: flightDay).day ?? 0
-
-        if days == 0 {
-            return "TODAY"
+        if days == 0 { return "TODAY" }
+        let abs = Swift.abs(days)
+        if abs >= 365 {
+            let years = max(1, abs / 365)
+            return days > 0 ? "IN \(years) \(years == 1 ? "YEAR" : "YEARS")" : "\(years) \(years == 1 ? "YEAR" : "YEARS") AGO"
         }
-
-        let absoluteDays = abs(days)
-        if absoluteDays >= 365 {
-            let years = max(1, absoluteDays / 365)
-            let unit = years == 1 ? "YEAR" : "YEARS"
-            return days > 0 ? "IN \(years) \(unit)" : "\(years) \(unit) AGO"
-        }
-
-        return days > 0 ? "IN \(days) DAYS" : "\(absoluteDays) DAYS AGO"
+        return days > 0 ? "IN \(days) \(days == 1 ? "DAY" : "DAYS")" : "\(abs) \(abs == 1 ? "DAY" : "DAYS") AGO"
     }
 
     private var dateText: String {

@@ -26,6 +26,7 @@ struct BoardingPassDetailView: View {
     @State private var passSemanticsEnabled: Bool = false
     @State private var showFieldsEditor = false
     @State private var showYearInfo = false
+    @State private var departureTimeOverride: Date? = nil
 
     @AppStorage("passFieldsConfigJSON") private var passFieldsConfigJSON: String = ""
 
@@ -41,6 +42,7 @@ struct BoardingPassDetailView: View {
                         walletDebugPanel
                     }
                     customizePanel
+                    walletTimingPanel
                     walletButton
                 }
                 actionButtons
@@ -56,7 +58,10 @@ struct BoardingPassDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarColorScheme(colorScheme == .dark ? .dark : .light, for: .navigationBar)
-        .onAppear(perform: refreshDebugMode)
+        .onAppear {
+            refreshDebugMode()
+            if #unavailable(iOS 26) { passSemanticsEnabled = false }
+        }
         .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
             refreshDebugMode()
         }
@@ -87,25 +92,21 @@ struct BoardingPassDetailView: View {
                 foregroundColor: passForegroundColor,
                 backgroundColor: passBackgroundColor,
                 labelColor: passLabelColor,
-                semantics: passSemanticsEnabled
+                semantics: passSemanticsEnabled,
+                departureTimeOverride: departureTimeOverride
             )
         }
     }
 
     private var tripDetails: some View {
         VStack(spacing: 16) {
-            HStack {
-                detailBlock(title: "DEPARTURE", value: departureTime)
-                Spacer()
+            HStack(alignment: .top) {
                 detailBlock(title: "DATE", value: dateText)
                 Spacer()
                 detailBlock(title: "DAY", value: dayText)
+                Spacer()
+                yearDetailBlock
             }
-
-            Divider()
-                .overlay(panelStroke)
-
-            yearRow
         }
         .padding(22)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -133,55 +134,51 @@ struct BoardingPassDetailView: View {
         }
     }
 
-    private var yearRow: some View {
-        HStack(spacing: 0) {
-            Text("YEAR")
-                .font(.system(.caption, design: .monospaced, weight: .bold))
-                .tracking(3)
-                .foregroundStyle(.secondary)
-
-            Spacer()
+    private var yearDetailBlock: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 4) {
+                Text("YEAR")
+                    .font(.system(.caption, design: .monospaced, weight: .bold))
+                    .tracking(3)
+                    .foregroundStyle(.secondary)
+                Button {
+                    showYearInfo = true
+                } label: {
+                    Image(systemName: "info.circle")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+                .buttonStyle(.plain)
+            }
 
             HStack(spacing: 4) {
                 Button {
                     adjustYear(-1)
                 } label: {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 13, weight: .bold))
+                        .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(primaryText)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 26, height: 26)
                         .background(panelStroke.opacity(0.8), in: Circle())
                 }
                 .buttonStyle(.plain)
 
-                Text("\(currentFlightYear)")
+                Text(String(currentFlightYear))
                     .font(.system(.title3, design: .rounded, weight: .bold))
                     .foregroundStyle(primaryText)
-                    .frame(minWidth: 52)
-                    .multilineTextAlignment(.center)
+                    .monospacedDigit()
 
                 Button {
                     adjustYear(1)
                 } label: {
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 13, weight: .bold))
+                        .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(primaryText)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 26, height: 26)
                         .background(panelStroke.opacity(0.8), in: Circle())
                 }
                 .buttonStyle(.plain)
             }
-
-            Button {
-                showYearInfo = true
-            } label: {
-                Image(systemName: "info.circle")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 32, height: 32)
-            }
-            .buttonStyle(.plain)
-            .padding(.leading, 8)
         }
     }
 
@@ -222,14 +219,16 @@ struct BoardingPassDetailView: View {
                     .labelsHidden()
             }
 
-            Toggle(isOn: $passSemanticsEnabled) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Semantics")
-                        .font(.subheadline)
-                        .foregroundStyle(primaryText)
-                    Text("Enable live Apple tracking")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            if #available(iOS 26, *) {
+                Toggle(isOn: $passSemanticsEnabled) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Semantics")
+                            .font(.subheadline)
+                            .foregroundStyle(primaryText)
+                        Text("Enable live Apple tracking")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
 
@@ -238,9 +237,9 @@ struct BoardingPassDetailView: View {
                 showFieldsEditor = true
             } label: {
                 HStack {
-                    Label("Reorder pass fields", systemImage: "list.bullet.rectangle")
+                    Label("Customize pass fields", systemImage: "list.bullet.rectangle")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(primaryText)
+                        .foregroundStyle(passSemanticsEnabled ? .secondary : primaryText)
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.subheadline.weight(.semibold))
@@ -249,6 +248,68 @@ struct BoardingPassDetailView: View {
                 .padding(.vertical, 6)
             }
             .buttonStyle(.plain)
+            .disabled(passSemanticsEnabled)
+
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(panelBackground, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(panelStroke, lineWidth: 1)
+        }
+    }
+
+    private var walletTimingPanel: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Label("Lock Screen Timing", systemImage: "lock.iphone")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(primaryText)
+
+            Text("We'll try to detect the departure time from your flight number automatically. You can override it here — this determines when the boarding pass is automatically shown on your lock screen.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Divider()
+
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Departure time")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(primaryText)
+                    if departureTimeOverride != nil {
+                        Text("MANUAL OVERRIDE")
+                            .font(.system(size: 9, weight: .heavy))
+                            .foregroundStyle(.orange)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(.orange.opacity(0.14), in: Capsule())
+                    } else {
+                        Text("Auto-detected")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 4) {
+                    DatePicker("", selection: departureTimeBinding, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
+                        .datePickerStyle(.compact)
+
+                    if departureTimeOverride != nil {
+                        Button("Reset to auto") {
+                            Haptics.tap()
+                            departureTimeOverride = nil
+                        }
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(.orange)
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -296,12 +357,13 @@ struct BoardingPassDetailView: View {
 
             await Action_addPass.presentForRecord(
                 record,
+                departureTime: departureTimeOverride,
                 foregroundColor: passForegroundColor.passKitRgbString,
                 backgroundColor: passBackgroundColor.passKitRgbString,
                 labelColor: passLabelColor.passKitRgbString,
                 semantics: passSemanticsEnabled,
                 logoText: passFieldsConfig.logoText,
-                fieldsJSON: passFieldsConfig.jsonString(for: record)
+                fieldsJSON: passFieldsConfig.jsonString(for: record, departureTimeOverride: departureTimeOverride)
             )
             spinnerTask.cancel()
 
@@ -320,12 +382,13 @@ struct BoardingPassDetailView: View {
 
             Text(Action_addPass.requestDebugDescription(
                 for: record,
+                departureTime: departureTimeOverride,
                 foregroundColor: passForegroundColor.passKitRgbString,
                 backgroundColor: passBackgroundColor.passKitRgbString,
                 labelColor: passLabelColor.passKitRgbString,
                 semantics: passSemanticsEnabled,
                 logoText: passFieldsConfig.logoText,
-                fieldsJSON: passFieldsConfig.jsonString(for: record)
+                fieldsJSON: passFieldsConfig.jsonString(for: record, departureTimeOverride: departureTimeOverride)
             ))
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.secondary)
@@ -446,6 +509,13 @@ struct BoardingPassDetailView: View {
 
     private var dayText: String {
         record.flightDate.formatted(.dateTime.weekday(.abbreviated))
+    }
+
+    private var departureTimeBinding: Binding<Date> {
+        Binding(
+            get: { departureTimeOverride ?? (record.flightDate == .distantPast ? .now : record.flightDate) },
+            set: { departureTimeOverride = $0 }
+        )
     }
 
     private var currentFlightYear: Int {

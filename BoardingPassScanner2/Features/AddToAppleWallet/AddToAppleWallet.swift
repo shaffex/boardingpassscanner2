@@ -82,8 +82,29 @@ struct Action_addPass: SxActionProtocol {
     static let walletEndpointURLString = "https://shaffex.com/api/boardingpass2/generateBoardingPass.php"
     static let customWalletEndpointURLString = "https://shaffex.com/api/boardingpass2/generateCustomBoardingPass.php"
 
+    // Merges the calendar date from `record.flightDate` with the clock time from `departureTime`.
+    // When `departureTime` is nil the record's stored time is used unchanged.
+    private static func resolvedFlightDateString(
+        record: BoardingPassRecord,
+        departureTime: Date?
+    ) -> String {
+        let formatter = ISO8601DateFormatter()
+        guard let override = departureTime, record.flightDate != .distantPast else {
+            return formatter.string(from: record.flightDate)
+        }
+        let calendar = Calendar.current
+        var comps = calendar.dateComponents([.year, .month, .day], from: record.flightDate)
+        let timeComps = calendar.dateComponents([.hour, .minute], from: override)
+        comps.hour = timeComps.hour
+        comps.minute = timeComps.minute
+        comps.second = 0
+        comps.nanosecond = 0
+        return formatter.string(from: calendar.date(from: comps) ?? record.flightDate)
+    }
+
     static func presentCustomForRecord(
         _ record: BoardingPassRecord,
+        departureTime: Date? = nil,
         foregroundColor: String,
         backgroundColor: String,
         labelColor: String,
@@ -91,7 +112,7 @@ struct Action_addPass: SxActionProtocol {
         logoText: String,
         fieldsJSON: String
     ) async {
-        let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
+        let flightDateString = resolvedFlightDateString(record: record, departureTime: departureTime)
         await Action_addPass(node: nil).presentWallet(
             barcodeText: record.text,
             barcodeType: record.type,
@@ -108,6 +129,7 @@ struct Action_addPass: SxActionProtocol {
 
     static func presentForRecord(
         _ record: BoardingPassRecord,
+        departureTime: Date? = nil,
         foregroundColor: String,
         backgroundColor: String,
         labelColor: String,
@@ -115,7 +137,7 @@ struct Action_addPass: SxActionProtocol {
         logoText: String,
         fieldsJSON: String
     ) async {
-        let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
+        let flightDateString = resolvedFlightDateString(record: record, departureTime: departureTime)
         await Action_addPass(node: nil).presentWallet(
             barcodeText: record.text,
             barcodeType: record.type,
@@ -131,6 +153,7 @@ struct Action_addPass: SxActionProtocol {
 
     static func requestDebugDescription(
         for record: BoardingPassRecord,
+        departureTime: Date? = nil,
         foregroundColor: String,
         backgroundColor: String,
         labelColor: String,
@@ -138,7 +161,7 @@ struct Action_addPass: SxActionProtocol {
         logoText: String,
         fieldsJSON: String
     ) -> String {
-        let flightDateString = ISO8601DateFormatter().string(from: record.flightDate)
+        let flightDateString = resolvedFlightDateString(record: record, departureTime: departureTime)
         let fields = requestFields(
             barcodeText: record.text,
             barcodeType: record.type,

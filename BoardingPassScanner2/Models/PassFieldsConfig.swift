@@ -43,7 +43,7 @@ enum PassFieldAttribute: String, CaseIterable, Codable, Identifiable {
     var title: String {
         switch self {
         case .none: return "— (empty)"
-        case .passengerName: return "Passenger (full)"
+        case .passengerName: return "Passenger name"
         case .passengerSurname: return "Passenger surname"
         case .passengerGivenName: return "Passenger given name"
         case .flightCode: return "Flight code"
@@ -134,7 +134,7 @@ struct PassFieldsConfig: Codable, Hashable {
         auxiliaryFields: [
             PassFieldEntry(attribute: .flightDate, label: "DATE"),
             PassFieldEntry(attribute: .departureTime, label: "DEPART"),
-            PassFieldEntry(attribute: .compartmentCode, label: "CLASS"),
+            PassFieldEntry(attribute: .sequenceNumber, label: "SEQ"),
             PassFieldEntry.empty
         ],
         backFields: [
@@ -146,13 +146,13 @@ struct PassFieldsConfig: Codable, Hashable {
     // Build a flat dictionary describing the configured fields, ready to be
     // JSON-encoded and sent to the wallet endpoint. Only visible fields are
     // included; values are resolved against the supplied record.
-    func resolved(for record: BoardingPassRecord) -> [String: Any] {
+    func resolved(for record: BoardingPassRecord, departureTimeOverride: Date? = nil) -> [String: Any] {
         var dict: [String: Any] = [
-            "headerFields": uniqueKeyed(headerFields.compactMap { $0.serialised(for: record) }),
-            "primaryFields": uniqueKeyed(primaryFields.compactMap { $0.serialised(for: record) }),
-            "secondaryFields": uniqueKeyed(secondaryFields.compactMap { $0.serialised(for: record) }),
-            "auxiliaryFields": uniqueKeyed(auxiliaryFields.compactMap { $0.serialised(for: record) }),
-            "backFields": uniqueKeyed(backFields.compactMap { $0.serialised(for: record) })
+            "headerFields": uniqueKeyed(headerFields.compactMap { $0.serialised(for: record, departureTimeOverride: departureTimeOverride) }),
+            "primaryFields": uniqueKeyed(primaryFields.compactMap { $0.serialised(for: record, departureTimeOverride: departureTimeOverride) }),
+            "secondaryFields": uniqueKeyed(secondaryFields.compactMap { $0.serialised(for: record, departureTimeOverride: departureTimeOverride) }),
+            "auxiliaryFields": uniqueKeyed(auxiliaryFields.compactMap { $0.serialised(for: record, departureTimeOverride: departureTimeOverride) }),
+            "backFields": uniqueKeyed(backFields.compactMap { $0.serialised(for: record, departureTimeOverride: departureTimeOverride) })
         ]
         if !logoText.isEmpty { dict["logoText"] = logoText }
         return dict
@@ -172,16 +172,16 @@ struct PassFieldsConfig: Codable, Hashable {
         }
     }
 
-    func jsonString(for record: BoardingPassRecord) -> String {
-        let data = try? JSONSerialization.data(withJSONObject: resolved(for: record))
+    func jsonString(for record: BoardingPassRecord, departureTimeOverride: Date? = nil) -> String {
+        let data = try? JSONSerialization.data(withJSONObject: resolved(for: record, departureTimeOverride: departureTimeOverride))
         return data.flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
     }
 }
 
 private extension PassFieldEntry {
-    func serialised(for record: BoardingPassRecord) -> [String: String]? {
+    func serialised(for record: BoardingPassRecord, departureTimeOverride: Date? = nil) -> [String: String]? {
         guard isVisible, attribute != .none else { return nil }
-        let value = resolvedValue(for: record)
+        let value = resolvedValue(for: record, departureTimeOverride: departureTimeOverride)
         guard !value.isEmpty else { return nil }
         return [
             "key": attribute.rawValue,
@@ -190,7 +190,7 @@ private extension PassFieldEntry {
         ]
     }
 
-    func resolvedValue(for record: BoardingPassRecord) -> String {
+    func resolvedValue(for record: BoardingPassRecord, departureTimeOverride: Date? = nil) -> String {
         switch attribute {
         case .none: return ""
         case .custom: return customValue
@@ -198,7 +198,7 @@ private extension PassFieldEntry {
         case .passengerSurname: return record.passengerSurname
         case .passengerGivenName: return record.passengerGivenName
         case .flightCode: return [record.operatingCarrier, record.flightNumber].filter { !$0.isEmpty }.joined(separator: " ")
-        case .flightNumber: return record.flightNumber
+        case .flightNumber: return [record.operatingCarrier, record.flightNumber].filter { !$0.isEmpty }.joined(separator: " ")
         case .airlineName: return record.airlineName
         case .fromAirport: return record.fromAirport
         case .fromAirportCity: return record.fromAirportCity
@@ -207,8 +207,10 @@ private extension PassFieldEntry {
         case .toAirportCity: return record.toAirportCity
         case .toAirportName: return record.toAirportName
         case .flightDate: return record.flightDate.formatted(.dateTime.day().month(.abbreviated))
-        case .departureTime: return record.flightDate.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits))
-        case .seatNumber: return record.seatNumber
+        case .departureTime:
+            let date = departureTimeOverride ?? record.flightDate
+            return date.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits))
+        case .seatNumber: return record.seatNumber.replacingOccurrences(of: "^0+(?=\\d)", with: "", options: .regularExpression)
         case .compartmentCode: return record.compartmentCode
         case .pnr: return record.pnr
         case .sequenceNumber: return record.checkInSequenceNumber
