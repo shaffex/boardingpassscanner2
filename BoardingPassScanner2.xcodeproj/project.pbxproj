@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2F0AB8AD2FCAE6F50040F83B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2F0AB8AC2FCAE6F50040F83B /* PrivacyInfo.xcprivacy */; };
+		2F0AB8B42FCAEED50040F83B /* TestingStoreKit.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 2F0AB8B32FCAEED50040F83B /* TestingStoreKit.storekit */; };
 		2FABFA442FAE297200A66D55 /* MagicUi in Frameworks */ = {isa = PBXBuildFile; productRef = 2FABFA432FAE297200A66D55 /* MagicUi */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +30,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2F0AB8AC2FCAE6F50040F83B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		2F0AB8B32FCAEED50040F83B /* TestingStoreKit.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = TestingStoreKit.storekit; sourceTree = "<group>"; };
 		2FABFA062FAE284400A66D55 /* BoardingPassScanner2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BoardingPassScanner2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FABFA132FAE284600A66D55 /* BoardingPassScanner2Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoardingPassScanner2Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FABFA1D2FAE284600A66D55 /* BoardingPassScanner2UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoardingPassScanner2UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -94,6 +98,8 @@
 		2FABF9FD2FAE284400A66D55 = {
 			isa = PBXGroup;
 			children = (
+				2F0AB8B32FCAEED50040F83B /* TestingStoreKit.storekit */,
+				2F0AB8AC2FCAE6F50040F83B /* PrivacyInfo.xcprivacy */,
 				2FF9A8B12FB205FA0087BE24 /* README.md */,
 				2FABFA082FAE284400A66D55 /* BoardingPassScanner2 */,
 				2FABFA162FAE284600A66D55 /* BoardingPassScanner2Tests */,
@@ -238,6 +244,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2F0AB8B42FCAEED50040F83B /* TestingStoreKit.storekit in Resources */,
+				2F0AB8AD2FCAE6F50040F83B /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

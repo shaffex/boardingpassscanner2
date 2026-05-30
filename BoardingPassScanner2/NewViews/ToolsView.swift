@@ -6,16 +6,81 @@
 //
 
 import SwiftUI
+import StoreKit
 
 struct ToolsView: View {
     @Environment(BoardingPassMapper.self) private var mapper
+    @ObservedObject private var store = StoreManager.shared
 
     @AppStorage("jsonVersion") private var dataVersion = 0
     @State private var isCheckingForUpdate = false
     @State private var lastUpdateResult: String?
+    @State private var isRestoring = false
+    @State private var showProUpgrade = false
+
+    private var isProOwned: Bool {
+        store.purchasedProductIDs.contains(StoreManager.productID_UnlockPro)
+    }
 
     var body: some View {
         List {
+            Section("Version") {
+                HStack(spacing: 12) {
+                    Image(systemName: isProOwned ? "crown.fill" : "crown")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(isProOwned ? Color(red: 1.0, green: 0.80, blue: 0.22) : .secondary)
+                        .frame(width: 28)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(isProOwned ? "Pro" : "Free")
+                            .font(.headline.weight(.semibold))
+                        Text(isProOwned ? "All features unlocked" : "Upgrade to unlock all features")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    if isProOwned {
+                        Text("ACTIVE")
+                            .font(.system(size: 10, weight: .heavy, design: .rounded))
+                            .foregroundStyle(Color(red: 1.0, green: 0.80, blue: 0.22))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color(red: 1.0, green: 0.80, blue: 0.22).opacity(0.14), in: Capsule())
+                    }
+                }
+                .padding(.vertical, 4)
+
+                if !isProOwned {
+                    Button {
+                        Haptics.tap()
+                        showProUpgrade = true
+                    } label: {
+                        Label("Unlock Pro", systemImage: "crown.fill")
+                            .foregroundStyle(Color(red: 1.0, green: 0.80, blue: 0.22))
+                    }
+                }
+
+                Button {
+                    Haptics.tap()
+                    isRestoring = true
+                    Task {
+                        await store.restorePurchases(showAlert: true)
+                        await MainActor.run { isRestoring = false }
+                    }
+                } label: {
+                    HStack {
+                        Text("Restore Purchases")
+                        if isRestoring {
+                            Spacer()
+                            ProgressView()
+                        }
+                    }
+                }
+                .disabled(isRestoring)
+            }
+
             Section("Data Library") {
                 HStack {
                     Text("Data Library Version")
@@ -58,6 +123,23 @@ struct ToolsView: View {
             }
         }
         .navigationTitle(String(localized: "TEXT_TOOLS"))
+        .sheet(isPresented: $showProUpgrade) {
+            NavigationStack {
+                ScrollView {
+                    ProUpgradeCard()
+                        .padding(16)
+                }
+                .navigationTitle("Unlock Pro")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Close") { showProUpgrade = false }
+                    }
+                }
+            }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+        }
     }
 
     private func checkForUpdate() {

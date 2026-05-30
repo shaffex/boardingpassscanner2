@@ -49,6 +49,9 @@
             alertMessage="This boarding pass has already been added to your passes. Please try a different one."
         />
    
+<!--       In App purchases-->
+       <alert id="alertNothingToRestore" alertTitle="Info" alertMessage="No purchases to restore."/>
+       <alert id="alertPurchasesRestored" alertTitle="Info" alertMessage="Your purchases are already restored"/>
     </dialogs>
     
     
