@@ -1,5 +1,5 @@
 {
-  "originHash" : "b321abd223c043322b4dc05e4d85ec4f3b360e1d0d3dec534dde6ddbdee738a7",
+  "originHash" : "d4fe7e748b65da5feb56c81ad596042bda6d6279cf2befad874eb7f994442778",
   "pins" : [
     {
       "identity" : "magicui-framework-beta",
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/googleads/swift-package-manager-google-user-messaging-platform.git",
       "state" : {
-        "revision" : "13b248eaa73b7826f0efb1bcf455e251d65ecb1b",
-        "version" : "3.1.0"
+        "revision" : "708a282840c2171ee63bd93b87afa49fe507d70e",
+        "version" : "2.7.0"
       }
     }
   ],

@@ -50,12 +50,16 @@ struct ContentView: View {
             MagicUiView(resource: "MainScreen")
                 .onFirstAppear {
                     MagicLocalisation.exportKeys()
-                    
+
                     Task { @MainActor in
                         MigrationAssistant.checkMigration()
                     }
-                    
+
                     PluginAdmob.initialise()
+
+                    Task { @MainActor in
+                        await ConsentManager.shared.requestConsentAndStartAds()
+                    }
                 }
 
             AppBannerOverlay(presenter: bannerPresenter)

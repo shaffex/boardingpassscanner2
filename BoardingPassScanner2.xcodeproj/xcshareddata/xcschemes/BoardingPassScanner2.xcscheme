@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2FABFA052FAE284400A66D55"
-               BuildableName = "BoardingPassScanner2.app"
+               BuildableName = "Boarding Pass.app"
                BlueprintName = "BoardingPassScanner2"
                ReferencedContainer = "container:BoardingPassScanner2.xcodeproj">
             </BuildableReference>
@@ -70,7 +70,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2FABFA052FAE284400A66D55"
-            BuildableName = "BoardingPassScanner2.app"
+            BuildableName = "Boarding Pass.app"
             BlueprintName = "BoardingPassScanner2"
             ReferencedContainer = "container:BoardingPassScanner2.xcodeproj">
          </BuildableReference>
@@ -90,7 +90,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2FABFA052FAE284400A66D55"
-            BuildableName = "BoardingPassScanner2.app"
+            BuildableName = "Boarding Pass.app"
             BlueprintName = "BoardingPassScanner2"
             ReferencedContainer = "container:BoardingPassScanner2.xcodeproj">
          </BuildableReference>
