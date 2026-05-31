@@ -8,6 +8,13 @@ import SwiftUI
 struct BarcodeCard: View {
     let record: BoardingPassRecord
 
+    @AppStorage("showBarcodeText")   private var showBarcodeText   = true
+    @AppStorage("showSeatOnBarcode") private var showSeatOnBarcode = true
+
+    private var formattedSeat: String {
+        record.seatNumber.replacingOccurrences(of: "^0+(?=\\d)", with: "", options: .regularExpression)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top) {
@@ -19,12 +26,14 @@ struct BarcodeCard: View {
 
                 Spacer()
 
-                Text(record.type.isEmpty ? "CODE" : record.type.uppercased())
-                    .font(.system(.caption, design: .monospaced, weight: .bold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 12)
-                    .frame(height: 34)
-                    .background(.black, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                if showSeatOnBarcode {
+                    Text(formattedSeat.isEmpty ? (record.type.isEmpty ? "CODE" : record.type.uppercased()) : formattedSeat.uppercased())
+                        .font(.system(.caption, design: .monospaced, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .frame(height: 34)
+                        .background(.black, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                }
             }
 
             Color.clear
@@ -39,14 +48,16 @@ struct BarcodeCard: View {
                 }
                 .clipped()
 
-            Text(record.text)
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(.black.opacity(0.58))
-                .lineLimit(2)
-                .truncationMode(.middle)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity)
+            if showBarcodeText {
+                Text(record.text)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(.black.opacity(0.58))
+                    .lineLimit(2)
+                    .truncationMode(.middle)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity)
+            }
         }
         .padding(22)
         .frame(maxWidth: .infinity)

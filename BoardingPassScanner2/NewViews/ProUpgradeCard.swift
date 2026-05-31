@@ -108,16 +108,16 @@ struct ProUpgradeCard: View {
                 state: .included
             )
             featureRow(
-                title: "Home screen widget",
-                subtitle: "Your next flight always one glance away",
-                icon: "rectangle.grid.2x2.fill",
-                state: .soon
+                title: "Unlimited CSV export",
+                subtitle: "Export all your boarding passes anytime",
+                icon: "arrow.up.doc.fill",
+                state: .included
             )
             featureRow(
                 title: "iCloud sync",
                 subtitle: "All your passes on every device",
                 icon: "icloud.fill",
-                state: .soon
+                state: .included
             )
         }
         .padding(16)

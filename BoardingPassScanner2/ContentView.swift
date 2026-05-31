@@ -29,6 +29,7 @@ struct ContentView: View {
         MagicUiView.installViewPlugin(name: "homeview", plugin: HomePluginView())
         MagicUiView.installViewPlugin(name: "myBoardingPassesList", plugin: MyBoardingPassesPluginView())
         MagicUiView.installViewPlugin(name: "toolsview", plugin: ToolsPluginView())
+        MagicUiView.installViewPlugin(name: "settingsview", plugin: SettingsPluginView())
         MagicUiView.installViewPlugin(name: "admobview", plugin: AdmobBanner.self)
         
         // modifiers

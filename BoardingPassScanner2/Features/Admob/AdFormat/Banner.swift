@@ -75,7 +75,7 @@ struct MyBannerView: View {
 //        let adSize: AdSize = largeAnchoredAdaptiveBanner(width: UIScreen.main.bounds.width)
         //let adSize: AdSize = adSizeFor(cgSize: CGSize(width: 100, height: 50))
         
-        if !isProOwned {
+        if !isProOwned && !MainConfig.TESTING_MODE_NOADS {
             
             //if isAdLoaded {
                 BannerViewContainer(adUnitID: adUnitID, adSize: adSize, isAdLoaded: $isAdLoaded)

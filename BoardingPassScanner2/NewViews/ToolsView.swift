@@ -7,6 +7,13 @@
 
 import SwiftUI
 import StoreKit
+import SafariServices
+
+private struct SafariView: UIViewControllerRepresentable {
+    let url: URL
+    func makeUIViewController(context: Context) -> SFSafariViewController { SFSafariViewController(url: url) }
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {}
+}
 
 struct ToolsView: View {
     @Environment(BoardingPassMapper.self) private var mapper
@@ -17,6 +24,7 @@ struct ToolsView: View {
     @State private var lastUpdateResult: String?
     @State private var isRestoring = false
     @State private var showProUpgrade = false
+
 
     private var isProOwned: Bool {
         store.purchasedProductIDs.contains(StoreManager.productID_UnlockPro)
@@ -132,6 +140,22 @@ struct ToolsView: View {
                         Text(lastUpdateResult)
                             .font(.footnote)
                             .foregroundStyle(.secondary)
+                    }
+                }
+
+                Section("Report an Issue") {
+                    NavigationLink {
+                        SafariView(url: URL(string: "https://shaffex.com/api/boardingpass2/Links/contactUs.php")!)
+                            .ignoresSafeArea()
+                            .navigationTitle("Report Data Issue")
+                            .navigationBarTitleDisplayMode(.inline)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Report data issue")
+                            Text("Found incorrect airline or airport data? Let us know.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
             }

@@ -49,11 +49,13 @@ struct BoardingPassDetailView: View {
                         flightTrackingPanel
                     }
                     customizePanel
-                    walletTimingPanel
+                    if !passSemanticsEnabled {
+                        walletTimingPanel
+                    }
                     walletButton
                 }
                 actionButtons
-                decodedDataButton
+                //decodedDataButton
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 18)
@@ -434,12 +436,12 @@ struct BoardingPassDetailView: View {
 
     private var actionButtons: some View {
         HStack(spacing: 14) {
-            ShareLink(item: record.text) {
-                Label("Share", systemImage: "square.and.arrow.up")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(DetailActionButtonStyle())
-            .hapticTap()
+//            ShareLink(item: record.text) {
+//                Label("Share", systemImage: "square.and.arrow.up")
+//                    .frame(maxWidth: .infinity)
+//            }
+//            .buttonStyle(DetailActionButtonStyle())
+//            .hapticTap()
 
             Button(role: .destructive) {
                 Haptics.warning()

@@ -305,15 +305,21 @@ struct MyBoardingPassesView: View {
         Menu {
             Button {
                 Haptics.tap()
-                PluginActions.shared.runAction("presentSheet:item:sheetItem;id:barcodeScannerView")
+                PluginActions.shared.runAction("presentSheet:item:sheetItem;id:scannerView")
             } label: {
-                Label("Scan New Barcode", systemImage: "qrcode.viewfinder")
+                Label("Scan from Camera", systemImage: "qrcode.viewfinder")
             }
             Button {
                 Haptics.tap()
                 PluginActions.shared.runAction("setBool:isShowingImagePicker=true")
             } label: {
-                Label("Import From Photo", systemImage: "photo.on.rectangle")
+                Label("Import from Photos", systemImage: "photo.on.rectangle")
+            }
+            Button {
+                Haptics.tap()
+                PluginActions.shared.runAction("detectFromClipboard")
+            } label: {
+                Label("Import from Clipboard", systemImage: "doc.on.clipboard")
             }
         } label: {
             Image(systemName: "plus")

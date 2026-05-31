@@ -21,13 +21,14 @@ struct MainConfig {
     // Show debug request what are we passing to API call
     static let TESTING_MODE_SHOW_WALLET_DEBUG_REQUEST = false
     
-    //static let TESTING_MODE_NOADS = true
+    // Disable ADS
+    static let TESTING_MODE_NOADS = false
 #else
     static let adUnitID="ca-app-pub-8228478698443038/7381360240" // BPS2_SMART_BANNER
     static let TESTING_MODE = false
     static let TESTING_MODE_SHOW_TESTPASSES = false
     static let TESTING_MODE_SHOW_WALLET_DEBUG_REQUEST = false
     
-    //static let TESTING_MODE_NOADS = false
+    static let TESTING_MODE_NOADS = false
 #endif
 }

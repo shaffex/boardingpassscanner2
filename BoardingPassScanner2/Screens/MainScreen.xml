@@ -13,7 +13,7 @@
         </navigationstack>
                
         <navigationstack tabItem="label:$TEXT_SETTINGS;systemImage:gear" tag="Settings">
-            <remoteview src="resource:Settings"/>
+            <settingsview/>
         </navigationstack>
     </tabview>
     
