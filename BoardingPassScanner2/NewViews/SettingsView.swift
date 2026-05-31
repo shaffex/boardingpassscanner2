@@ -4,20 +4,21 @@
 //
 
 import SwiftUI
-import SafariServices
+import WebKit
 
-private struct InlineSafariView: UIViewControllerRepresentable {
+private struct EmbeddedWebView: UIViewRepresentable {
     let url: URL
-    func makeUIViewController(context: Context) -> SFSafariViewController { SFSafariViewController(url: url) }
-    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {}
+    func makeUIView(context: Context) -> WKWebView {
+        let view = WKWebView()
+        view.load(URLRequest(url: url))
+        return view
+    }
+    func updateUIView(_ uiView: WKWebView, context: Context) {}
 }
 
 struct SettingsView: View {
     @AppStorage("showBarcodeText")   private var showBarcodeText   = true
     @AppStorage("showSeatOnBarcode") private var showSeatOnBarcode = true
-
-    @State private var showPrivacyPolicy = false
-    @State private var showContactUs     = false
 
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
@@ -58,7 +59,6 @@ struct SettingsView: View {
                 }
 
                 Button {
-                    Haptics.tap()
                     if let url = URL(string: "itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=1166018608&onlyLatestVersion=true&pageNumber=0&sortOrdering=1&type=Purple+Software") {
                         UIApplication.shared.open(url)
                     }
@@ -67,44 +67,26 @@ struct SettingsView: View {
                         .foregroundStyle(Color.accentColor)
                 }
 
-                Button {
-                    Haptics.tap()
-                    showPrivacyPolicy = true
+                NavigationLink {
+                    EmbeddedWebView(url: URL(string: "https://shaffex.com/api/boardingpass2/Links/privacyPolicy.html")!)
+                        .ignoresSafeArea()
+                        .navigationTitle("Privacy Policy")
+                        .navigationBarTitleDisplayMode(.inline)
                 } label: {
-                    HStack {
-                        Text("Privacy Policy")
-                            .foregroundStyle(.primary)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                    }
+                    Text("Privacy Policy")
                 }
 
-                Button {
-                    Haptics.tap()
-                    showContactUs = true
+                NavigationLink {
+                    EmbeddedWebView(url: URL(string: "https://shaffex.com/api/boardingpass2/Links/contactUs.php")!)
+                        .ignoresSafeArea()
+                        .navigationTitle("Contact Us")
+                        .navigationBarTitleDisplayMode(.inline)
                 } label: {
-                    HStack {
-                        Text("Contact us")
-                            .foregroundStyle(.primary)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                    }
+                    Text("Contact us")
                 }
             }
         }
         .navigationTitle(String(localized: "TEXT_SETTINGS"))
-        .sheet(isPresented: $showPrivacyPolicy) {
-            InlineSafariView(url: URL(string: "https://shaffex.com/api/boardingpass2/Links/privacyPolicy.html")!)
-                .ignoresSafeArea()
-        }
-        .sheet(isPresented: $showContactUs) {
-            InlineSafariView(url: URL(string: "https://shaffex.com/api/boardingpass2/Links/contactUs.php")!)
-                .ignoresSafeArea()
-        }
     }
 }
 

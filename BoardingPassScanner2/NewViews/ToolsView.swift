@@ -7,12 +7,16 @@
 
 import SwiftUI
 import StoreKit
-import SafariServices
+import WebKit
 
-private struct SafariView: UIViewControllerRepresentable {
+private struct WebView: UIViewRepresentable {
     let url: URL
-    func makeUIViewController(context: Context) -> SFSafariViewController { SFSafariViewController(url: url) }
-    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {}
+    func makeUIView(context: Context) -> WKWebView {
+        let view = WKWebView()
+        view.load(URLRequest(url: url))
+        return view
+    }
+    func updateUIView(_ uiView: WKWebView, context: Context) {}
 }
 
 struct ToolsView: View {
@@ -145,7 +149,7 @@ struct ToolsView: View {
 
                 Section("Report an Issue") {
                     NavigationLink {
-                        SafariView(url: URL(string: "https://shaffex.com/api/boardingpass2/Links/contactUs.php")!)
+                        WebView(url: URL(string: "https://shaffex.com/api/boardingpass2/Links/contactUs.php")!)
                             .ignoresSafeArea()
                             .navigationTitle("Report Data Issue")
                             .navigationBarTitleDisplayMode(.inline)
