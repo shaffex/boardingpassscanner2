@@ -34,70 +34,74 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section("Next Flight") {
-                    if let upcomingFlight {
-                        Button {
-                            Haptics.tap()
-                            selectedUpcomingFlight = SelectedFlight(record: upcomingFlight)
-                        } label: {
-                            BoardingPassCard(record: upcomingFlight, style: .compact)
-                        }
-                        .buttonStyle(.plain)
-                    } else {
-                        NoUpcomingFlightCard()
-                    }
-                }
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-
-                Section("Boarding Pass") {
-                    VStack(spacing: 12) {
-                        actionButton(
-                            title: String(localized: "TEXT_SCAN_BOARDING_PASS"),
-                            description: String(localized: "TEXT_SCAN_BOARDING_DESCRIPTION"),
-                            systemImage: "camera.viewfinder"
-                        ) {
-                            requestCameraAndScan()
-                        }
-
-                        actionButton(
-                            title: String(localized: "TEXT_IMPORT_BOARDING_PASS"),
-                            description: String(localized: "TEXT_IMPORT_BOARDING_PASS_DESCRIPTION"),
-                            systemImage: "photo.on.rectangle"
-                        ) {
-                            PluginActions.shared.runAction("setBool:isShowingImagePicker=true")
-                        }
-
-                        actionButton(
-                            title: String(localized: "TEXT_PASTE_BOARDING_PASS"),
-                            description: String(localized: "TEXT_PASTE_BOARDING_PASS_DESCRIPTION"),
-                            systemImage: "doc.on.clipboard"
-                        ) {
-                            PluginActions.shared.runAction("detectFromClipboard")
+            VStack {
+                List {
+                    Section("Next Flight") {
+                        if let upcomingFlight {
+                            Button {
+                                Haptics.tap()
+                                selectedUpcomingFlight = SelectedFlight(record: upcomingFlight)
+                            } label: {
+                                BoardingPassCard(record: upcomingFlight, style: .compact)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            NoUpcomingFlightCard()
                         }
                     }
-                    .padding(.vertical, 4)
-                }
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-
-                Section {
-                    ProUpgradeCard()
-                }
-                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-
-                if isDebugModeEnabled {
-                    MagicUiView(string: """
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    
+                    Section("Boarding Pass") {
+                        VStack(spacing: 12) {
+                            actionButton(
+                                title: String(localized: "TEXT_SCAN_BOARDING_PASS"),
+                                description: String(localized: "TEXT_SCAN_BOARDING_DESCRIPTION"),
+                                systemImage: "camera.viewfinder"
+                            ) {
+                                requestCameraAndScan()
+                            }
+                            
+                            actionButton(
+                                title: String(localized: "TEXT_IMPORT_BOARDING_PASS"),
+                                description: String(localized: "TEXT_IMPORT_BOARDING_PASS_DESCRIPTION"),
+                                systemImage: "photo.on.rectangle"
+                            ) {
+                                PluginActions.shared.runAction("setBool:isShowingImagePicker=true")
+                            }
+                            
+                            actionButton(
+                                title: String(localized: "TEXT_PASTE_BOARDING_PASS"),
+                                description: String(localized: "TEXT_PASTE_BOARDING_PASS_DESCRIPTION"),
+                                systemImage: "doc.on.clipboard"
+                            ) {
+                                PluginActions.shared.runAction("detectFromClipboard")
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    
+                    Section {
+                        ProUpgradeCard()
+                    }
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    
+                    if isDebugModeEnabled {
+                        MagicUiView(string: """
 <body>
 <remoteview src="resource:DEBUG_TestPasses"/>
 </body>
 """)
+                    }
                 }
+                
+                MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID)\"/></body>")
             }
             .navigationTitle(String(localized: "TEXT_HOME"))
             .onAppear(perform: refreshDebugMode)

@@ -86,40 +86,44 @@ struct MyBoardingPassesView: View {
                 )
                 .foregroundStyle(primaryText)
             } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 22) {
-                        Text("My Passes")
-                            .font(.system(size: 48, weight: .semibold, design: .default))
-                            .foregroundStyle(primaryText)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                        searchField
-
-                        segmentControl
-
-                        LazyVStack(spacing: 16) {
-                            ForEach(visibleRecords, id: \.persistentModelID) { record in
-                                NavigationLink {
-                                    BoardingPassDetailView(record: record)
-                                } label: {
-                                    BoardingPassCard(record: record)
-                                }
-                                .buttonStyle(.plain)
-                                .hapticTap()
-                                .contextMenu {
-                                    Button(role: .destructive) {
-                                        Haptics.success()
-                                        BoardingPassStore.shared.delete(record)
+                VStack {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 22) {
+                            Text("My Passes")
+                                .font(.system(size: 48, weight: .semibold, design: .default))
+                                .foregroundStyle(primaryText)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            searchField
+                            
+                            segmentControl
+                            
+                            LazyVStack(spacing: 16) {
+                                ForEach(visibleRecords, id: \.persistentModelID) { record in
+                                    NavigationLink {
+                                        BoardingPassDetailView(record: record)
                                     } label: {
-                                        Label("Delete", systemImage: "trash")
+                                        BoardingPassCard(record: record)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .hapticTap()
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            Haptics.success()
+                                            BoardingPassStore.shared.delete(record)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
                                     }
                                 }
                             }
                         }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 12)
+                        .padding(.bottom, 28)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 12)
-                    .padding(.bottom, 28)
+                    // admob
+                    MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID)\"/></body>")
                 }
             }
         }
