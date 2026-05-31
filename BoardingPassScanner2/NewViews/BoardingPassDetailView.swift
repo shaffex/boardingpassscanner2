@@ -69,6 +69,20 @@ struct BoardingPassDetailView: View {
         .toolbarColorScheme(colorScheme == .dark ? .dark : .light, for: .navigationBar)
         .onAppear {
             if #unavailable(iOS 26) { passSemanticsEnabled = false }
+            
+            if !isProOwned {
+                Task { @MainActor in
+                    await InterstitialAdViewModel.shared.loadAd(id: MainConfig.adUnitID_Interstitial)
+                    //InterstitialAdViewModel.shared.showAd()
+                }
+            }
+        }
+        .onChange(of: passSemanticsEnabled) { _, enabled in
+            if enabled {
+                if !isProOwned {
+                    PluginActions.shared.runAction("showInterstitialAd")
+                }
+            }
         }
         .alert("Warning", isPresented: $showDeleteAlert) {
             Button("No", role: .cancel) {}

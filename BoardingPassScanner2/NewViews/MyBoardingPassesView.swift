@@ -116,7 +116,7 @@ struct MyBoardingPassesView: View {
                         .padding(.bottom, 28)
                     }
                     // admob
-                    MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID)\"/></body>")
+                    MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID_Banner)\"/></body>")
                         .padding(.bottom, 8)
                 }
             }

@@ -96,7 +96,7 @@ struct HomeView: View {
                     }
                 }
                 
-                MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID)\"/></body>")
+                MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID_Banner)\"/></body>")
                     .padding(.bottom, 8)
             }
             .navigationTitle(String(localized: "TEXT_HOME"))

@@ -54,6 +54,8 @@ struct ContentView: View {
                     Task { @MainActor in
                         MigrationAssistant.checkMigration()
                     }
+                    
+                    PluginAdmob.initialise()
                 }
 
             AppBannerOverlay(presenter: bannerPresenter)
