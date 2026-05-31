@@ -243,7 +243,7 @@ struct SxAction_purchaseProduct: SxActionProtocol {
     func execute(_ actionString: String) {
         Task {
             await StoreManager.shared.fetchProducts()
-            if let product = await StoreManager.shared.products.first(where: { $0.id == actionString} ) {
+            if let product = StoreManager.shared.products.first(where: { $0.id == actionString} ) {
                 await StoreManager.shared.purchase(product)
             }
         }

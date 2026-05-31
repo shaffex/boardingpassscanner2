@@ -219,5 +219,5 @@ private extension PassFieldEntry {
 }
 
 extension UTType {
-    static let passFieldEntry = UTType(exportedAs: "com.shaffex.boardingpassscanner2.field-entry")
+    static let passFieldEntry = UTType(importedAs: "com.shaffex.boardingpassscanner2.field-entry")
 }

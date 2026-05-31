@@ -15,7 +15,6 @@ struct BoardingPassDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
 
-    @State private var debugMode = false
     @State private var showDecodedSheet = false
     @State private var showDeleteAlert = false
     @State private var isAddingToWallet = false
@@ -29,6 +28,11 @@ struct BoardingPassDetailView: View {
     @State private var departureTimeOverride: Date? = nil
 
     @AppStorage("passFieldsConfigJSON") private var passFieldsConfigJSON: String = ""
+    @ObservedObject private var store = StoreManager.shared
+
+    private var isProOwned: Bool {
+        store.purchasedProductIDs.contains(StoreManager.productID_UnlockPro)
+    }
 
     var body: some View {
         ScrollView {
@@ -36,10 +40,13 @@ struct BoardingPassDetailView: View {
                 barcodeCard
                 BoardingPassCard(record: record)
                 tripDetails
-                // KOKOCE: remove || true
-                if isUpcomingBoardingPass || true {
-                    if debugMode {
+
+                if isUpcomingBoardingPass || MainConfig.TESTING_MODE {
+                    if MainConfig.TESTING_MODE_SHOW_WALLET_DEBUG_REQUEST {
                         walletDebugPanel
+                    }
+                    if #available(iOS 26, *), isFlightWithinWeek {
+                        flightTrackingPanel
                     }
                     customizePanel
                     walletTimingPanel
@@ -59,11 +66,7 @@ struct BoardingPassDetailView: View {
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarColorScheme(colorScheme == .dark ? .dark : .light, for: .navigationBar)
         .onAppear {
-            refreshDebugMode()
             if #unavailable(iOS 26) { passSemanticsEnabled = false }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
-            refreshDebugMode()
         }
         .alert("Warning", isPresented: $showDeleteAlert) {
             Button("No", role: .cancel) {}
@@ -188,9 +191,18 @@ struct BoardingPassDetailView: View {
 
     private var customizePanel: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label("Customize", systemImage: "paintpalette")
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(primaryText)
+            HStack(spacing: 10) {
+                Label("Customize", systemImage: "paintpalette")
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(primaryText)
+                Text("PRO")
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color(red: 1.0, green: 0.80, blue: 0.22))
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(Color(red: 1.0, green: 0.80, blue: 0.22).opacity(0.15), in: Capsule())
+                    .overlay(Capsule().stroke(Color(red: 1.0, green: 0.80, blue: 0.22).opacity(0.3), lineWidth: 1))
+            }
 
             HStack {
                 Text("Foreground")
@@ -219,19 +231,6 @@ struct BoardingPassDetailView: View {
                     .labelsHidden()
             }
 
-            if #available(iOS 26, *) {
-                Toggle(isOn: $passSemanticsEnabled) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Semantics")
-                            .font(.subheadline)
-                            .foregroundStyle(primaryText)
-                        Text("Enable live Apple tracking")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-
             Button {
                 Haptics.tap()
                 showFieldsEditor = true
@@ -250,6 +249,35 @@ struct BoardingPassDetailView: View {
             .buttonStyle(.plain)
             .disabled(passSemanticsEnabled)
 
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(panelBackground, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(panelStroke, lineWidth: 1)
+        }
+        .opacity(isProOwned ? 1 : 0.5)
+        .disabled(!isProOwned)
+    }
+
+    @available(iOS 26, *)
+    private var flightTrackingPanel: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Label("Flight Tracking", systemImage: "location.fill")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(primaryText)
+
+            Toggle(isOn: $passSemanticsEnabled) {
+                Text("Enable flight tracking")
+                    .font(.subheadline)
+                    .foregroundStyle(primaryText)
+            }
+
+            Text("When enabled, a Live Activity is created for supported flights so you can track your flight directly from the Lock Screen and Dynamic Island.\n\nPass customisation is disabled while flight tracking is active.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -455,10 +483,6 @@ struct BoardingPassDetailView: View {
         .buttonStyle(.plain)
     }
 
-    private func refreshDebugMode() {
-        debugMode = MagicUiBrisge.isDebugModeEnabled
-    }
-
     private var passFieldsConfig: PassFieldsConfig {
         guard let data = passFieldsConfigJSON.data(using: .utf8),
               let decoded = try? JSONDecoder().decode(PassFieldsConfig.self, from: data) else {
@@ -481,6 +505,14 @@ struct BoardingPassDetailView: View {
 
     private var isUpcomingBoardingPass: Bool {
         Calendar.current.startOfDay(for: record.flightDate) >= Calendar.current.startOfDay(for: .now)
+    }
+
+    private var isFlightWithinWeek: Bool {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let flightDay = cal.startOfDay(for: record.flightDate)
+        guard let deadline = cal.date(byAdding: .day, value: 7, to: today) else { return false }
+        return flightDay >= today && flightDay <= deadline
     }
 
     private var screenBackground: Color {
@@ -528,7 +560,8 @@ struct BoardingPassDetailView: View {
     private func adjustYear(_ delta: Int) {
         Haptics.tap()
         let newYear = currentFlightYear + delta
-        guard newYear >= 2000, newYear <= 2100 else { return }
+        let maxYear = Calendar.current.component(.year, from: .now) + 1
+        guard newYear >= 2000, newYear <= maxYear else { return }
         BoardingPassStore.shared.updateFlightYear(newYear, for: record)
     }
 

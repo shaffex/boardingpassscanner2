@@ -1,6 +1,6 @@
 <body>
     <list navigationTitle="$TEXT_SETTINGS">
-        <toggle key="DEBUG_MODE">DEBUG_MODE</toggle>
+<!--        <toggle key="DEBUG_MODE">DEBUG_MODE</toggle>-->
         
         <button action="showBanner:type:error;text:This is a test message">showBanner:type:error</button>
         
@@ -11,15 +11,10 @@
         <section header="About">
             <text badge="Shaffex Limited">Developer</text>
             <text badge="$SYSTEM_BUNDLE.VERSION">Version</text>
-            <group if="$DEBUG_MODE">
             <text  badge="$SYSTEM_BUNDLE.BUILD">Build</text>
             
             
-            </group>
-            
-            
-            
-            <button if="$DEBUG_MODE" foregroundColor="accentColor" action="openUrl:itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=1166018608&amp;onlyLatestVersion=true&amp;pageNumber=0&amp;sortOrdering=1&amp;type=Purple+Software">Rate this app</button>
+            <button foregroundColor="accentColor" action="openUrl:itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=1166018608&amp;onlyLatestVersion=true&amp;pageNumber=0&amp;sortOrdering=1&amp;type=Purple+Software">Rate this app</button>
             <navigationlink destination="settings_privacyPolicy">Privacy Policy</navigationlink>
             <navigationlink destination="settings_contactUs">Contact us</navigationlink>
         </section>

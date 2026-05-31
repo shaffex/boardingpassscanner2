@@ -83,7 +83,6 @@ struct PassFieldsEditorView: View {
         .onChange(of: backFields)      { _, _ in save() }
         .onAppear {
             removeDuplicateFieldsFromEditor()
-            save()
         }
     }
 
@@ -195,6 +194,10 @@ struct PassFieldsEditorView: View {
                     RoundedRectangle(cornerRadius: 9, style: .continuous)
                         .strokeBorder(.white.opacity(0.25), style: StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
                 }
+            }
+            .dropDestination(for: PassFieldEntry.self) { items, _ in
+                guard let dropped = items.first else { return false }
+                return drop(dropped, to: .header, at: 0)
             }
         } else {
             ForEach($headerFields) { $entry in

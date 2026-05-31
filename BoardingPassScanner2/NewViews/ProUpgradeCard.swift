@@ -102,7 +102,7 @@ struct ProUpgradeCard: View {
                 state: .included
             )
             featureRow(
-                title: "Apple Wallet colors & logo",
+                title: "Customize Wallet colors",
                 subtitle: "Make your boarding pass uniquely yours",
                 icon: "paintpalette.fill",
                 state: .included

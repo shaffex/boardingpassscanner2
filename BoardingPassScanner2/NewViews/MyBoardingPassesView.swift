@@ -86,16 +86,9 @@ struct MyBoardingPassesView: View {
                 )
                 .foregroundStyle(primaryText)
             } else {
-                VStack {
+                VStack() {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 22) {
-                            Text("My Passes")
-                                .font(.system(size: 48, weight: .semibold, design: .default))
-                                .foregroundStyle(primaryText)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            
-                            searchField
-                            
                             segmentControl
                             
                             LazyVStack(spacing: 16) {
@@ -124,10 +117,12 @@ struct MyBoardingPassesView: View {
                     }
                     // admob
                     MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID)\"/></body>")
+                        .padding(.bottom, 8)
                 }
             }
         }
-        .navigationTitle("")
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search name, route, flight...")
+        .navigationTitle("My Passes")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarColorScheme(colorScheme == .dark ? .dark : .light, for: .navigationBar)
@@ -170,19 +165,10 @@ struct MyBoardingPassesView: View {
             Text("Are you sure you want to delete all saved boarding passes?\n\nPlease note, this action is irreversible.")
         }
         .onAppear {
-            refreshDebugMode()
-
             if upcomingRecords.isEmpty, !pastRecords.isEmpty {
                 selectedSegment = .past
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
-            refreshDebugMode()
-        }
-    }
-
-    private func refreshDebugMode() {
-        debugMode = MagicUiBrisge.isDebugModeEnabled
     }
 
     private func importCodes(from result: Result<URL, Error>) {
@@ -238,27 +224,6 @@ struct MyBoardingPassesView: View {
     }
 
 
-    private var searchField: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.secondary)
-
-            TextField("Search name, route, flight...", text: $searchText)
-                .textInputAutocapitalization(.never)
-                .disableAutocorrection(true)
-                .font(.title3)
-                .foregroundStyle(primaryText)
-        }
-        .padding(.horizontal, 18)
-        .frame(height: 58)
-        .background(controlBackground, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(borderColor, lineWidth: 1)
-        }
-    }
-
     private var segmentControl: some View {
         HStack(spacing: 18) {
             segmentButton(.upcoming, count: upcomingRecords.count)
@@ -304,14 +269,14 @@ struct MyBoardingPassesView: View {
                 Haptics.tap()
                 isShowingImporter = true
             } label: {
-                Label("Import codes", systemImage: "tray.and.arrow.down")
+                Label("Import passes", systemImage: "tray.and.arrow.down")
             }
             Button {
                 Haptics.tap()
                 exportDocument = BoardingPassCSVDocument(records: Array(records))
                 isShowingExporter = true
             } label: {
-                Label("Export codes", systemImage: "tray.and.arrow.up")
+                Label("Export passes", systemImage: "tray.and.arrow.up")
             }
             .disabled(records.isEmpty)
             Button(role: .destructive) {

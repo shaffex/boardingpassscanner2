@@ -16,7 +16,6 @@ struct HomeView: View {
     @Query private var records: [BoardingPassRecord]
 
     @State private var selectedUpcomingFlight: SelectedFlight?
-    @State private var isDebugModeEnabled = false
     @State private var showCameraPermissionSheet = false
 
     private var upcomingFlight: BoardingPassRecord? {
@@ -26,10 +25,6 @@ struct HomeView: View {
             .filter { Calendar.current.startOfDay(for: $0.date) >= today }
             .min { $0.date < $1.date }?
             .record
-    }
-
-    private func refreshDebugMode() {
-        isDebugModeEnabled = MagicUiBrisge.isDebugModeEnabled
     }
 
     var body: some View {
@@ -92,7 +87,7 @@ struct HomeView: View {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     
-                    if isDebugModeEnabled {
+                    if MainConfig.TESTING_MODE_SHOW_TESTPASSES {
                         MagicUiView(string: """
 <body>
 <remoteview src="resource:DEBUG_TestPasses"/>
@@ -102,12 +97,9 @@ struct HomeView: View {
                 }
                 
                 MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID)\"/></body>")
+                    .padding(.bottom, 8)
             }
             .navigationTitle(String(localized: "TEXT_HOME"))
-            .onAppear(perform: refreshDebugMode)
-            .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
-                refreshDebugMode()
-            }
             .sheet(item: $selectedUpcomingFlight) { selectedFlight in
                 NavigationStack {
                     BoardingPassDetailView(record: selectedFlight.record)

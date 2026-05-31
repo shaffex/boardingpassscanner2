@@ -64,21 +64,30 @@ struct MyBannerView: View {
     let adSize: AdSize
     @State private var isAdLoaded = true
 
+    @ObservedObject private var store = StoreManager.shared
+    private var isProOwned: Bool {
+        store.purchasedProductIDs.contains(StoreManager.productID_UnlockPro)
+    }
+    
 //    @State private var adSize: AdSize = largeAnchoredAdaptiveBanner(width: UIScreen.main.bounds.width)
 
     var body: some View {
 //        let adSize: AdSize = largeAnchoredAdaptiveBanner(width: UIScreen.main.bounds.width)
         //let adSize: AdSize = adSizeFor(cgSize: CGSize(width: 100, height: 50))
-        if isAdLoaded {
-            BannerViewContainer(adUnitID: adUnitID, adSize: adSize, isAdLoaded: $isAdLoaded)
-                .frame(width: adSize.size.width, height: adSize.size.height)
-//                .onGeometryChange(for: CGFloat.self, of: \.size.width) { newWidth in
-//                    adSize = largeAnchoredAdaptiveBanner(width: newWidth)
-//                }
-                .border(.red, width: 5)
-//                .onAppear() {
-//                    adSize = largeAnchoredAdaptiveBanner(width: UIScreen.main.bounds.width)
-//                }
+        
+        if !isProOwned {
+            
+            //if isAdLoaded {
+                BannerViewContainer(adUnitID: adUnitID, adSize: adSize, isAdLoaded: $isAdLoaded)
+                    .frame(width: adSize.size.width, height: adSize.size.height)
+                //                .onGeometryChange(for: CGFloat.self, of: \.size.width) { newWidth in
+                //                    adSize = largeAnchoredAdaptiveBanner(width: newWidth)
+                //                }
+                    //.border(.red, width: 5)
+                //                .onAppear() {
+                //                    adSize = largeAnchoredAdaptiveBanner(width: UIScreen.main.bounds.width)
+                //                }
+            //}
         }
     }
 }

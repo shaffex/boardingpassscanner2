@@ -12,11 +12,6 @@ struct ContentView: View {
     @StateObject private var bannerPresenter = BannerPresenter.shared
 
     init() {
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            MagicLocalisation.exportKeys()
-        }
-
         Task { @MainActor in
             BoardingPassStore.shared.prefetchParsed()
         }
@@ -53,6 +48,8 @@ struct ContentView: View {
         ZStack(alignment: .top) {
             MagicUiView(resource: "MainScreen")
                 .onFirstAppear {
+                    MagicLocalisation.exportKeys()
+                    
                     Task { @MainActor in
                         MigrationAssistant.checkMigration()
                     }

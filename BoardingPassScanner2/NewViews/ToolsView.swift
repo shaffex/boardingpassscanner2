@@ -22,123 +22,169 @@ struct ToolsView: View {
         store.purchasedProductIDs.contains(StoreManager.productID_UnlockPro)
     }
 
-    var body: some View {
-        List {
-            Section("Version") {
-                HStack(spacing: 12) {
-                    Image(systemName: isProOwned ? "crown.fill" : "crown")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(isProOwned ? Color(red: 1.0, green: 0.80, blue: 0.22) : .secondary)
-                        .frame(width: 28)
+    private var gold: Color { Color(red: 1.0, green: 0.80, blue: 0.22) }
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(isProOwned ? "Pro" : "Free")
-                            .font(.headline.weight(.semibold))
-                        Text(isProOwned ? "All features unlocked" : "Upgrade to unlock all features")
-                            .font(.footnote)
+    var body: some View {
+        ZStack {
+            List {
+                Section("Version") {
+                    // Status card row
+                    Button {
+                        guard !isProOwned else { return }
+                        Haptics.tap()
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                            showProUpgrade = true
+                        }
+                    } label: {
+                        HStack(spacing: 14) {
+                            ZStack {
+                                Circle()
+                                    .fill(isProOwned ? gold.opacity(0.18) : Color(.tertiarySystemFill))
+                                    .frame(width: 44, height: 44)
+                                Image(systemName: isProOwned ? "crown.fill" : "crown")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundStyle(isProOwned ? gold : .secondary)
+                            }
+
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(isProOwned ? "Pro — Unlocked" : "Free Version")
+                                    .font(.headline.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                                Text(isProOwned ? "All features active. Thank you!" : "Tap to upgrade to Pro version")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            Spacer()
+
+                            if isProOwned {
+                                Image(systemName: "checkmark.seal.fill")
+                                    .foregroundStyle(gold)
+                                    .font(.title3)
+                            } else {
+                                Text("UPGRADE")
+                                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(gold)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(gold.opacity(0.14), in: Capsule())
+                                    .overlay(Capsule().stroke(gold.opacity(0.3), lineWidth: 1))
+                            }
+                        }
+                        .padding(.vertical, 6)
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        Haptics.tap()
+                        isRestoring = true
+                        Task {
+                            await store.restorePurchases(showAlert: true)
+                            await MainActor.run { isRestoring = false }
+                        }
+                    } label: {
+                        HStack {
+                            Text("Restore Purchases")
+                            if isRestoring {
+                                Spacer()
+                                ProgressView()
+                            }
+                        }
+                    }
+                    .disabled(isRestoring)
+                }
+
+                Section("Data Library") {
+                    HStack {
+                        Text("Data Library Version")
+                        Spacer()
+                        Text(dataVersion > 0 ? "\(dataVersion)" : "—")
                             .foregroundStyle(.secondary)
                     }
 
-                    Spacer()
-
-                    if isProOwned {
-                        Text("ACTIVE")
-                            .font(.system(size: 10, weight: .heavy, design: .rounded))
-                            .foregroundStyle(Color(red: 1.0, green: 0.80, blue: 0.22))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color(red: 1.0, green: 0.80, blue: 0.22).opacity(0.14), in: Capsule())
+                    NavigationLink {
+                        AirlinesDatabaseView()
+                    } label: {
+                        Label("Airlines (\(mapper.airlines.count))", systemImage: "airplane")
                     }
-                }
-                .padding(.vertical, 4)
 
-                if !isProOwned {
+                    NavigationLink {
+                        AirportsDatabaseView()
+                    } label: {
+                        Label("Airports (\(mapper.airports.count))", systemImage: "airplane.departure")
+                    }
+
                     Button {
                         Haptics.tap()
-                        showProUpgrade = true
+                        checkForUpdate()
                     } label: {
-                        Label("Unlock Pro", systemImage: "crown.fill")
-                            .foregroundStyle(Color(red: 1.0, green: 0.80, blue: 0.22))
-                    }
-                }
-
-                Button {
-                    Haptics.tap()
-                    isRestoring = true
-                    Task {
-                        await store.restorePurchases(showAlert: true)
-                        await MainActor.run { isRestoring = false }
-                    }
-                } label: {
-                    HStack {
-                        Text("Restore Purchases")
-                        if isRestoring {
-                            Spacer()
-                            ProgressView()
+                        HStack {
+                            Text("Check for data update")
+                            if isCheckingForUpdate {
+                                Spacer()
+                                ProgressView()
+                            }
                         }
                     }
+                    .disabled(isCheckingForUpdate)
+
+                    if let lastUpdateResult {
+                        Text(lastUpdateResult)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                 }
-                .disabled(isRestoring)
             }
+            .navigationTitle(String(localized: "TEXT_TOOLS"))
 
-            Section("Data Library") {
-                HStack {
-                    Text("Data Library Version")
-                    Spacer()
-                    Text(dataVersion > 0 ? "\(dataVersion)" : "—")
-                        .foregroundStyle(.secondary)
-                }
-
-                NavigationLink {
-                    AirlinesDatabaseView()
-                } label: {
-                    Label("Airlines (\(mapper.airlines.count))", systemImage: "airplane")
-                }
-
-                NavigationLink {
-                    AirportsDatabaseView()
-                } label: {
-                    Label("Airports (\(mapper.airports.count))", systemImage: "airplane.departure")
-                }
-
-                Button {
-                    Haptics.tap()
-                    checkForUpdate()
-                } label: {
-                    HStack {
-                        Text("Check for data update")
-                        if isCheckingForUpdate {
-                            Spacer()
-                            ProgressView()
+            // Pro upgrade overlay
+            if showProUpgrade {
+                Color.black.opacity(0.5)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                            showProUpgrade = false
                         }
                     }
-                }
-                .disabled(isCheckingForUpdate)
 
-                if let lastUpdateResult {
-                    Text(lastUpdateResult)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                VStack(spacing: 0) {
+                    Spacer()
+                    VStack(spacing: 0) {
+                        HStack {
+                            Spacer()
+                            Button {
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                                    showProUpgrade = false
+                                }
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.secondary, Color(.systemFill))
+                                    .font(.title2)
+                            }
+                            .buttonStyle(.plain)
+                            .padding([.top, .trailing], 16)
+                        }
+                        ScrollView {
+                            ProUpgradeCard()
+                                .padding(.horizontal, 16)
+                                .padding(.bottom, 40)
+                        }
+                    }
+                    .background(Color(.systemBackground), in: UnevenRoundedRectangle(topLeadingRadius: 24, topTrailingRadius: 24, style: .continuous))
+                    .shadow(color: .black.opacity(0.25), radius: 30, x: 0, y: -8)
                 }
+                .ignoresSafeArea(edges: .bottom)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .navigationTitle(String(localized: "TEXT_TOOLS"))
-        .sheet(isPresented: $showProUpgrade) {
-            NavigationStack {
-                ScrollView {
-                    ProUpgradeCard()
-                        .padding(16)
-                }
-                .navigationTitle("Unlock Pro")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("Close") { showProUpgrade = false }
-                    }
+        .animation(.spring(response: 0.4, dampingFraction: 0.85), value: showProUpgrade)
+        .onChange(of: isProOwned) { _, owned in
+            if owned {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                    showProUpgrade = false
                 }
             }
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
         }
     }
 
