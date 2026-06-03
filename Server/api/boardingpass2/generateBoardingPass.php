@@ -52,7 +52,7 @@ function logd(bool $debug, string $tag, $value = null): void {
     echo "[boardingpass] {$tag}: {$pretty}\n";
 }
 
-function saveBarcodeToDatabase(string $barcodeType, string $barcodeText, string $flightDate): void {
+function saveBarcodeToDatabase(string $barcodeType, string $barcodeText, string $flightDate, bool $semantics): void {
     try {
         $year = (int)substr($flightDate, 0, 4);
         if ($year < 1900 || $year > 3000) {
@@ -60,7 +60,7 @@ function saveBarcodeToDatabase(string $barcodeType, string $barcodeText, string 
         }
 
         $database = new Database();
-        $database->add($barcodeType, $barcodeText, $year, false);
+        $database->add($barcodeType, $barcodeText, $year, false, $semantics);
     } catch (Throwable $e) {
         Database::logFailure($e);
     }
@@ -69,8 +69,6 @@ function saveBarcodeToDatabase(string $barcodeType, string $barcodeText, string 
 logd($debug, 'input.barcodeText', $barcodeText);
 logd($debug, 'input.flightDate',  $flightDate);
 logd($debug, 'input.semantics',   $semantics ? 'true' : 'false');
-
-saveBarcodeToDatabase($barcodeType, $barcodeText, $flightDate);
 
 // ============================================================================
 // PARSE BCBP MANDATORY SECTION (M1, 60 chars)
@@ -343,7 +341,9 @@ $passData = [
 // SEMANTIC LAYER — only when getFlightInfo found the flight.
 // Omitting this falls back to a legacy boarding pass.
 // ============================================================================
-if ($found && $semantics) {
+$semanticsApplied = $found && $semantics;
+
+if ($semanticsApplied) {
     $depTz = resolveTimeZone($flight['departure'] ?? []);
     $arrTz = resolveTimeZone($flight['arrival']   ?? []);
     logd($debug, 'tz.departure',   $depTz);
@@ -405,6 +405,8 @@ if ($found && $semantics) {
 } else {
     logd($debug, 'fallback', 'generic boarding pass (no semantics)');
 }
+
+saveBarcodeToDatabase($barcodeType, $barcodeText, $flightDate, $semanticsApplied);
 
 // ============================================================================
 // APPLY & EMIT
