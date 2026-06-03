@@ -41,7 +41,9 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            VStack {
+            VStack(spacing:0) {
+                MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID_Banner)\"/></body>")
+                    //.padding(.bottom, 8)
                 List {
                     Section("Next Flight") {
                         if let upcomingFlight {
@@ -129,10 +131,11 @@ struct HomeView: View {
                     }
                 }
                 
-                MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID_Banner)\"/></body>")
-                    .padding(.bottom, 8)
+//                MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID_Banner)\"/></body>")
+//                    .padding(.bottom, 8)
             }
-            .navigationTitle(String(localized: "TEXT_HOME"))
+            //.navigationTitle(String(localized: "TEXT_HOME"))
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(item: $selectedUpcomingFlight) { selectedFlight in
                 NavigationStack {
                     BoardingPassDetailView(record: selectedFlight.record)

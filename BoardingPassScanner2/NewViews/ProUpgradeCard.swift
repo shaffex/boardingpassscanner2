@@ -119,6 +119,12 @@ struct ProUpgradeCard: View {
                 icon: "icloud.fill",
                 state: .included
             )
+            featureRow(
+                title: "Priority support",
+                subtitle: "Get faster help when you need it",
+                icon: "bubble.left.and.bubble.right.fill",
+                state: .included
+            )
         }
         .padding(16)
         .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 16, style: .continuous))

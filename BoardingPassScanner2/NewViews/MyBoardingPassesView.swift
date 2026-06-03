@@ -87,6 +87,11 @@ struct MyBoardingPassesView: View {
                 .foregroundStyle(primaryText)
             } else {
                 VStack() {
+                    
+                    // admob
+                    MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID_Banner)\"/></body>")
+                        //.padding(.bottom, 8)
+                    
                     ScrollView {
                         VStack(alignment: .leading, spacing: 22) {
                             segmentControl
@@ -115,9 +120,9 @@ struct MyBoardingPassesView: View {
                         .padding(.top, 12)
                         .padding(.bottom, 28)
                     }
-                    // admob
-                    MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID_Banner)\"/></body>")
-                        .padding(.bottom, 8)
+//                    // admob
+//                    MagicUiView(string: "<body><admobview adUnitID=\"\(MainConfig.adUnitID_Banner)\"/></body>")
+//                        .padding(.bottom, 8)
                 }
             }
         }

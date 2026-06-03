@@ -39,6 +39,8 @@ struct AdmobBanner: SxViewProtocol {
             return AdSizeLeaderboard
         }
 
+        //return currentOrientationAnchoredAdaptiveBanner(width: UIScreen.main.bounds.width)
+        //return inlineAdaptiveBanner(width: UIScreen.main.bounds.width, maxHeight: 90.0)
         return largeAnchoredAdaptiveBanner(width: UIScreen.main.bounds.width)
     }
     

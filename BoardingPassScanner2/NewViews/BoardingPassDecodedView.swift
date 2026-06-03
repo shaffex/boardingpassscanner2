@@ -281,12 +281,12 @@ struct BoardingPassDecodedView: View {
     private func row(_ label: String, _ value: String, meaning: String? = nil, mono: Bool = false) -> some View {
         let display = value.isEmpty ? "—" : value
         return HStack(alignment: .firstTextBaseline, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(label)
                 if let meaning, !meaning.isEmpty, !value.isEmpty {
                     Text(meaning)
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
             }
             Spacer(minLength: 12)

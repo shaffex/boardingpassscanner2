@@ -184,7 +184,7 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
 
             //SxEventManager.shared.fireEvent(eventType: SxEventManager.EventType.onBarcodeDetected.rawValue)
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 PluginActions.shared.runAction("dismissSheet:item:sheetItem")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                     EventAddNewBarcode.fireNewBarcodeEvent(barcodeText: barcodeText, barcodeType: barcodeType)
