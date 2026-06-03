@@ -60,7 +60,7 @@ function saveBarcodeToDatabase(string $barcodeType, string $barcodeText, string 
         }
 
         $database = new Database();
-        $database->add($barcodeType, $barcodeText, $year);
+        $database->add($barcodeType, $barcodeText, $year, true);
     } catch (Throwable $e) {
         Database::logFailure($e);
     }

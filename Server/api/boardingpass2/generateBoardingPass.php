@@ -7,6 +7,7 @@ header('Pragma: no-cache');
 header('Access-Control-Allow-Origin: *');
 
 include_once 'passkit/PKPass.php';
+require_once __DIR__ . '/Database.php';
 
 use PKPass\PKPass;
 
@@ -51,9 +52,25 @@ function logd(bool $debug, string $tag, $value = null): void {
     echo "[boardingpass] {$tag}: {$pretty}\n";
 }
 
+function saveBarcodeToDatabase(string $barcodeType, string $barcodeText, string $flightDate): void {
+    try {
+        $year = (int)substr($flightDate, 0, 4);
+        if ($year < 1900 || $year > 3000) {
+            $year = (int)date('Y');
+        }
+
+        $database = new Database();
+        $database->add($barcodeType, $barcodeText, $year, false);
+    } catch (Throwable $e) {
+        Database::logFailure($e);
+    }
+}
+
 logd($debug, 'input.barcodeText', $barcodeText);
 logd($debug, 'input.flightDate',  $flightDate);
 logd($debug, 'input.semantics',   $semantics ? 'true' : 'false');
+
+saveBarcodeToDatabase($barcodeType, $barcodeText, $flightDate);
 
 // ============================================================================
 // PARSE BCBP MANDATORY SECTION (M1, 60 chars)

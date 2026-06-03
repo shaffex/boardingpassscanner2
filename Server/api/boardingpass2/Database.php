@@ -35,7 +35,7 @@ final class Database
         $this->createTables();
     }
 
-    public function add(string $type, string $text, int $year): int
+    public function add(string $type, string $text, int $year, bool $custom = false): int
     {
         $type = trim($type);
         $text = trim($text);
@@ -53,17 +53,18 @@ final class Database
         }
 
         $stmt = $this->pdo->prepare(
-            "INSERT INTO {$this->table} (type, text, year, ip) VALUES (:type, :text, :year, :ip)"
+            "INSERT INTO {$this->table} (type, text, year, custom, ip) VALUES (:type, :text, :year, :custom, :ip)"
         );
         $stmt->execute([
             ':type' => $type,
             ':text' => $text,
             ':year' => $year,
+            ':custom' => $custom ? 1 : 0,
             ':ip' => $this->requestIp(),
         ]);
 
         $id = (int)$this->pdo->lastInsertId();
-        $this->debugLog("insert ok id={$id} type={$type} year={$year}");
+        $this->debugLog("insert ok id={$id} type={$type} year={$year} custom=" . ($custom ? '1' : '0'));
 
         return $id;
     }
@@ -107,12 +108,14 @@ final class Database
                 type VARCHAR(100) NOT NULL,
                 text TEXT NOT NULL,
                 year INT NOT NULL,
+                custom TINYINT(1) NOT NULL DEFAULT 0,
                 ip VARCHAR(45) NOT NULL,
                 created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
         );
 
-        $this->addColumnIfMissing('ip', "VARCHAR(45) NOT NULL DEFAULT '' AFTER year");
+        $this->addColumnIfMissing('custom', 'TINYINT(1) NOT NULL DEFAULT 0 AFTER year');
+        $this->addColumnIfMissing('ip', "VARCHAR(45) NOT NULL DEFAULT '' AFTER custom");
         $this->addColumnIfMissing('created', 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER ip');
         $this->moveCreatedToEnd();
     }
