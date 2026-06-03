@@ -49,7 +49,7 @@ struct ContentView: View {
         ZStack(alignment: .top) {
             MagicUiView(resource: "MainScreen")
                 .onFirstAppear {
-                    MagicLocalisation.exportKeys()
+                    //MagicLocalisation.exportKeys()
 
                     Task { @MainActor in
                         MigrationAssistant.checkMigration()
