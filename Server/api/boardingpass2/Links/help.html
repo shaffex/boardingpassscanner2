@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Boarding Pass Scanner | User Guide</title>
+  <style>
+    :root{--bg:#000000;--ink:#ffffff;--muted:#8e8e93;--card:#1c1c1e;--line:#38383a;--brand:#0a84ff;--code-bg:rgba(255,255,255,0.1);--shadow:rgba(0,0,0,0.3);--brand-bg:rgba(10,132,255,0.15);--brand-border:rgba(10,132,255,0.3)}
+    @media (prefers-color-scheme: light){:root{--bg:#ffffff;--ink:#000000;--muted:#8e8e93;--card:#f2f2f7;--line:#c6c6c8;--brand:#007aff;--code-bg:rgba(0,0,0,0.05);--shadow:rgba(0,0,0,0.1);--brand-bg:rgba(0,122,255,0.1);--brand-border:rgba(0,122,255,0.2)}}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Roboto,Inter,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+    .wrap{max-width:880px;margin:0 auto;padding:32px 20px 80px}
+    header{background:linear-gradient(135deg, var(--brand-bg), transparent);border:1px solid var(--brand-border);border-radius:18px;padding:20px 18px 16px;box-shadow:0 16px 36px var(--shadow)}
+    h1{margin:0 0 6px;font-size:clamp(1.6rem,3.2vw,2.2rem)}
+    .muted{color:var(--muted)}
+    .card{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 24px var(--shadow)}
+    .pad{padding:18px}
+    h2{margin:.2rem 0 .6rem;font-size:1.2rem;display:flex;align-items:center;gap:10px}
+    h3{margin:1rem 0 .3rem;font-size:1.02rem}
+    a{color:var(--brand)}
+    ul,ol{margin:.2rem 0;padding-left:20px}
+    li{margin:.25rem 0}
+    .small{font-size:.92rem}
+    footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+    code{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--code-bg);padding:2px 6px;border-radius:6px}
+    .badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-bg);border:1px solid var(--brand-border);font-size:1rem}
+    .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+    .toc a{display:inline-block;padding:7px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none;font-size:.9rem}
+    .tip{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--brand-bg);border:1px solid var(--brand-border);font-size:.95rem}
+    .step{display:flex;gap:12px;align-items:flex-start;margin:12px 0}
+    .step .num{flex:0 0 26px;width:26px;height:26px;border-radius:999px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.9rem}
+    .step .body{flex:1}
+    .step h3{margin:.1rem 0 .2rem}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>User Guide</h1>
+      <div class="muted">Boarding Pass Scanner — everything you need for every flight</div>
+    </header>
+
+    <section class="card"><div class="pad">
+      <p>Boarding Pass Scanner turns the barcode on your boarding pass into a clean, readable pass you can keep, customise, add to Apple Wallet and <strong>track live</strong> right up to departure. Here's how to get the most out of it.</p>
+      <div class="toc">
+        <a href="#add">Adding a pass</a>
+        <a href="#passes">My Passes</a>
+        <a href="#details">Pass details</a>
+        <a href="#tracking">Live flight tracking</a>
+        <a href="#wallet">Apple Wallet</a>
+        <a href="#tools">Tools</a>
+        <a href="#settings">Settings</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#help">Get help</a>
+      </div>
+    </div></section>
+
+    <section class="card" id="add"><div class="pad">
+      <h2><span class="badge">✈️</span> Adding a boarding pass</h2>
+      <p>From the <strong>Home</strong> tab you have three quick ways to add a pass:</p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <h3>Scan with the camera</h3>
+          <p>Tap <strong>Scan Boarding Pass</strong> and point your camera at the barcode (PDF417, Aztec or QR). It's detected automatically — no need to press a shutter. Grant camera access the first time you scan.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <h3>Import from Photos</h3>
+          <p>Tap <strong>Import Boarding Pass</strong> to pick a screenshot or photo of a boarding pass from your photo library. The barcode is read directly from the image on your device.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <h3>Paste from the clipboard</h3>
+          <p>Copied a barcode string or screenshot from an airline email or app? Tap <strong>Paste Boarding Pass</strong> and we'll detect it from your clipboard.</p>
+        </div>
+      </div>
+
+      <div class="tip">Boarding Pass Scanner reads the standard <strong>IATA BCBP</strong> data encoded in the barcode — passenger name, flight number, origin and destination, seat, sequence number and more.</div>
+    </div></section>
+
+    <section class="card" id="passes"><div class="pad">
+      <h2><span class="badge">🎫</span> My Passes</h2>
+      <p>Every pass you add appears in the <strong>My Passes</strong> tab. From here you can:</p>
+      <ul>
+        <li>Browse all your saved boarding passes.</li>
+        <li>Tap any pass to open its full details.</li>
+        <li>Swipe to delete a pass you no longer need.</li>
+      </ul>
+      <p>Your next upcoming flight is also surfaced at the top of the <strong>Home</strong> tab under <em>Next Flight</em>, so it's always one tap away.</p>
+    </div></section>
+
+    <section class="card" id="details"><div class="pad">
+      <h2><span class="badge">🔎</span> Pass details &amp; customisation</h2>
+      <p>Open a pass to see the live barcode plus all of its decoded fields. You can:</p>
+      <ul>
+        <li>Show the scannable barcode full-screen at the gate.</li>
+        <li>View the decoded IATA BCBP fields for the flight.</li>
+        <li><strong>Customise pass fields</strong> — choose which details appear and personalise the look of your pass.</li>
+      </ul>
+      <p class="small muted">Note: pass customisation is disabled while live flight tracking is active for that pass (see below).</p>
+    </div></section>
+
+    <section class="card" id="tracking"><div class="pad">
+      <h2><span class="badge">📍</span> Live flight tracking</h2>
+      <p>This is one of the most useful features in the app. When you enable <strong>Flight Tracking</strong> on a pass, Boarding Pass Scanner creates a <strong>Live Activity</strong> for supported flights so you can follow your flight directly from the <strong>Lock Screen</strong> and <strong>Dynamic Island</strong> — without even opening the app.</p>
+
+      <h3>How to turn it on</h3>
+      <ol>
+        <li>Open a boarding pass from <strong>My Passes</strong> or <em>Next Flight</em>.</li>
+        <li>Find the <strong>Flight Tracking</strong> panel.</li>
+        <li>Switch on <strong>Enable flight tracking</strong>.</li>
+      </ol>
+
+      <h3>What you get</h3>
+      <ul>
+        <li>A Live Activity on your Lock Screen and in the Dynamic Island for supported flights.</li>
+        <li>Up-to-date flight information at a glance as your departure approaches.</li>
+        <li>Your boarding pass can be shown automatically on the Lock Screen around departure time.</li>
+      </ul>
+
+      <h3>Lock Screen timing</h3>
+      <p>The app tries to detect your departure time from the flight number automatically. You can override it in the <strong>Lock Screen Timing</strong> panel — this controls when the boarding pass is shown automatically on your Lock Screen.</p>
+
+      <div class="tip">Live tracking works for <strong>supported flights</strong>. While tracking is active for a pass, customisation of that pass is paused so the live data stays accurate.</div>
+    </div></section>
+
+    <section class="card" id="wallet"><div class="pad">
+      <h2><span class="badge">📲</span> Add to Apple Wallet</h2>
+      <p>From a pass's detail screen, tap <strong>Add to Apple Wallet</strong> to create a native Wallet pass for your flight. Once it's in Wallet, iOS can surface it on your Lock Screen near departure, and you can present it at the gate just like an airline's own pass.</p>
+    </div></section>
+
+    <section class="card" id="tools"><div class="pad">
+      <h2><span class="badge">🛠️</span> Tools</h2>
+      <p>The <strong>Tools</strong> tab gives you a few extra capabilities:</p>
+      <ul>
+        <li><strong>Data Library</strong> — built-in airline and airport databases used to turn codes into friendly names. You can check for and download data updates here.</li>
+        <li><strong>Import / export passes</strong> — back up your boarding passes or move them between devices.</li>
+        <li>Report incorrect airline or airport data so we can fix it.</li>
+      </ul>
+    </div></section>
+
+    <section class="card" id="settings"><div class="pad">
+      <h2><span class="badge">⚙️</span> Settings</h2>
+      <ul>
+        <li><strong>Show barcode text</strong> — display the raw barcode string beneath the code.</li>
+        <li><strong>Show seat number on barcode</strong> — keep your seat visible on the scannable view.</li>
+        <li><strong>About</strong> — app version, links to rate the app, the Privacy Policy and Contact Us.</li>
+      </ul>
+    </div></section>
+
+    <section class="card" id="privacy"><div class="pad">
+      <h2><span class="badge">🔒</span> Your privacy</h2>
+      <p><strong>Your boarding passes stay on your device.</strong> We don't collect or store the contents of your passes. The camera processes barcodes on-device, and imported images are read locally. See the full <a href="privacyPolicy.html">Privacy Policy</a> for details.</p>
+    </div></section>
+
+    <section class="card" id="help"><div class="pad">
+      <h2><span class="badge">💬</span> Need more help?</h2>
+      <p>Can't scan a pass, or spotted incorrect flight data? We're happy to help.</p>
+      <ul>
+        <li>Make sure the whole barcode is in frame and well lit when scanning.</li>
+        <li>If a screenshot won't import, try a clearer, uncropped image.</li>
+        <li>Still stuck? Email us at <a href="mailto:support@shaffex.com">support@shaffex.com</a> or use <strong>Contact Us</strong> in Settings.</li>
+      </ul>
+    </div></section>
+
+    <footer>
+      © <span id="year"></span> shaffex. All rights reserved.
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
