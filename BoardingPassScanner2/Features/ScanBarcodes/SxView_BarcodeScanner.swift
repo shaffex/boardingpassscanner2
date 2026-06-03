@@ -62,12 +62,65 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
         context.coordinator.captureSession = captureSession
         context.coordinator.batchMode = batch
 
+        if batch {
+            setupBatchOverlay(in: viewController, coordinator: context.coordinator)
+        }
+
         DispatchQueue.global(qos: .userInitiated).async {
             // this must be called from background thread to prevent blocking of UI
             captureSession.startRunning()
         }
 
         return viewController
+    }
+
+    /// Builds the prominent in-sheet feedback pill shown while batch scanning.
+    private func setupBatchOverlay(in viewController: UIViewController, coordinator: Coordinator) {
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        container.layer.cornerRadius = 20
+        container.layer.cornerCurve = .continuous
+        container.alpha = 0
+
+        let countLabel = UILabel()
+        countLabel.font = .systemFont(ofSize: 34, weight: .heavy)
+        countLabel.textColor = .white
+        countLabel.textAlignment = .center
+        countLabel.adjustsFontSizeToFitWidth = true
+        countLabel.minimumScaleFactor = 0.6
+
+        let messageLabel = UILabel()
+        messageLabel.font = .systemFont(ofSize: 16, weight: .semibold)
+        messageLabel.textColor = .systemYellow
+        messageLabel.textAlignment = .center
+        messageLabel.numberOfLines = 1
+        messageLabel.isHidden = true
+
+        let stack = UIStackView(arrangedSubviews: [countLabel, messageLabel])
+        stack.axis = .vertical
+        stack.alignment = .center
+        stack.spacing = 2
+        stack.translatesAutoresizingMaskIntoConstraints = false
+
+        container.addSubview(stack)
+        viewController.view.addSubview(container)
+
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 14),
+            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -14),
+            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 22),
+            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -22),
+
+            container.centerXAnchor.constraint(equalTo: viewController.view.centerXAnchor),
+            container.topAnchor.constraint(equalTo: viewController.view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            container.leadingAnchor.constraint(greaterThanOrEqualTo: viewController.view.leadingAnchor, constant: 24),
+            container.trailingAnchor.constraint(lessThanOrEqualTo: viewController.view.trailingAnchor, constant: -24),
+        ])
+
+        coordinator.feedbackContainer = container
+        coordinator.countLabel = countLabel
+        coordinator.messageLabel = messageLabel
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
@@ -87,6 +140,11 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
         private var isCoolingDown = false
         private var lastHandledText: String?
         private var addedCount = 0
+
+        // In-sheet feedback overlay (batch mode).
+        weak var feedbackContainer: UIView?
+        weak var countLabel: UILabel?
+        weak var messageLabel: UILabel?
 
         private func remapBarCodeType(_ type: String) -> String {
             switch type {
@@ -151,19 +209,46 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
                 switch BoardingPassAdder.add(text: barcodeText, type: type) {
                 case .added:
                     self.addedCount += 1
-                    SxMagicVariables.shared.setValue("✓ \(self.addedCount) added", forKey: "batchScanCountLabel")
-                    SxMagicVariables.shared.setValue("", forKey: "batchScanMessage")
+                    self.showFeedback(count: "✓ \(self.addedCount) added", message: nil)
                     PluginActions.shared.runAction("playSystemSound:4095")
                 case .duplicate:
-                    SxMagicVariables.shared.setValue("Already in your passes", forKey: "batchScanMessage")
+                    self.showFeedback(count: self.countText(), message: "Already added")
                 case .invalid:
-                    SxMagicVariables.shared.setValue("Not a boarding pass", forKey: "batchScanMessage")
+                    self.showFeedback(count: self.countText(), message: "Not a boarding pass")
                 }
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
                 self?.clearBoundingBoxes()
                 self?.isCoolingDown = false
+                // Keep the running count, clear only the transient message.
+                self?.messageLabel?.isHidden = true
+                self?.messageLabel?.text = nil
+            }
+        }
+
+        private func countText() -> String? {
+            addedCount > 0 ? "✓ \(addedCount) added" : nil
+        }
+
+        /// Shows the big count and an optional transient message in the overlay pill.
+        @MainActor
+        private func showFeedback(count: String?, message: String?) {
+            if let count {
+                countLabel?.text = count
+                countLabel?.isHidden = false
+            } else {
+                countLabel?.isHidden = (countLabel?.text?.isEmpty ?? true)
+            }
+
+            messageLabel?.text = message
+            messageLabel?.isHidden = (message == nil)
+
+            guard let container = feedbackContainer else { return }
+            container.alpha = 1
+            container.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.4) {
+                container.transform = .identity
             }
         }
 
@@ -198,8 +283,6 @@ struct SxView_BarcodeScanner: SxViewProtocol {
                 .onAppear() {
                     SxMagicVariables.shared.setValue("", forKey: key + ".text")
                     SxMagicVariables.shared.setValue("", forKey: key + ".type")
-                    SxMagicVariables.shared.setValue("", forKey: "batchScanCountLabel")
-                    SxMagicVariables.shared.setValue("", forKey: "batchScanMessage")
                 }
         } else {
             Text("Please provide key for barcode scanner")

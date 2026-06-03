@@ -34,6 +34,14 @@ extension BoardingPassRecord {
         boardingPass?.legs ?? []
     }
 
+    var conditional: BoardingPassConditional? {
+        BoardingPassConditional(parsing: text)
+    }
+
+    var isValidBoardingPass: Bool {
+        (try? BoardingPass(parsing: text)) != nil
+    }
+
     var name: String {
         boardingPass?.passengerName.displayName ?? "Unknown passenger"
     }

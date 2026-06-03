@@ -28,6 +28,7 @@ struct BoardingPassDetailView: View {
     @State private var departureTimeOverride: Date? = nil
 
     @AppStorage("passFieldsConfigJSON") private var passFieldsConfigJSON: String = ""
+    @AppStorage("showDecodedFieldsButton") private var showDecodedFieldsButton = false
     @ObservedObject private var store = StoreManager.shared
 
     private var isProOwned: Bool {
@@ -67,6 +68,19 @@ struct BoardingPassDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarColorScheme(colorScheme == .dark ? .dark : .light, for: .navigationBar)
+        .toolbar {
+            if showDecodedFieldsButton {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        Haptics.tap()
+                        showDecodedSheet = true
+                    } label: {
+                        Image(systemName: "list.bullet.rectangle")
+                    }
+                    .accessibilityLabel("Decoded fields")
+                }
+            }
+        }
         .onAppear {
             if #unavailable(iOS 26) { passSemanticsEnabled = false }
             
@@ -213,11 +227,21 @@ struct BoardingPassDetailView: View {
                     .foregroundStyle(primaryText)
                 Text("PRO")
                     .font(.system(size: 10, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color(red: 1.0, green: 0.80, blue: 0.22))
-                    .padding(.horizontal, 7)
+                    .tracking(0.5)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Color(red: 1.0, green: 0.80, blue: 0.22).opacity(0.15), in: Capsule())
-                    .overlay(Capsule().stroke(Color(red: 1.0, green: 0.80, blue: 0.22).opacity(0.3), lineWidth: 1))
+                    .background(
+                        LinearGradient(
+                            colors: [Color(red: 1.0, green: 0.74, blue: 0.20),
+                                     Color(red: 0.98, green: 0.52, blue: 0.10)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        in: Capsule()
+                    )
+                    .overlay(Capsule().stroke(Color.white.opacity(0.35), lineWidth: 0.5))
+                    .shadow(color: Color(red: 0.98, green: 0.52, blue: 0.10).opacity(0.45), radius: 4, x: 0, y: 2)
             }
 
             HStack {

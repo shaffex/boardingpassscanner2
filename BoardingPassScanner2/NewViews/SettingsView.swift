@@ -17,8 +17,9 @@ private struct EmbeddedWebView: UIViewRepresentable {
 }
 
 struct SettingsView: View {
-    @AppStorage("showBarcodeText")   private var showBarcodeText   = true
-    @AppStorage("showSeatOnBarcode") private var showSeatOnBarcode = true
+    @AppStorage("showBarcodeText")        private var showBarcodeText        = true
+    @AppStorage("showSeatOnBarcode")      private var showSeatOnBarcode      = true
+    @AppStorage("showDecodedFieldsButton") private var showDecodedFieldsButton = false
 
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
@@ -35,6 +36,9 @@ struct SettingsView: View {
                 }
                 Toggle(isOn: $showSeatOnBarcode) {
                     Text("Show seat number on barcode")
+                }
+                Toggle(isOn: $showDecodedFieldsButton) {
+                    Text("Show decoded fields")
                 }
             }
 
