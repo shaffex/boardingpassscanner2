@@ -464,6 +464,28 @@
         }
       }
     },
+    "TEXT_BATCH_SCAN_BOARDING_PASS" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Batch Scan"
+          }
+        }
+      }
+    },
+    "TEXT_BATCH_SCAN_BOARDING_PASS_DESCRIPTION" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan several passes in a row"
+          }
+        }
+      }
+    },
     "TEXT_SCAN_BOARDING_DESCRIPTION" : {
       "extractionState" : "manual",
       "localizations" : {

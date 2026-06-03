@@ -19,6 +19,9 @@
     
     <!--    For displaying camera scanner sheet-->
     <remoteview id="scannerView" src="resource:ScannerView"/>
+
+    <!--    For displaying the batch (continuous) camera scanner sheet-->
+    <remoteview id="batchScannerView" src="resource:BatchScannerView"/>
     
     <remoteview id="sheetScanSimulatorView" src="file:live/SXML/DebugOnly/ScanSimulator.xml"/>
     

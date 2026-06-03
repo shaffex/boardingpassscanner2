@@ -69,7 +69,15 @@ struct HomeView: View {
                             ) {
                                 requestCameraAndScan()
                             }
-                            
+
+                            actionButton(
+                                title: String(localized: "TEXT_BATCH_SCAN_BOARDING_PASS"),
+                                description: String(localized: "TEXT_BATCH_SCAN_BOARDING_PASS_DESCRIPTION"),
+                                systemImage: "square.stack.3d.up"
+                            ) {
+                                requestCameraAndScan(batch: true)
+                            }
+
                             actionButton(
                                 title: String(localized: "TEXT_IMPORT_BOARDING_PASS"),
                                 description: String(localized: "TEXT_IMPORT_BOARDING_PASS_DESCRIPTION"),
@@ -152,15 +160,16 @@ struct HomeView: View {
         }
     }
 
-    private func requestCameraAndScan() {
+    private func requestCameraAndScan(batch: Bool = false) {
+        let presentScanner = "presentSheet:item:sheetItem;id:\(batch ? "batchScannerView" : "scannerView")"
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
-            PluginActions.shared.runAction("presentSheet:item:sheetItem;id:scannerView")
+            PluginActions.shared.runAction(presentScanner)
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 DispatchQueue.main.async {
                     if granted {
-                        PluginActions.shared.runAction("presentSheet:item:sheetItem;id:scannerView")
+                        PluginActions.shared.runAction(presentScanner)
                     } else {
                         showCameraPermissionSheet = true
                     }

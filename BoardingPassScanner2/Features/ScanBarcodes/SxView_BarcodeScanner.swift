@@ -14,7 +14,8 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
     let key: String
     let rectColor: String
     let rectWidth: Double
-    
+    let batch: Bool
+
     func makeCoordinator() -> Coordinator {
         Coordinator()
     }
@@ -59,6 +60,7 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
         context.coordinator.rectColor = UIColor(Color(hex: rectColor))
         context.coordinator.rectWidth = rectWidth
         context.coordinator.captureSession = captureSession
+        context.coordinator.batchMode = batch
 
         DispatchQueue.global(qos: .userInitiated).async {
             // this must be called from background thread to prevent blocking of UI
@@ -79,6 +81,12 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
         var rectWidth = 2.0
         var captureSession: AVCaptureSession?
 
+        // Batch scanning: keep the camera running and add every detected pass
+        // until the user dismisses the sheet.
+        var batchMode = false
+        private var isCoolingDown = false
+        private var lastHandledText: String?
+
         private func remapBarCodeType(_ type: String) -> String {
             switch type {
             case "org.iso.QRCode": return "qr"
@@ -93,50 +101,77 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
         }
         
         func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-            if let metadataObject = metadataObjects.first {
-                guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
-                guard let stringValue = readableObject.stringValue else { return }
-                
-                let barcodeText: String = stringValue
-                let barcodeType: String = readableObject.type.rawValue
-                
-                print("Barcode Text: \(barcodeText)")
-                print("Barcode Type: \(barcodeType)")
-                
-                SxMagicVariables.shared.setValue(barcodeText, forKey: self.key + ".text")
-                SxMagicVariables.shared.setValue(remapBarCodeType(barcodeType), forKey: self.key + ".type")
+            guard let metadataObject = metadataObjects.first,
+                  let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
+                  let stringValue = readableObject.stringValue else { return }
 
-                // Draw rectangle over detected bar code
-                DispatchQueue.main.async {
-                    // Remove any existing layers.
-                    self.previewLayer.sublayers?.filter({ $0 is CAShapeLayer }).forEach({ $0.removeFromSuperlayer() })
+            let barcodeText: String = stringValue
+            let barcodeType: String = readableObject.type.rawValue
 
-                    // Create a new layer for the bounding box.
-                    let shapeLayer = CAShapeLayer()
-                    shapeLayer.strokeColor = self.rectColor.cgColor
-                    shapeLayer.fillColor = UIColor.clear.cgColor
-                    shapeLayer.lineWidth = self.rectWidth
+            print("Barcode Text: \(barcodeText)")
+            print("Barcode Type: \(barcodeType)")
 
-                    // Convert the bounding box to the preview layer's coordinate system.
-                    let transformedMetadataObject = self.previewLayer.transformedMetadataObject(for: metadataObject)
-                    shapeLayer.path = UIBezierPath(rect: transformedMetadataObject!.bounds).cgPath
+            if batchMode {
+                handleBatchDetection(metadataObject, barcodeText: barcodeText, barcodeType: barcodeType)
+                return
+            }
 
-                    // Add the bounding box to the preview layer.
-                    self.previewLayer.addSublayer(shapeLayer)
-                }
-                
-                captureSession?.stopRunning()
-                
-                //SxEventManager.shared.fireEvent(eventType: SxEventManager.EventType.onBarcodeDetected.rawValue)
-                
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    PluginActions.shared.runAction("dismissSheet:item:sheetItem")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                        EventAddNewBarcode.fireNewBarcodeEvent(barcodeText: barcodeText, barcodeType: barcodeType)
-                    }
+            SxMagicVariables.shared.setValue(barcodeText, forKey: self.key + ".text")
+            SxMagicVariables.shared.setValue(remapBarCodeType(barcodeType), forKey: self.key + ".type")
+
+            drawBoundingBox(for: metadataObject)
+
+            captureSession?.stopRunning()
+
+            //SxEventManager.shared.fireEvent(eventType: SxEventManager.EventType.onBarcodeDetected.rawValue)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                PluginActions.shared.runAction("dismissSheet:item:sheetItem")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    EventAddNewBarcode.fireNewBarcodeEvent(barcodeText: barcodeText, barcodeType: barcodeType)
                 }
             }
+        }
+
+        /// Adds the detected pass and keeps the camera running so the user can scan
+        /// the next pass. The same code is ignored while the rectangle is shown and
+        /// until a different barcode appears, so a pass left in frame isn't re-added.
+        private func handleBatchDetection(_ metadataObject: AVMetadataObject, barcodeText: String, barcodeType: String) {
+            guard !isCoolingDown, barcodeText != lastHandledText else { return }
+
+            lastHandledText = barcodeText
+            isCoolingDown = true
+
+            SxMagicVariables.shared.setValue(barcodeText, forKey: self.key + ".text")
+            SxMagicVariables.shared.setValue(remapBarCodeType(barcodeType), forKey: self.key + ".type")
+
+            drawBoundingBox(for: metadataObject)
+            EventAddNewBarcode.fireNewBarcodeEvent(barcodeText: barcodeText, barcodeType: barcodeType)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+                self?.clearBoundingBoxes()
+                self?.isCoolingDown = false
+            }
+        }
+
+        private func drawBoundingBox(for metadataObject: AVMetadataObject) {
+            DispatchQueue.main.async {
+                self.clearBoundingBoxes()
+
+                guard let transformed = self.previewLayer.transformedMetadataObject(for: metadataObject) else { return }
+
+                let shapeLayer = CAShapeLayer()
+                shapeLayer.strokeColor = self.rectColor.cgColor
+                shapeLayer.fillColor = UIColor.clear.cgColor
+                shapeLayer.lineWidth = self.rectWidth
+                shapeLayer.path = UIBezierPath(rect: transformed.bounds).cgPath
+
+                self.previewLayer.addSublayer(shapeLayer)
+            }
+        }
+
+        private func clearBoundingBoxes() {
+            previewLayer.sublayers?.filter { $0 is CAShapeLayer }.forEach { $0.removeFromSuperlayer() }
         }
     }
 }
@@ -146,7 +181,7 @@ struct SxView_BarcodeScanner: SxViewProtocol {
 
     var body: some View {
         if let key = node.getAttribute("key") {
-            BarcodeScannerView(key: key, rectColor: node.getAttribute("rectColor") ?? "red", rectWidth: node.getAttribute("rectWidth")?.convertToDouble() ?? 2.0)
+            BarcodeScannerView(key: key, rectColor: node.getAttribute("rectColor") ?? "red", rectWidth: node.getAttribute("rectWidth")?.convertToDouble() ?? 2.0, batch: node.getAttribute("batch") == "true")
                 .onAppear() {
                     SxMagicVariables.shared.setValue("", forKey: key + ".text")
                     SxMagicVariables.shared.setValue("", forKey: key + ".type")
