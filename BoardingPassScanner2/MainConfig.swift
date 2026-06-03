@@ -17,7 +17,7 @@ struct MainConfig {
     static let TESTING_MODE = true
     
     // Show test passes from DEBUG_TestPAsses.xml
-    static let TESTING_MODE_SHOW_TESTPASSES = true
+    static let TESTING_MODE_SHOW_TESTPASSES = false
     
     // Show debug request what are we passing to API call
     static let TESTING_MODE_SHOW_WALLET_DEBUG_REQUEST = false

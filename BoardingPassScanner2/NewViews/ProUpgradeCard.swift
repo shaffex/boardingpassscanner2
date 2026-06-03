@@ -13,7 +13,9 @@ struct ProUpgradeCard: View {
     @State private var isFetchingProducts = false
 
     private var isOwned: Bool {
-        store.purchasedProductIDs.contains(StoreManager.productID_UnlockPro)
+        // Use the cached flag so the card doesn't flash for Pro users on launch
+        // while StoreKit is still resolving entitlements. Reset on refund.
+        StoreManager.cachedIsProOwned || store.purchasedProductIDs.contains(StoreManager.productID_UnlockPro)
     }
 
     private var proProduct: Product? {

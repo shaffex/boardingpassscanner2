@@ -17,8 +17,22 @@ final class StoreManager: ObservableObject {
     
     static let productID_UnlockPro: String = "com.shaffex.boardingpassscanner.unlockpro"
 
+    /// Cached Pro ownership, persisted so ad-gating can decide instantly on launch
+    /// (before StoreKit finishes resolving entitlements). Kept in sync with the real
+    /// state below, and reset to `false` automatically on refund/revoke.
+    private static let cachedProOwnedKey = "cachedProOwned"
+
+    static var cachedIsProOwned: Bool {
+        get { UserDefaults.standard.bool(forKey: cachedProOwnedKey) }
+        set { UserDefaults.standard.set(newValue, forKey: cachedProOwnedKey) }
+    }
+
     @Published var products: [Product] = []
-    @Published var purchasedProductIDs: Set<String> = []
+    @Published var purchasedProductIDs: Set<String> = [] {
+        didSet {
+            StoreManager.cachedIsProOwned = purchasedProductIDs.contains(StoreManager.productID_UnlockPro)
+        }
+    }
 
     private let productIDs = [productID_UnlockPro]
     private var isPurchaseInProgress: Bool = false

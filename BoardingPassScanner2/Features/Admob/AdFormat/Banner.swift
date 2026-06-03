@@ -66,7 +66,10 @@ struct MyBannerView: View {
 
     @ObservedObject private var store = StoreManager.shared
     private var isProOwned: Bool {
-        store.purchasedProductIDs.contains(StoreManager.productID_UnlockPro)
+        // Use the cached flag so Pro users never see an ad flash on launch while
+        // StoreKit is still resolving entitlements. The cache is kept in sync and
+        // reset on refund, after which ads reappear.
+        StoreManager.cachedIsProOwned || store.purchasedProductIDs.contains(StoreManager.productID_UnlockPro)
     }
     
 //    @State private var adSize: AdSize = largeAnchoredAdaptiveBanner(width: UIScreen.main.bounds.width)
