@@ -2,10 +2,12 @@
     <navigationview onAppear="setBool:isShowingViewFinder=true">
     <zstack id="barcodeScannerViewBatch" navLeading="id:buttonCancelBatch" navTrailing="id:buttonTorchToggleBatch">
     <barcodescannerlocal key="barcodeObject" batch="true" rectColor="$barcodeRectColor" rectWidth="$barcodeRectLineWidth"/>
-    <vstack background="clear">
+    <vstack spacing="6" background="clear">
 
     <spacer/>
     <text if="$isShowingViewFinder" foregroundColor="$settingsViewfinderColor" animationOpacity="animation:linear;duration:1;from:0;to:1;repeatForever:true;autoreverses:true">Scanning — keep adding passes</text>
+    <text if="js:'$batchScanCountLabel'!=''" foregroundColor="white" font="headline">$batchScanCountLabel</text>
+    <text if="js:'$batchScanMessage'!=''" foregroundColor="orange">$batchScanMessage</text>
     <text foregroundColor="white">Tap Done when finished</text>
 
     </vstack>

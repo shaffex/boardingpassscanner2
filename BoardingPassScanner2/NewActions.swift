@@ -64,19 +64,12 @@ struct Action_addNewBoardingPass: SxActionProtocol {
 
     @MainActor
     private func addBoardingPass(text: String, type: String) async {
-        let store = BoardingPassStore.shared
-
-        if store.contains(text: text) {
+        switch BoardingPassAdder.add(text: text, type: type) {
+        case .duplicate:
             PluginActions.shared.runAction("presentAlert:myAlertBoardingPassAlreadyExists")
-            return
-        }
-
-        guard (try? BoardingPass(parsing: text)) != nil else {
+        case .invalid:
             PluginActions.shared.runAction("presentAlert:myAlertInvalidBoardingPassCode")
-            return
-        }
-
-        if let record = store.insertIfMissing(barcodeText: text, barcodeType: type) {
+        case .added(let record):
             let title = record.name.isEmpty ? "Boarding pass added" : record.name
             let message = bannerMessage(for: record)
             BannerPresenter.shared.show(style: .success, title: title, message: message)

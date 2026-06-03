@@ -86,6 +86,7 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
         var batchMode = false
         private var isCoolingDown = false
         private var lastHandledText: String?
+        private var addedCount = 0
 
         private func remapBarCodeType(_ type: String) -> String {
             switch type {
@@ -136,17 +137,29 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
         /// Adds the detected pass and keeps the camera running so the user can scan
         /// the next pass. The same code is ignored while the rectangle is shown and
         /// until a different barcode appears, so a pass left in frame isn't re-added.
+        /// Feedback is shown inside the sheet (the global banner is hidden behind it).
         private func handleBatchDetection(_ metadataObject: AVMetadataObject, barcodeText: String, barcodeType: String) {
             guard !isCoolingDown, barcodeText != lastHandledText else { return }
 
             lastHandledText = barcodeText
             isCoolingDown = true
 
-            SxMagicVariables.shared.setValue(barcodeText, forKey: self.key + ".text")
-            SxMagicVariables.shared.setValue(remapBarCodeType(barcodeType), forKey: self.key + ".type")
-
             drawBoundingBox(for: metadataObject)
-            EventAddNewBarcode.fireNewBarcodeEvent(barcodeText: barcodeText, barcodeType: barcodeType)
+
+            let type = remapBarCodeType(barcodeType)
+            Task { @MainActor in
+                switch BoardingPassAdder.add(text: barcodeText, type: type) {
+                case .added:
+                    self.addedCount += 1
+                    SxMagicVariables.shared.setValue("✓ \(self.addedCount) added", forKey: "batchScanCountLabel")
+                    SxMagicVariables.shared.setValue("", forKey: "batchScanMessage")
+                    PluginActions.shared.runAction("playSystemSound:4095")
+                case .duplicate:
+                    SxMagicVariables.shared.setValue("Already in your passes", forKey: "batchScanMessage")
+                case .invalid:
+                    SxMagicVariables.shared.setValue("Not a boarding pass", forKey: "batchScanMessage")
+                }
+            }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
                 self?.clearBoundingBoxes()
@@ -185,6 +198,8 @@ struct SxView_BarcodeScanner: SxViewProtocol {
                 .onAppear() {
                     SxMagicVariables.shared.setValue("", forKey: key + ".text")
                     SxMagicVariables.shared.setValue("", forKey: key + ".type")
+                    SxMagicVariables.shared.setValue("", forKey: "batchScanCountLabel")
+                    SxMagicVariables.shared.setValue("", forKey: "batchScanMessage")
                 }
         } else {
             Text("Please provide key for barcode scanner")
