@@ -274,6 +274,43 @@ $BG_COLOR    = $_POST['backgroundColor'] ?? 'rgb(7,53,144)';
 $FG_COLOR    = $_POST['foregroundColor'] ?? 'rgb(255,255,255)';
 $LABEL_COLOR = $_POST['labelColor']      ?? 'rgb(255,255,255)';
 
+// Flight date for the DATE header — from the flightDate input (always present).
+$DATE_DISPLAY = '';
+$dateTs = strtotime(substr($flightDate, 0, 10));
+if ($dateTs !== false) {
+    $DATE_DISPLAY = date('j M Y', $dateTs);
+}
+
+// Departure time for the DEPARTURE field — taken from the flightDate input,
+// which carries the wallclock time (e.g. the 04:30 default). Parse the time
+// portion of the ISO string directly so no timezone shifting occurs.
+$DEPARTURE_TIME = '';
+if (preg_match('/[T ](\d{2}):(\d{2})/', $flightDate, $tm)) {
+    $DEPARTURE_TIME = "{$tm[1]}:{$tm[2]}";
+}
+
+// Auxiliary row: DEPARTURE / FLIGHT NO / BOOKING REF (mirrors the semantic pass
+// layout). DEPARTURE is included only when we have a real time to show.
+$auxiliaryFields = [];
+if ($DEPARTURE_TIME !== '') {
+    $auxiliaryFields[] = [
+        'key'   => 'departure',
+        'label' => 'DEPARTURE',
+        'value' => $DEPARTURE_TIME,
+    ];
+}
+$auxiliaryFields[] = [
+    'key'   => 'flightno',
+    'label' => 'FLIGHT NO',
+    'value' => "{$AIRLINE_CODE} {$FLIGHT_NUMBER}",
+];
+$auxiliaryFields[] = [
+    'key'           => 'pnr',
+    'label'         => 'BOOKING REF',
+    'value'         => $bcbp['pnr'],
+    'textAlignment' => 'PKTextAlignmentRight',
+];
+
 // ============================================================================
 // PASS
 // ============================================================================
@@ -300,9 +337,10 @@ $passData = [
 
         'headerFields' => [
             [
-                'key'   => 'flight',
-                'label' => 'FLIGHT',
-                'value' => "{$AIRLINE_CODE} {$FLIGHT_NUMBER}"
+                'key'           => 'date',
+                'label'         => 'DATE',
+                'value'         => $DATE_DISPLAY,
+                'textAlignment' => 'PKTextAlignmentRight'
             ]
         ],
 
@@ -310,6 +348,8 @@ $passData = [
             ['key' => 'from', 'label' => $FROM_CITY, 'value' => $FROM_CODE],
             ['key' => 'to',   'label' => $TO_CITY,   'value' => $TO_CODE],
         ],
+
+        'auxiliaryFields' => $auxiliaryFields,
 
         'secondaryFields' => [
             [
@@ -326,7 +366,8 @@ $passData = [
         ],
 
         'backFields' => [
-            ['key' => 'pnr', 'label' => 'BOOKING REF', 'value' => $bcbp['pnr']],
+            ['key' => 'flight',  'label' => 'FLIGHT',      'value' => "{$AIRLINE_CODE} {$FLIGHT_NUMBER}"],
+            ['key' => 'pnrBack', 'label' => 'BOOKING REF', 'value' => $bcbp['pnr']],
         ],
     ],
 

@@ -89,6 +89,10 @@ struct Action_addPass: SxActionProtocol {
         departureTime: Date?
     ) -> String {
         let formatter = ISO8601DateFormatter()
+        // Emit the local wallclock time (with offset, e.g. ...T04:30:00+01:00).
+        // Default ISO8601DateFormatter uses UTC, which would shift the time the
+        // user picked by their local offset before it reaches the server.
+        formatter.timeZone = .current
         guard let override = departureTime, record.flightDate != .distantPast else {
             return formatter.string(from: record.flightDate)
         }
