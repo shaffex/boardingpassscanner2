@@ -115,7 +115,7 @@ extension BoardingPass {
                 explicitYear: flightDateYear,
                 referenceDate: referenceDate,
                 pastDateRolloverThresholdDays: pastDateRolloverThresholdDays
-            ) ?? Self.todayAt1430()
+            ) ?? Self.defaultDepartureToday()
         )
         let compartmentCode = scanner.read(1).trimmed
         let seatNumber = scanner.read(4).trimmed
@@ -238,7 +238,7 @@ extension BoardingPass {
                 explicitYear: explicitYear,
                 referenceDate: referenceDate,
                 pastDateRolloverThresholdDays: pastDateRolloverThresholdDays
-            ) ?? Self.todayAt1430()
+            ) ?? Self.defaultDepartureToday()
         )
 
         return Leg(
@@ -307,18 +307,23 @@ extension BoardingPass {
             return nil
         }
 
+        // The barcode only encodes the flight date, never the time. We stamp an
+        // early default (04:30) so that if the server-side time detection is wrong
+        // or unavailable, the lock-screen pass surfaces too early rather than too
+        // late — a user with an early-morning flight won't miss it. The real time
+        // is overridden via the generate API when the user sets one manually.
         return calendar.date(
-            bySettingHour: 14,
+            bySettingHour: 4,
             minute: 30,
             second: 0,
             of: flightDay
         )
     }
 
-    private static func todayAt1430() -> Date {
+    private static func defaultDepartureToday() -> Date {
         let calendar = Calendar.current
         return calendar.date(
-            bySettingHour: 14,
+            bySettingHour: 4,
             minute: 30,
             second: 0,
             of: Date()

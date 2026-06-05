@@ -334,7 +334,7 @@ struct BoardingPassDetailView: View {
                 .font(.headline.weight(.semibold))
                 .foregroundStyle(primaryText)
 
-            Text("We'll try to detect the departure time from your flight number automatically. You can override it here — this determines when the boarding pass is automatically shown on your lock screen.")
+            Text("If your flight is within 7 days, we'll try to detect the departure time automatically when you add the pass to Apple Wallet. Otherwise, please set the departure time here. This determines when the boarding pass is automatically shown on your lock screen.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

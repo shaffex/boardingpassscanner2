@@ -81,6 +81,15 @@ struct SettingsView: View {
                 }
 
                 NavigationLink {
+                    EmbeddedWebView(url: URL(string: "https://shaffex.com/api/boardingpass2/Links/termsAndConditions.html")!)
+                        .ignoresSafeArea()
+                        .navigationTitle("Terms & Conditions")
+                        .navigationBarTitleDisplayMode(.inline)
+                } label: {
+                    Text("Terms & Conditions")
+                }
+
+                NavigationLink {
                     EmbeddedWebView(url: URL(string: "https://shaffex.com/api/boardingpass2/Links/contactUs.php")!)
                         .ignoresSafeArea()
                         .navigationTitle("Contact Us")
