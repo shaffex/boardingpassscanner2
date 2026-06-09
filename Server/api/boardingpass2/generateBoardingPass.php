@@ -8,6 +8,7 @@ header('Access-Control-Allow-Origin: *');
 
 include_once 'passkit/PKPass.php';
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Lookup.php';
 
 use PKPass\PKPass;
 
@@ -258,17 +259,21 @@ function seatInfo(string $rawSeat, string $compartment): array {
 // ============================================================================
 // $AIRLINE_CODE  = $found ? $flight['carrierCode']  : $bcbp['carrierCode'];
 $AIRLINE_CODE  = $bcbp['carrierCode'];
-$AIRLINE_NAME  = $found ? $flight['carrierName']  : $bcbp['carrierCode'];
+// Airline name: prefer the API, else map the carrier code via airlines.csv,
+// else fall back to the raw code. Displayed top-left (logoText) on the pass.
+$AIRLINE_NAME  = $found ? $flight['carrierName'] : (lookupAirlineName($AIRLINE_CODE) ?? $AIRLINE_CODE);
 $FLIGHT_NUMBER = $found ? $flight['flightNumber'] : $bcbp['flightNumber'];
 
 // kkc use original flight number as for example W9A 5457 is not working for
 // $AIRLINE_CODE = "W9";//KKC
 // $FLIGHT_NUMBER = $bcbp['flightNumber'];
 
+// Airport cities: prefer the API, else map the IATA code via airports.csv, else
+// fall back to the raw code. Shown as the label on the primary fields.
 $FROM_CODE = $found ? $flight['departure']['airportCode'] : $bcbp['fromCode'];
-$FROM_CITY = $found ? $flight['departure']['cityName']    : $bcbp['fromCode'];
+$FROM_CITY = $found ? $flight['departure']['cityName']    : (lookupAirportCity($FROM_CODE) ?? $FROM_CODE);
 $TO_CODE   = $found ? $flight['arrival']['airportCode']   : $bcbp['toCode'];
-$TO_CITY   = $found ? $flight['arrival']['cityName']      : $bcbp['toCode'];
+$TO_CITY   = $found ? $flight['arrival']['cityName']      : (lookupAirportCity($TO_CODE) ?? $TO_CODE);
 
 $BG_COLOR    = $_POST['backgroundColor'] ?? 'rgb(7,53,144)';
 $FG_COLOR    = $_POST['foregroundColor'] ?? 'rgb(255,255,255)';
@@ -287,6 +292,15 @@ if ($dateTs !== false) {
 $DEPARTURE_TIME = '';
 if (preg_match('/[T ](\d{2}):(\d{2})/', $flightDate, $tm)) {
     $DEPARTURE_TIME = "{$tm[1]}:{$tm[2]}";
+}
+
+// If the user left the app default (04:30) untouched, prefer the real scheduled
+// local departure time from getFlightInfo. A non-default value means the user
+// picked a time deliberately, so we keep theirs.
+if ($found && $DEPARTURE_TIME === '04:30'
+    && preg_match('/[T ](\d{2}):(\d{2})/', $flight['departure']['localTime'] ?? '', $lt)) {
+    logd($debug, 'departureTime.override', "{$DEPARTURE_TIME} -> {$lt[1]}:{$lt[2]}");
+    $DEPARTURE_TIME = "{$lt[1]}:{$lt[2]}";
 }
 
 // Auxiliary row: DEPARTURE / FLIGHT NO / BOOKING REF (mirrors the semantic pass
