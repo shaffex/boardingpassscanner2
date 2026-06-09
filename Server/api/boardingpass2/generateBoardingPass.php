@@ -459,6 +459,37 @@ if ($semanticsApplied) {
     logd($debug, 'semantics', $passData['semantics']);
 } else {
     logd($debug, 'fallback', 'generic boarding pass (no semantics)');
+
+    // Generic passes don't carry the flight number in semantics, so append it to
+    // organizationName (the text Wallet shows on the lock screen), e.g.
+    // "Ryanair FR 2304".
+    $passData['organizationName'] = trim("{$AIRLINE_NAME} {$AIRLINE_CODE} {$FLIGHT_NUMBER}");
+    logd($debug, 'organizationName.generic', $passData['organizationName']);
+}
+
+// Always give the pass a relevantDate so Wallet can surface it on the lock
+// screen near departure. Priority:
+//   1. The semantics block above (when applied) already set it from scheduledUTC.
+//   2. If the flight was found but semantics is off, still use the API's
+//      scheduledUTC — we have a real departure time, so don't waste it.
+//   3. Otherwise fall back to the flightDate input. We don't know the departure
+//      timezone here, so we keep any offset the app sent and otherwise emit a
+//      naive wallclock (Wallet interprets it in the device's local time).
+if (empty($passData['relevantDate']) && $found && !empty($flight['departure']['scheduledUTC'])) {
+    $passData['relevantDate'] = $flight['departure']['scheduledUTC'];
+    logd($debug, 'relevantDate.fromApi', $passData['relevantDate']);
+}
+if (empty($passData['relevantDate']) && $flightDate !== '') {
+    $hasTz = (bool) preg_match('/[Zz]$|[+\-]\d{2}:?\d{2}$/', $flightDate);
+    try {
+        $dt = new DateTime($flightDate);
+        $passData['relevantDate'] = $hasTz
+            ? $dt->format('Y-m-d\TH:i:sP')
+            : $dt->format('Y-m-d\TH:i:s');
+        logd($debug, 'relevantDate.fallback', $passData['relevantDate']);
+    } catch (Exception $e) {
+        logd($debug, 'relevantDate.fallback', "(unparseable flightDate: {$flightDate})");
+    }
 }
 
 saveBarcodeToDatabase($barcodeType, $barcodeText, $flightDate, $semanticsApplied);
