@@ -90,6 +90,17 @@ final class Database
         return (int)$this->pdo->query("SELECT COUNT(*) FROM {$this->table}")->fetchColumn();
     }
 
+    /**
+     * Number of rows created within the last $minutes, measured in DB time
+     * (NOW()), so it is independent of the PHP process timezone.
+     */
+    public function countSinceMinutes(int $minutes): int
+    {
+        $minutes = max(1, $minutes); // inlined safely: guaranteed positive int
+        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE created >= (NOW() - INTERVAL {$minutes} MINUTE)";
+        return (int)$this->pdo->query($sql)->fetchColumn();
+    }
+
     private function connectToMysql(): void
     {
         if (DB_HOST === '' || DB_NAME === '' || DB_USER === '') {
